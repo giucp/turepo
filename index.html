@@ -83,8 +83,14 @@
         .card-stats { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; background: var(--bg); padding: 7px 10px; border-radius: 8px; color: var(--txt); }
         .star-row { display: flex; align-items: center; gap: 3px; } .star-row span { color: var(--accent); font-size: 13px; }
         .sep { color: var(--border); font-weight: 400; } .card-meta { color: var(--muted); font-size: 11.5px; font-weight: 500; }
-        .btn-wa { display: flex; justify-content: center; align-items: center; gap: 9px; padding: 12px; border-radius: var(--radius-sm); background: #25D366; color: var(--white); border: none; cursor: pointer; font-weight: 700; font-size: 14px; font-family: inherit; transition: opacity .18s, transform .14s; letter-spacing: .2px; width: 100%; text-decoration: none;}
+        
+        /* ── BOTONES DE TARJETA (NUEVO: FAVORITOS) ─────────── */
+        .btn-row { display: flex; gap: 8px; margin-top: 2px; width: 100%;}
+        .btn-wa { flex: 1; display: flex; justify-content: center; align-items: center; gap: 9px; padding: 12px; border-radius: var(--radius-sm); background: #25D366; color: var(--white); border: none; cursor: pointer; font-weight: 700; font-size: 14px; font-family: inherit; transition: opacity .18s, transform .14s; letter-spacing: .2px; text-decoration: none;}
         .btn-wa:active { opacity: .85; transform: scale(.985); }
+        .btn-fav { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: all .15s; flex-shrink: 0; color: #D1D5DB; }
+        .btn-fav.active { background: #FEE2E2; border-color: #FCA5A5; color: #EF4444; }
+        .btn-fav:active { transform: scale(.9); }
 
         /* ── SKELETON & EMPTY STATE ────────────────────────── */
         .skeleton-card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); }
@@ -96,8 +102,8 @@
         .empty-title { font-size: 16px; font-weight: 700; color: var(--txt); }
         .empty-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
-        /* ── UI HISTORIAL Y ESTRELLAS (MEJORA UI) ──────────── */
-        .hist-card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
+        /* ── UI HISTORIAL Y ESTRELLAS ──────────────────────── */
+        .hist-card { contain: content; background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
         .hist-title { font-size: 15px; font-weight: 700; color: var(--txt); margin-bottom: 4px; }
         .hist-meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
         .hist-status { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
@@ -191,6 +197,14 @@
     <div class="list" id="lista-restaurantes"></div>
 </div>
 
+<!-- NUEVA SECCIÓN DE FAVORITOS -->
+<div id="favoritos-section" class="section-wrap">
+    <div class="profile-wrap">
+        <h2>Mis Favoritos</h2>
+        <div id="lista-favoritos" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
 <div id="historial-section" class="section-wrap">
     <div class="profile-wrap">
         <h2>Historial</h2>
@@ -271,9 +285,13 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- MENÚ INFERIOR ACTUALIZADO CON FAVORITOS -->
 <nav class="bottom-nav">
     <div class="nav-item active" onclick="navegar('inicio', this)">
         <span class="nav-icon">🏠</span>Inicio<div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="navegar('favoritos', this)">
+        <span class="nav-icon">❤️</span>Favs<div class="nav-dot"></div>
     </div>
     <div class="nav-item" onclick="navegar('historial', this)">
         <span class="nav-icon">📜</span>Historial<div class="nav-dot"></div>
@@ -292,7 +310,7 @@ const CACHE_KEY  = 'turepo_v2_final';
 const CACHE_TTL  = 3 * 60 * 1000;
 
 /* ════════════════════════════════════════════════════════════
-   2. UTILIDADES GLOBALES
+   2. UTILIDADES GLOBALES Y SISTEMA DE FAVORITOS
 ══════════════════════════════════════════════════════════════ */
 function toast(msg, tipo = '') {
     const el = document.getElementById('toast');
@@ -310,6 +328,25 @@ function avatarClass(t = '') {
     return '';
 }
 
+// LOGICA DE FAVORITOS LOCALES
+function getFavs() { return JSON.parse(localStorage.getItem('turepo_favs') || '[]'); }
+function isFavorito(tel) { return getFavs().includes(String(tel)); }
+window.toggleFav = function(tel, btnEl) {
+    let favs = getFavs();
+    const strTel = String(tel);
+    if (favs.includes(strTel)) {
+        favs = favs.filter(t => t !== strTel);
+        if(btnEl) { btnEl.classList.remove('active'); btnEl.textContent = '🤍'; }
+        toast('Eliminado de favoritos 💔');
+    } else {
+        favs.push(strTel);
+        if(btnEl) { btnEl.classList.add('active'); btnEl.textContent = '❤️'; }
+        toast('Guardado en favoritos ❤️', 'ok');
+    }
+    localStorage.setItem('turepo_favs', JSON.stringify(favs));
+    if(document.getElementById('favoritos-section').classList.contains('active')) renderFavoritos();
+};
+
 function renderSkeletons(id, n = 4) {
     document.getElementById(id).innerHTML = Array.from({ length: n }, () => `
         <div class="skeleton-card"><div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">
@@ -320,7 +357,7 @@ function renderSkeletons(id, n = 4) {
 function estadoVacio(icon, title, sub) { return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><p class="empty-sub">${sub}</p></div>`; }
 
 /* ════════════════════════════════════════════════════════════
-   3. RENDER DE TARJETAS (MEJORA RANGOS CENTRALES)
+   3. RENDER DE TARJETAS CON BOTÓN DE FAVORITOS
 ══════════════════════════════════════════════════════════════ */
 function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, delay = 0) {
     const v = parseInt(votos) || 0;
@@ -334,9 +371,11 @@ function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, delay = 0) 
     let avatarGoldClass = isOro ? 'rank-gold' : '';
     
     // Asignación del ícono central eliminando las iniciales
-    let iconoCentral = '🥉'; // Bronce por defecto para todos los nuevos/menores a 5 votos
-    if (isOro) iconoCentral = '👑'; // Oro para los top
-    else if (isPlata) iconoCentral = '🥈'; // Plata para 5 a 14 votos
+    let iconoCentral = '🥉'; 
+    if (isOro) iconoCentral = '👑'; 
+    else if (isPlata) iconoCentral = '🥈'; 
+
+    const isFav = isFavorito(telProv);
 
     return `
     <div class="card card-enter ${cardClass}" style="animation-delay:${delay}ms">
@@ -354,7 +393,10 @@ function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, delay = 0) 
                 </div>
             </div>
         </div>
-        <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')">💬 Contactar por WhatsApp</button>
+        <div class="btn-row">
+            <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')">💬 Contactar por WhatsApp</button>
+            <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${telProv}', this)">${isFav ? '❤️' : '🤍'}</button>
+        </div>
     </div>`;
 }
 
@@ -370,7 +412,7 @@ function contactarProveedor(telProv, urlWA) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   4. MOTOR DE DATOS (CONEXIÓN EXACTA ORIGINAL)
+   4. MOTOR DE DATOS Y BUSCADOR INTELIGENTE SEMÁNTICO
 ══════════════════════════════════════════════════════════════ */
 let allData = { servicios: [], restaurantes: [], historial: [] };
 
@@ -411,15 +453,58 @@ async function cargarDirectorio(force = false) {
 }
 
 function renderListas(filtro = 'Todos', query = '') {
-    const q = quitarTildes(query.trim().toLowerCase()); const fLimpio = quitarTildes(filtro.toLowerCase());
+    const q = quitarTildes(query.trim().toLowerCase()); 
+    const fLimpio = quitarTildes(filtro.toLowerCase());
+
+    // DICCIONARIO SEMÁNTICO (Buscador Inteligente)
+    const DICCIONARIO = {
+        'refrigeracion': ['aire', 'acondicionado', 'split', 'enfriador', 'nevera', 'congelador', 'mantenimiento', 'gas'],
+        'linea blanca': ['lavadora', 'secadora', 'cocina', 'horno', 'microondas'],
+        'electricidad': ['cable', 'enchufe', 'brequera', 'luz', 'iluminacion', 'tablero', 'cortocircuito'],
+        'plomeria': ['tubo', 'agua', 'filtracion', 'poceta', 'fregadero', 'destape', 'bomba', 'fuga'],
+        'herreria': ['soldadura', 'puerta', 'reja', 'porton', 'soldar', 'techo'],
+        'tecnologia': ['computadora', 'pc', 'laptop', 'celular', 'telefono', 'software', 'formateo', 'wifi', 'redes'],
+        'limpieza': ['aseo', 'mantenimiento', 'pulitura', 'desinfeccion'],
+        'transporte': ['flete', 'mudanza', 'taxi', 'viaje', 'carga'],
+        'fast food': ['hamburguesa', 'perro', 'caliente', 'pizza', 'pepito', 'shawarma'],
+        'tradicional': ['empanada', 'arepa', 'almuerzo', 'sopa', 'carne', 'pollo', 'criolla'],
+        'postres': ['torta', 'dulce', 'helado', 'galleta', 'postre', 'cupcake']
+    };
+
     ['servicios', 'restaurantes'].forEach(tipo => {
         const items = allData[tipo] || [];
         const filtrados = items.filter(({ nombre, tipo: t }) => {
-            return (filtro === 'Todos' || quitarTildes(String(t).toLowerCase()).includes(fLimpio)) && (!q || quitarTildes(String(nombre).toLowerCase()).includes(q) || quitarTildes(String(t).toLowerCase()).includes(q));
+            const tLimpio = quitarTildes(String(t).toLowerCase());
+            const nLimpio = quitarTildes(String(nombre).toLowerCase());
+            
+            const coincideFiltro = filtro === 'Todos' || tLimpio.includes(fLimpio);
+            
+            // Lógica de Búsqueda Inteligente
+            let coincideBusqueda = false;
+            if (!q) {
+                coincideBusqueda = true;
+            } else if (nLimpio.includes(q) || tLimpio.includes(q)) {
+                coincideBusqueda = true;
+            } else {
+                for (let cat in DICCIONARIO) {
+                    if (tLimpio.includes(cat)) {
+                        if (DICCIONARIO[cat].some(palabra => palabra.includes(q) || q.includes(palabra))) {
+                            coincideBusqueda = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return coincideFiltro && coincideBusqueda;
         });
-        const container = document.getElementById('lista-' + tipo); const counter = document.getElementById('count-' + tipo);
+
+        const container = document.getElementById('lista-' + tipo); 
+        const counter = document.getElementById('count-' + tipo);
+        
         if (filtrados.length === 0) {
-            container.innerHTML = estadoVacio('🔍', 'Sin resultados', 'Aún no hay registros en esta categoría.'); if(counter) counter.textContent = '';
+            container.innerHTML = estadoVacio('🔍', 'Sin resultados', 'Aún no hay registros en esta categoría.'); 
+            if(counter) counter.textContent = '';
         } else {
             container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, i * 40)).join('');
             if(counter) counter.textContent = `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''}`;
@@ -427,8 +512,23 @@ function renderListas(filtro = 'Todos', query = '') {
     });
 }
 
+function renderFavoritos() {
+    const favs = getFavs();
+    const container = document.getElementById('lista-favoritos');
+    
+    if(favs.length === 0) {
+        container.innerHTML = estadoVacio('❤️', 'Sin favoritos', 'Tus proveedores de confianza aparecerán aquí guardados.');
+        return;
+    }
+    
+    const todos = [...allData.servicios, ...allData.restaurantes];
+    const filtrados = todos.filter(p => favs.includes(String(p.telefono)));
+    
+    container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, i * 40)).join('');
+}
+
 /* ════════════════════════════════════════════════════════════
-   5. LÓGICA DEL HISTORIAL (MEJORA UI OPTIMISTA Y ESTRELLAS)
+   5. LÓGICA DEL HISTORIAL
 ══════════════════════════════════════════════════════════════ */
 function switchHistorial(vista, el) {
     document.querySelectorAll('#nav-historial-tabs .fseg-btn').forEach(b => b.classList.remove('active'));
@@ -506,28 +606,23 @@ function renderHistorial(vista) {
     }).join('');
 }
 
-// UI OPTIMISTA 1: Terminar trabajo sin esperar a Google
 function marcarTerminado(id) {
     const btn = document.getElementById(`btn-term-${id}`);
     if(btn) { btn.textContent = 'Procesando...'; btn.disabled = true; }
     
-    // Engañamos a la vista
     const idx = allData.historial.findIndex(h => h.id === id);
     if (idx > -1) allData.historial[idx].estado = 'Terminado';
     
     toast('✅ Trabajo Terminado', 'ok');
     renderHistorial('proveedor'); 
 
-    // Viaja a Google de fondo
     fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'marcar_terminado', idTrabajo: id }) })
     .then(() => { recargarTodoSilencioso('proveedor'); });
 }
 
-// UI OPTIMISTA 2: Estrellas sin esperar a Google
 function calificar(id, telProv, estrellas) {
     iluminarEstrellas(id, estrellas); 
     
-    // Engañamos a la vista
     const idx = allData.historial.findIndex(h => h.id === id);
     if (idx > -1) {
         allData.historial[idx].estado = 'Calificado';
@@ -537,7 +632,6 @@ function calificar(id, telProv, estrellas) {
     toast('¡Gracias por calificar! ⭐', 'ok');
     setTimeout(() => { renderHistorial('cliente'); }, 300);
 
-    // Viaja a Google de fondo
     fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'calificar', idTrabajo: id, telProveedor: telProv, estrellas: estrellas }) })
     .then(() => { recargarTodoSilencioso('cliente'); });
 }
@@ -550,7 +644,7 @@ function recargarTodoSilencioso(vistaActual = 'cliente') {
 }
 
 /* ════════════════════════════════════════════════════════════
-   6. EVENTOS DE UI (Navegación)
+   6. EVENTOS DE UI Y NAVEGACIÓN
 ══════════════════════════════════════════════════════════════ */
 let searchTimer; const sInput = document.getElementById('search-input'), cBtn = document.getElementById('clear-btn');
 sInput.addEventListener('input', e => { cBtn.classList.toggle('visible', e.target.value.length > 0); clearTimeout(searchTimer); searchTimer = setTimeout(() => renderListas(activeFiltro(), e.target.value), 260); });
@@ -567,7 +661,7 @@ function switchTab(tab, el) {
 function navegar(dest, el) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active');
     const hdr = document.querySelector('.header');
-    ['servicios-section', 'restaurantes-section', 'perfil-section', 'historial-section'].forEach(id => document.getElementById(id).classList.remove('active'));
+    ['servicios-section', 'restaurantes-section', 'perfil-section', 'historial-section', 'favoritos-section'].forEach(id => document.getElementById(id).classList.remove('active'));
    
     if (dest === 'inicio') {
         hdr.style.display = ''; switchTab(document.querySelector('#segmentador .seg-btn.active').textContent.toLowerCase().includes('restaurante') ? 'restaurantes' : 'servicios', document.querySelector('#segmentador .seg-btn.active'));
@@ -576,6 +670,9 @@ function navegar(dest, el) {
     } else if (dest === 'historial') {
         hdr.style.display = 'none'; document.getElementById('historial-section').classList.add('active'); window.scrollTo(0,0);
         switchHistorial('cliente', document.querySelector('#nav-historial-tabs .fseg-btn'));
+    } else if (dest === 'favoritos') {
+        hdr.style.display = 'none'; document.getElementById('favoritos-section').classList.add('active'); window.scrollTo(0,0);
+        renderFavoritos();
     }
 }
 
@@ -620,4 +717,3 @@ document.addEventListener('DOMContentLoaded', () => { verificarSesion(); cargarD
 </script>
 </body>
 </html>
-
