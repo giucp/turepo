@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1E5C52">
+    <title>turepo · Directorio Local</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ── TOKENS Y BASE ─────────────────────────────────── */
+        :root {
+            --p: #1E5C52; --p2: #2C786C; --p-light: #E8F5F3; --accent: #F4C542; --bg: #F3F6F5;
+            --white: #FFFFFF; --txt: #1A1A2E; --muted: #6B7280; --border: #E4E9E8; --skeleton: #E4EAE8;
+            --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px;
+            --shadow-sm: 0 2px 8px rgba(30,92,82,.07);
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--txt); padding-bottom: 90px; -webkit-font-smoothing: antialiased; }
+
+        /* ── HEADER & SEARCH ───────────────────────────────── */
+        .header { background: linear-gradient(150deg, #1E5C52 0%, #145046 100%); padding: 16px 16px 14px; position: sticky; top: 0; z-index: 100; border-radius: 0 0 22px 22px; box-shadow: 0 8px 24px rgba(20,80,70,.22); }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .logo { font-size: 27px; font-weight: 800; color: var(--white); letter-spacing: -1.2px; display: flex; align-items: center; gap: 2px; }
+        .logo span { color: var(--accent); } .logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 10px; margin-left: 1px; }
+        .location-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,.13); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--white); backdrop-filter: blur(8px); }
+        .location-pill select { background: transparent; color: var(--white); border: none; outline: none; font-size: 12px; font-weight: 700; font-family: inherit; appearance: none; cursor: pointer; }
+        .location-pill select option { color: var(--txt); background: var(--white); }
+        .search-wrap { background: rgba(255,255,255,.96); border-radius: var(--radius-md); display: flex; align-items: center; padding: 11px 14px; margin-bottom: 13px; box-shadow: 0 2px 10px rgba(0,0,0,.10); }
+        .search-wrap:focus-within { box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+        .search-icon { color: var(--muted); font-size: 16px; margin-right: 9px; flex-shrink:0; }
+        .search-input { flex: 1; border: none; outline: none; font-size: 14px; font-family: inherit; color: var(--txt); background: transparent; }
+        .search-input::placeholder { color: #A8B5B2; }
+        .clear-btn { background: var(--skeleton); border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 11px; color: var(--muted); display: none; align-items: center; justify-content: center; flex-shrink: 0; }
+        .clear-btn.visible { display: flex; }
+
+        /* ── SEGMENTADOR Y CHIPS ───────────────────────────── */
+        .segment { display: flex; background: rgba(255,255,255,.14); border-radius: var(--radius-sm); padding: 3px; gap: 3px; }
+        .seg-btn { flex: 1; padding: 9px 8px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,.7); font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s; }
+        .seg-btn.active { background: var(--white); color: var(--p); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+        .chips-row { display: flex; overflow-x: auto; padding: 14px 16px 4px; gap: 8px; scrollbar-width: none; }
+        .chips-row::-webkit-scrollbar { display: none; }
+        .chip { background: var(--white); padding: 7px 15px; border-radius: 20px; font-size: 12.5px; font-weight: 600; white-space: nowrap; color: var(--muted); border: 1.5px solid var(--border); cursor: pointer; transition: all .18s; user-select: none; }
+        .chip.active { background: var(--p); color: var(--white); border-color: var(--p); box-shadow: 0 3px 10px rgba(30,92,82,.28); }
+        .sort-row { display: flex; padding: 10px 16px 0; gap: 8px; }
+        .sort-btn { background: transparent; border: 1.5px solid var(--border); padding: 6px 13px; border-radius: 14px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .18s; }
+        .sort-btn.active { background: var(--white); color: var(--p); border-color: var(--p); }
+
+        /* ── SECCIONES Y TARJETAS ──────────────────────────── */
+        .section-wrap { display: none; } .section-wrap.active { display: block; animation: slideUp .28s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .list { padding: 14px 16px 4px; }
+        .card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; transition: transform .18s, border-color .2s, box-shadow .2s; }
+        .card:active { transform: scale(.993); }
+        .card-top { display: flex; gap: 14px; align-items: flex-start; }
+        
+        /* ── AVATARES Y RANGOS  ──────────────────── */
+        .avatar-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #C8E6E1, #8ECEC6); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--p); flex-shrink: 0; border: 2px solid rgba(30,92,82,.12); }
+        .avatar.biz { border-radius: var(--radius-sm); background: linear-gradient(135deg, #FFE4CC, #FFBCB2); color: #C0392B; }
+        .avatar.tech { background: linear-gradient(135deg, #D4E8FF, #A8CBFF); color: #1565C0; }
+        .avatar.elec { background: linear-gradient(135deg, #FFF8D4, #FFE97A); color: #F57F17; }
+        .avatar.plom { background: linear-gradient(135deg, #D4F4FF, #7DDCFF); color: #0277BD; }
+        .avatar.rest { background: linear-gradient(135deg, #FFE0CC, #FFAB76); color: #E65100; }
+        
+        /* Rango Oro Destacado */
+        .card.rank-gold { border-color: #FDE68A; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.12); background: linear-gradient(to bottom right, #FFFFFF, #FFFBEB); }
+        .avatar.rank-gold { background: linear-gradient(135deg, #FDE68A, #F59E0B) !important; color: #78350F !important; border: 2px solid #FCD34D !important; }
+
+        .card-info { flex: 1; min-width: 0; }
+        .card-badge { font-size: 10px; padding: 3px 9px; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; margin-bottom: 5px; }
+        .badge-good { background: #E0F2FE; color: #0369A1; }
+        .card-name { font-size: 15.5px; font-weight: 700; color: var(--txt); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-type { font-size: 12.5px; color: var(--muted); margin-bottom: 9px; font-weight: 500; }
+        .card-stats { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; background: var(--bg); padding: 7px 10px; border-radius: 8px; color: var(--txt); }
+        .star-row { display: flex; align-items: center; gap: 3px; } .star-row span { color: var(--accent); font-size: 13px; }
+        .sep { color: var(--border); font-weight: 400; } .card-meta { color: var(--muted); font-size: 11.5px; font-weight: 500; }
+        .btn-wa { display: flex; justify-content: center; align-items: center; gap: 9px; padding: 12px; border-radius: var(--radius-sm); background: #25D366; color: var(--white); border: none; cursor: pointer; font-weight: 700; font-size: 14px; font-family: inherit; transition: opacity .18s, transform .14s; letter-spacing: .2px; width: 100%; text-decoration: none;}
+        .btn-wa:active { opacity: .85; transform: scale(.985); }
+
+        /* ── SKELETON & EMPTY STATE ────────────────────────── */
+        .skeleton-card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); }
+        .sk { background: var(--skeleton); border-radius: 6px; animation: pulse 1.4s ease-in-out infinite; }
+        .sk-avatar { width: 60px; height: 60px; border-radius: 50%; } .sk-line { height: 12px; } .sk-btn { height: 44px; border-radius: var(--radius-sm); margin-top: 4px; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+        .empty-state { text-align: center; padding: 48px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .empty-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--p-light); display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 4px; }
+        .empty-title { font-size: 16px; font-weight: 700; color: var(--txt); }
+        .empty-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+        /* ── UI HISTORIAL Y ESTRELLAS (MEJORA UI) ──────────── */
+        .hist-card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
+        .hist-title { font-size: 15px; font-weight: 700; color: var(--txt); margin-bottom: 4px; }
+        .hist-meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+        .hist-status { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
+        .status-pen { background: #FEF3C7; color: #92400E; } 
+        .status-ter { background: #E0F2FE; color: #0369A1; } 
+        .status-cal { background: #DCFCE7; color: #166534; } 
+        .stars-wrap { display: flex; gap: 8px; font-size: 28px; margin-top: 8px; justify-content: center; background: var(--bg); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);}
+        
+        /* Estrellas interactivas */
+        .star-click { cursor: pointer; color: var(--skeleton); transition: color .1s, transform .1s; -webkit-tap-highlight-color: transparent; }
+        .star-click.active { color: var(--accent); transform: scale(1.1); }
+        .star-fija { color: var(--accent); }
+
+        /* ── PERFIL / FORMULARIO ───────────────────────────── */
+        .profile-wrap { padding: 18px 16px; }
+        .profile-wrap h2 { font-size: 22px; font-weight: 800; color: var(--p); margin-bottom: 18px; }
+        .form-seg { display: flex; background: var(--border); border-radius: var(--radius-sm); padding: 3px; gap: 3px; margin-bottom: 18px; }
+        .fseg-btn { flex: 1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s; }
+        .fseg-btn.active { background: var(--white); color: var(--p); box-shadow: var(--shadow-sm); }
+        .form-card { background: var(--white); border-radius: var(--radius-md); padding: 20px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
+        .form-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+        .form-card p { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+        .form-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; display: block; margin-top: 16px; margin-bottom: 5px; }
+        .form-input { width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); outline: none; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--txt); transition: border-color .18s; }
+        .form-input:focus { border-color: var(--p); background: var(--white); box-shadow: 0 0 0 3px rgba(30,92,82,.08); }
+        .form-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--p2), var(--p)); color: var(--white); border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 20px; font-family: inherit; box-shadow: 0 4px 14px rgba(30,92,82,.30); transition: opacity .18s, transform .14s; }
+        .form-btn:active { opacity: .88; transform: scale(.987); } .form-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+        /* ── TOAST Y NAV INFERIOR ──────────────────────────── */
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--txt); color: var(--white); padding: 12px 22px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: all .3s ease; pointer-events: none; white-space: nowrap; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.ok { background: var(--p); } .toast.err { background: #DC2626; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 18px; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; transition: color .18s; padding: 4px 16px; }
+        .nav-item.active { color: var(--p); } .nav-item.active .nav-dot { display: block; }
+        .nav-dot { display: none; width: 4px; height: 4px; border-radius: 50%; background: var(--p); margin: 0 auto; }
+        .sec-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 14px 16px 2px; }
+        .card-enter { animation: cardIn .28s ease both; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-top">
+        <div class="logo">tu<span>repo</span><div class="logo-dot"></div></div>
+        <div class="location-pill">📍 <select><option selected>Barinas</option></select> ▾</div>
+    </div>
+    <div class="search-wrap" id="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar servicios…" autocomplete="off">
+        <button class="clear-btn" id="clear-btn">✕</button>
+    </div>
+    <div class="segment" id="segmentador">
+        <button class="seg-btn active" onclick="switchTab('servicios', this)">🔧 Servicios</button>
+        <button class="seg-btn" onclick="switchTab('restaurantes', this)">🍔 Restaurantes</button>
+    </div>
+</header>
+
+<div id="servicios-section" class="section-wrap active">
+    <div class="chips-row" id="chips-servicios">
+        <div class="chip active" onclick="filtrar('Todos', this)">Todos</div>
+        <div class="chip" onclick="filtrar('Refrigeración', this)">❄️ Refrigeración</div>
+        <div class="chip" onclick="filtrar('Línea Blanca', this)">🧊 Línea Blanca</div>
+        <div class="chip" onclick="filtrar('Electricidad', this)">⚡ Electricidad</div>
+        <div class="chip" onclick="filtrar('Plomería', this)">💧 Plomería</div>
+        <div class="chip" onclick="filtrar('Herrería', this)">🛠️ Herrería</div>
+        <div class="chip" onclick="filtrar('Tecnología', this)">💻 Tecnología</div>
+        <div class="chip" onclick="filtrar('Limpieza', this)">🧹 Limpieza</div>
+        <div class="chip" onclick="filtrar('Transporte', this)">🚚 Transporte</div>
+    </div>
+    <div class="sort-row">
+        <button class="sort-btn active">⭐ Mejor calificados</button>
+        <button class="sort-btn">🕒 Más recientes</button>
+    </div>
+    <p class="sec-title" id="count-servicios"></p>
+    <div class="list" id="lista-servicios"></div>
+</div>
+
+<div id="restaurantes-section" class="section-wrap">
+    <div class="chips-row" id="chips-restaurantes">
+        <div class="chip active" onclick="filtrar('Todos', this)">Todos</div>
+        <div class="chip" onclick="filtrar('Fast Food', this)">🍔 Fast Food</div>
+        <div class="chip" onclick="filtrar('Tradicional', this)">🍲 Tradicional</div>
+        <div class="chip" onclick="filtrar('Postres', this)">🍰 Postres</div>
+    </div>
+    <div class="sort-row">
+        <button class="sort-btn active">⭐ Más populares</button>
+        <button class="sort-btn">🛵 Abierto ahora</button>
+    </div>
+    <p class="sec-title" id="count-restaurantes"></p>
+    <div class="list" id="lista-restaurantes"></div>
+</div>
+
+<div id="historial-section" class="section-wrap">
+    <div class="profile-wrap">
+        <h2>Historial</h2>
+        <div class="form-seg" id="nav-historial-tabs">
+            <button class="fseg-btn active" onclick="switchHistorial('cliente', this)">Mis Solicitudes</button>
+            <button class="fseg-btn" onclick="switchHistorial('proveedor', this)">Mis Trabajos</button>
+        </div>
+        <div id="lista-historial" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
+<div id="perfil-section" class="section-wrap">
+    <div class="profile-wrap">
+        <h2>Mi Cuenta</h2>
+        <div class="form-seg" id="nav-login-tabs">
+            <button class="fseg-btn active" onclick="toggleForm('login', this)">🔑 Iniciar Sesión</button>
+            <button class="fseg-btn"        onclick="toggleForm('registro', this)">📝 Registrarme</button>
+        </div>
+
+        <div id="pant-login">
+            <div class="form-card">
+                <h3>Bienvenido de nuevo</h3>
+                <p>Ingresa para gestionar tu perfil.</p>
+                <label class="form-label">Número Telefónico</label>
+                <input type="tel" class="form-input" id="login-tel" placeholder="Ej: 04141234567">
+                <button class="form-btn" onclick="iniciarSesion()">Ingresar</button>
+            </div>
+        </div>
+
+        <div id="pant-registro" style="display:none">
+            <div class="form-card">
+                <h3>Crea tu cuenta</h3>
+                <p>Únete al directorio local de Barinas.</p>
+               
+                <label class="form-label">¿Qué deseas hacer?</label>
+                <select class="form-input" id="reg-tipo" onchange="mostrarSubCategoria()">
+                    <option value="" disabled selected>Selecciona una opción</option>
+                    <option value="cliente">Soy Cliente (Quiero buscar)</option>
+                    <option value="servicio">Ofrezco un Servicio</option>
+                    <option value="restaurante">Soy un Restaurante / Local</option>
+                </select>
+
+                <div id="caja-subcategoria" style="display:none; margin-top: 15px;">
+                    <label class="form-label">¿Qué tipo de servicio?</label>
+                    <select class="form-input" id="reg-sub-tipo" onchange="mostrarOtro()">
+                        <option value="Refrigeración">❄️ Refrigeración</option>
+                        <option value="Línea Blanca">🧊 Línea Blanca</option>
+                        <option value="Electricidad">⚡ Electricidad</option>
+                        <option value="Plomería">💧 Plomería</option>
+                        <option value="Herrería">🛠️ Herrería</option>
+                        <option value="Tecnología">💻 Tecnología</option>
+                        <option value="Limpieza">🧹 Limpieza</option>
+                        <option value="Transporte">🚚 Transporte</option>
+                        <option value="Otro">➕ Otro distinto...</option>
+                    </select>
+                    <input type="text" class="form-input" id="reg-otro" placeholder="Ej: Carpintería" style="display:none; margin-top: 12px;">
+                </div>
+
+                <label class="form-label">Nombre o Razón Social</label>
+                <input type="text" class="form-input" id="reg-nombre" placeholder="Ej: Juan Pérez">
+                <label class="form-label">Número Telefónico</label>
+                <input type="tel" class="form-input" id="reg-tel" placeholder="Ej: 04141234567">
+
+                <button class="form-btn" id="reg-btn" onclick="prepararYEnviar()">Completar Registro</button>
+            </div>
+        </div>
+
+        <div id="pant-sesion-activa" style="display:none; text-align: center;">
+            <div class="form-card" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <div class="avatar" style="width: 70px; height: 70px; font-size: 30px;">👤</div>
+                <h3>Sesión Iniciada</h3>
+                <p style="color: var(--muted); font-size: 14px;">Navegando como:<br><strong id="sesion-tel-texto" style="color: var(--p); font-size: 16px;"></strong></p>
+                <button class="form-btn" onclick="cerrarSesion()" style="background: #E74C3C; margin-top: 10px; box-shadow: none;">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+    <div class="nav-item active" onclick="navegar('inicio', this)">
+        <span class="nav-icon">🏠</span>Inicio<div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="navegar('historial', this)">
+        <span class="nav-icon">📜</span>Historial<div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" onclick="navegar('perfil', this)">
+        <span class="nav-icon">👤</span>Mi Perfil<div class="nav-dot"></div>
+    </div>
+</nav>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   1. CONFIGURACIÓN
+══════════════════════════════════════════════════════════════ */
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwBILHLFwpL0XFWUK6k37J3aX-zr8mLitttWgxOmh1VWjjA4LwTPnD884Z6PIh9aOUMJA/exec';
+const CACHE_KEY  = 'turepo_v2_final'; 
+const CACHE_TTL  = 3 * 60 * 1000;
+
+/* ════════════════════════════════════════════════════════════
+   2. UTILIDADES GLOBALES
+══════════════════════════════════════════════════════════════ */
+function toast(msg, tipo = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = `toast show ${tipo}`;
+    clearTimeout(el._t); el._t = setTimeout(() => { el.className = 'toast'; }, 2800);
+}
+function quitarTildes(t) { return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+function avatarClass(t = '') {
+    const tl = String(t).toLowerCase();
+    if (tl.includes('restaurante') || tl.includes('comida')) return 'rest';
+    if (tl.includes('tecnología') || tl.includes('tecnologia')) return 'tech'; 
+    if (tl.includes('electricidad')) return 'elec';
+    if (tl.includes('plomería') || tl.includes('plomeria')) return 'plom'; 
+    if (tl.includes('local') || tl.includes('negocio')) return 'biz';
+    return '';
+}
+
+function renderSkeletons(id, n = 4) {
+    document.getElementById(id).innerHTML = Array.from({ length: n }, () => `
+        <div class="skeleton-card"><div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">
+        <div class="sk sk-avatar"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px">
+        <div class="sk sk-line" style="width:55%"></div><div class="sk sk-line" style="width:38%"></div>
+        <div class="sk sk-line" style="width:70%;height:30px;border-radius:8px"></div></div></div><div class="sk sk-btn"></div></div>`).join('');
+}
+function estadoVacio(icon, title, sub) { return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><p class="empty-sub">${sub}</p></div>`; }
+
+/* ════════════════════════════════════════════════════════════
+   3. RENDER DE TARJETAS (MEJORA RANGOS CENTRALES)
+══════════════════════════════════════════════════════════════ */
+function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, delay = 0) {
+    const v = parseInt(votos) || 0;
+    const e = parseFloat(estrellas) || 0;
+    
+    // LÓGICA DE RANGOS
+    let isOro = v >= 15 && e >= 4.7;
+    let isPlata = !isOro && v >= 5 && e >= 4.0;
+    
+    let cardClass = isOro ? 'rank-gold' : '';
+    let avatarGoldClass = isOro ? 'rank-gold' : '';
+    
+    // Asignación del ícono central eliminando las iniciales
+    let iconoCentral = '🥉'; // Bronce por defecto para todos los nuevos/menores a 5 votos
+    if (isOro) iconoCentral = '👑'; // Oro para los top
+    else if (isPlata) iconoCentral = '🥈'; // Plata para 5 a 14 votos
+
+    return `
+    <div class="card card-enter ${cardClass}" style="animation-delay:${delay}ms">
+        <div class="card-top">
+            <div class="avatar-wrap">
+                <div class="avatar ${avatarClass(tipo)} ${avatarGoldClass}" style="font-size: 28px;">${iconoCentral}</div>
+            </div>
+            <div class="card-info">
+                <div class="card-badge badge-good">✅ Verificado</div>
+                <div class="card-name">${nombre}</div>
+                <div class="card-type">${tipo}</div>
+                <div class="card-stats">
+                    <div class="star-row"><span>★</span> ${e} <span style="color:var(--muted); font-size:11px;">(${v})</span></div>
+                    <span class="sep">|</span><span class="card-meta">Barinas, VE</span>
+                </div>
+            </div>
+        </div>
+        <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')">💬 Contactar por WhatsApp</button>
+    </div>`;
+}
+
+function contactarProveedor(telProv, urlWA) {
+    const miNumero = localStorage.getItem('turepo_usuario');
+    if (miNumero) {
+        fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'crear_trabajo', telCliente: miNumero, telProveedor: String(telProv) })
+        }).catch(err => console.log('Registro silente'));
+       
+        setTimeout(() => recargarTodoSilencioso(), 1500);
+    }
+    window.open(urlWA, '_blank');
+}
+
+/* ════════════════════════════════════════════════════════════
+   4. MOTOR DE DATOS (CONEXIÓN EXACTA ORIGINAL)
+══════════════════════════════════════════════════════════════ */
+let allData = { servicios: [], restaurantes: [], historial: [] };
+
+async function cargarDirectorio(force = false) {
+    if (!force) {
+        try {
+            const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
+            if (cached && Date.now() - cached.ts < CACHE_TTL) { allData = cached.data; renderListas(); return; }
+        } catch (_) {}
+    }
+    if(!force) { renderSkeletons('lista-servicios', 4); renderSkeletons('lista-restaurantes', 2); }
+
+    try {
+        const resp = await fetch(SHEETS_URL);
+        const dataObj = await resp.json();
+       
+        const rows = Array.isArray(dataObj.registros) ? dataObj.registros.slice(1) : [];
+        const histRows = Array.isArray(dataObj.historial) ? dataObj.historial.slice(1) : [];
+
+        allData.servicios = []; allData.restaurantes = [];
+       
+        rows.forEach(([fecha, tipo = '', nombre = '', telefono = '', linkWA = '', estado = '', estrellas = 5, votos = 0]) => {
+            const tl = tipo ? tipo.toString().toLowerCase() : '';
+            if (tl === 'cliente' || tl.includes('cliente')) return;
+            const entry = { nombre, tipo, linkWA, telefono, estrellas, votos };
+            if (tl.includes('restaurante') || tl.includes('comida') || tl.includes('postre') || tl.includes('fast food') || tl.includes('tradicional')) {
+                allData.restaurantes.push(entry);
+            } else {
+                allData.servicios.push(entry);
+            }
+        });
+
+        allData.historial = histRows.map(r => ({ id: r[0], telCliente: String(r[2]), telProv: String(r[3]), estado: r[4], calif: r[5] }));
+
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: allData }));
+        renderListas();
+    } catch (e) { document.getElementById('lista-servicios').innerHTML = estadoVacio('⚠️', 'Sin conexión', 'Verifica tu internet.'); }
+}
+
+function renderListas(filtro = 'Todos', query = '') {
+    const q = quitarTildes(query.trim().toLowerCase()); const fLimpio = quitarTildes(filtro.toLowerCase());
+    ['servicios', 'restaurantes'].forEach(tipo => {
+        const items = allData[tipo] || [];
+        const filtrados = items.filter(({ nombre, tipo: t }) => {
+            return (filtro === 'Todos' || quitarTildes(String(t).toLowerCase()).includes(fLimpio)) && (!q || quitarTildes(String(nombre).toLowerCase()).includes(q) || quitarTildes(String(t).toLowerCase()).includes(q));
+        });
+        const container = document.getElementById('lista-' + tipo); const counter = document.getElementById('count-' + tipo);
+        if (filtrados.length === 0) {
+            container.innerHTML = estadoVacio('🔍', 'Sin resultados', 'Aún no hay registros en esta categoría.'); if(counter) counter.textContent = '';
+        } else {
+            container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, i * 40)).join('');
+            if(counter) counter.textContent = `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''}`;
+        }
+    });
+}
+
+/* ════════════════════════════════════════════════════════════
+   5. LÓGICA DEL HISTORIAL (MEJORA UI OPTIMISTA Y ESTRELLAS)
+══════════════════════════════════════════════════════════════ */
+function switchHistorial(vista, el) {
+    document.querySelectorAll('#nav-historial-tabs .fseg-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active'); renderHistorial(vista);
+}
+
+function generarEstrellasFijas(calif) {
+    let html = '<div style="font-size: 24px; letter-spacing: 2px; margin-top: 5px;">';
+    for(let i=1; i<=5; i++) {
+        html += (i <= calif) ? '<span class="star-fija">★</span>' : '<span style="color: var(--skeleton);">★</span>';
+    }
+    html += '</div>';
+    return html;
+}
+
+window.iluminarEstrellas = function(id, rating) {
+    const wrap = document.getElementById(`stars-${id}`);
+    if(!wrap) return;
+    const stars = wrap.querySelectorAll('.star-click');
+    stars.forEach((s, index) => {
+        if(index < rating) { s.classList.add('active'); } 
+        else { s.classList.remove('active'); }
+    });
+}
+
+function renderHistorial(vista) {
+    const miNumero = localStorage.getItem('turepo_usuario');
+    const container = document.getElementById('lista-historial');
+
+    if (!miNumero) { container.innerHTML = estadoVacio('🔒', 'Inicia Sesión', 'Debes iniciar sesión para ver tu historial.'); return; }
+
+    const limpiarNum = (n) => String(n).replace(/^0+/, '').trim();
+    const miNumLimpio = limpiarNum(miNumero);
+
+    const misTrabajos = allData.historial.filter(h =>
+        vista === 'cliente' ? limpiarNum(h.telCliente) === miNumLimpio : limpiarNum(h.telProv) === miNumLimpio
+    ).reverse();
+
+    if (misTrabajos.length === 0) { container.innerHTML = estadoVacio('📜', 'Historial vacío', `Aún no tienes trabajos como ${vista}.`); return; }
+
+    container.innerHTML = misTrabajos.map(h => {
+        const telOtro = vista === 'cliente' ? h.telProv : h.telCliente;
+        const provInfo = [...allData.servicios, ...allData.restaurantes].find(p => limpiarNum(p.telefono) === limpiarNum(telOtro));
+        const nombreOtro = provInfo ? provInfo.nombre : telOtro;
+
+        let sc = 'status-pen', st = 'Pendiente', ah = '';
+        if (h.estado === 'Terminado') { sc = 'status-ter'; st = 'Terminado'; }
+        if (h.estado === 'Calificado') { sc = 'status-cal'; st = 'Calificado'; }
+
+        if (vista === 'cliente') {
+            if (h.estado === 'Pendiente') ah = `<p class="hist-meta">Esperando que el proveedor finalice el trabajo.</p>`;
+            if (h.estado === 'Terminado') ah = `
+                <p class="hist-meta" style="color:var(--p); font-weight:700;">¡Trabajo listo! Califica el servicio:</p>
+                <div class="stars-wrap" id="stars-${h.id}">
+                    <span class="star-click" onclick="calificar('${h.id}', '${h.telProv}', 1)" onmouseover="iluminarEstrellas('${h.id}', 1)" ontouchstart="iluminarEstrellas('${h.id}', 1)">★</span>
+                    <span class="star-click" onclick="calificar('${h.id}', '${h.telProv}', 2)" onmouseover="iluminarEstrellas('${h.id}', 2)" ontouchstart="iluminarEstrellas('${h.id}', 2)">★</span>
+                    <span class="star-click" onclick="calificar('${h.id}', '${h.telProv}', 3)" onmouseover="iluminarEstrellas('${h.id}', 3)" ontouchstart="iluminarEstrellas('${h.id}', 3)">★</span>
+                    <span class="star-click" onclick="calificar('${h.id}', '${h.telProv}', 4)" onmouseover="iluminarEstrellas('${h.id}', 4)" ontouchstart="iluminarEstrellas('${h.id}', 4)">★</span>
+                    <span class="star-click" onclick="calificar('${h.id}', '${h.telProv}', 5)" onmouseover="iluminarEstrellas('${h.id}', 5)" ontouchstart="iluminarEstrellas('${h.id}', 5)">★</span>
+                </div>`;
+            if (h.estado === 'Calificado') ah = `<p class="hist-meta" style="margin-bottom:0;">Calificaste con:</p> ${generarEstrellasFijas(h.calif)}`;
+        } else {
+            if (h.estado === 'Pendiente') ah = `<button class="form-btn" id="btn-term-${h.id}" style="padding:12px; margin-top:0;" onclick="marcarTerminado('${h.id}')">✅ Marcar como Terminado</button>`;
+            if (h.estado === 'Terminado') ah = `<p class="hist-meta">Esperando calificación del cliente.</p>`;
+            if (h.estado === 'Calificado') ah = `<p class="hist-meta" style="margin-bottom:0;">El cliente te dio:</p> ${generarEstrellasFijas(h.calif)}`;
+        }
+
+        return `
+        <div class="hist-card card-enter">
+            <div class="hist-status ${sc}">${st}</div>
+            <div class="hist-title">${vista === 'cliente' ? 'Solicitaste a:' : 'Cliente:'} ${nombreOtro}</div>
+            <div class="hist-meta">Orden: ${h.id}</div>
+            ${ah}
+        </div>`;
+    }).join('');
+}
+
+// UI OPTIMISTA 1: Terminar trabajo sin esperar a Google
+function marcarTerminado(id) {
+    const btn = document.getElementById(`btn-term-${id}`);
+    if(btn) { btn.textContent = 'Procesando...'; btn.disabled = true; }
+    
+    // Engañamos a la vista
+    const idx = allData.historial.findIndex(h => h.id === id);
+    if (idx > -1) allData.historial[idx].estado = 'Terminado';
+    
+    toast('✅ Trabajo Terminado', 'ok');
+    renderHistorial('proveedor'); 
+
+    // Viaja a Google de fondo
+    fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'marcar_terminado', idTrabajo: id }) })
+    .then(() => { recargarTodoSilencioso('proveedor'); });
+}
+
+// UI OPTIMISTA 2: Estrellas sin esperar a Google
+function calificar(id, telProv, estrellas) {
+    iluminarEstrellas(id, estrellas); 
+    
+    // Engañamos a la vista
+    const idx = allData.historial.findIndex(h => h.id === id);
+    if (idx > -1) {
+        allData.historial[idx].estado = 'Calificado';
+        allData.historial[idx].calif = estrellas;
+    }
+    
+    toast('¡Gracias por calificar! ⭐', 'ok');
+    setTimeout(() => { renderHistorial('cliente'); }, 300);
+
+    // Viaja a Google de fondo
+    fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'calificar', idTrabajo: id, telProveedor: telProv, estrellas: estrellas }) })
+    .then(() => { recargarTodoSilencioso('cliente'); });
+}
+
+function recargarTodoSilencioso(vistaActual = 'cliente') {
+    sessionStorage.removeItem(CACHE_KEY);
+    cargarDirectorio(true).then(() => {
+        if(document.getElementById('historial-section').classList.contains('active')) { renderHistorial(vistaActual); }
+    });
+}
+
+/* ════════════════════════════════════════════════════════════
+   6. EVENTOS DE UI (Navegación)
+══════════════════════════════════════════════════════════════ */
+let searchTimer; const sInput = document.getElementById('search-input'), cBtn = document.getElementById('clear-btn');
+sInput.addEventListener('input', e => { cBtn.classList.toggle('visible', e.target.value.length > 0); clearTimeout(searchTimer); searchTimer = setTimeout(() => renderListas(activeFiltro(), e.target.value), 260); });
+cBtn.addEventListener('click', () => { sInput.value = ''; cBtn.classList.remove('visible'); renderListas(activeFiltro(), ''); sInput.focus(); });
+function activeFiltro() { const t = document.querySelector('#segmentador .seg-btn.active').textContent.toLowerCase().includes('restaurante') ? 'restaurantes' : 'servicios'; const c = document.querySelector(`#${t}-section .chip.active`); return c ? c.textContent.replace(/[^\w\sáéíóúüñ]/gu, '').trim() : 'Todos'; }
+function filtrar(cat, el) { el.closest('.chips-row').querySelectorAll('.chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderListas(cat, sInput.value); }
+
+function switchTab(tab, el) {
+    document.querySelectorAll('#segmentador .seg-btn').forEach(b => b.classList.remove('active')); el.classList.add('active');
+    ['servicios-section', 'restaurantes-section'].forEach(id => document.getElementById(id).classList.remove('active')); document.getElementById(tab + '-section').classList.add('active');
+    sInput.placeholder = tab === 'restaurantes' ? 'Buscar restaurantes…' : 'Buscar servicios…'; renderListas(activeFiltro(), sInput.value);
+}
+
+function navegar(dest, el) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active');
+    const hdr = document.querySelector('.header');
+    ['servicios-section', 'restaurantes-section', 'perfil-section', 'historial-section'].forEach(id => document.getElementById(id).classList.remove('active'));
+   
+    if (dest === 'inicio') {
+        hdr.style.display = ''; switchTab(document.querySelector('#segmentador .seg-btn.active').textContent.toLowerCase().includes('restaurante') ? 'restaurantes' : 'servicios', document.querySelector('#segmentador .seg-btn.active'));
+    } else if (dest === 'perfil') {
+        hdr.style.display = 'none'; document.getElementById('perfil-section').classList.add('active'); window.scrollTo(0,0);
+    } else if (dest === 'historial') {
+        hdr.style.display = 'none'; document.getElementById('historial-section').classList.add('active'); window.scrollTo(0,0);
+        switchHistorial('cliente', document.querySelector('#nav-historial-tabs .fseg-btn'));
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   7. SESIÓN Y REGISTRO
+══════════════════════════════════════════════════════════════ */
+function toggleForm(tipo, el) { el.closest('.form-seg').querySelectorAll('.fseg-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); document.getElementById('pant-login').style.display = tipo === 'login' ? 'block' : 'none'; document.getElementById('pant-registro').style.display = tipo === 'registro' ? 'block' : 'none'; }
+function mostrarSubCategoria() { document.getElementById('caja-subcategoria').style.display = document.getElementById('reg-tipo').value === 'servicio' ? 'block' : 'none'; }
+function mostrarOtro() { document.getElementById('reg-otro').style.display = document.getElementById('reg-sub-tipo').value === 'Otro' ? 'block' : 'none'; }
+
+function iniciarSesion() {
+    const tel = document.getElementById('login-tel').value.trim(); if (!tel || tel.length < 10) return toast('Ingresa un número válido', 'err');
+    localStorage.setItem('turepo_usuario', tel); document.getElementById('login-tel').value = ''; toast('¡Sesión iniciada! 🔓', 'ok'); verificarSesion(); recargarTodoSilencioso();
+}
+function cerrarSesion() { localStorage.removeItem('turepo_usuario'); toast('Sesión cerrada 👋', 'ok'); verificarSesion(); }
+function verificarSesion() {
+    const user = localStorage.getItem('turepo_usuario');
+    if (user) {
+        document.getElementById('nav-login-tabs').style.display = 'none'; document.getElementById('pant-login').style.display = 'none'; document.getElementById('pant-registro').style.display = 'none'; document.getElementById('pant-sesion-activa').style.display = 'block'; document.getElementById('sesion-tel-texto').textContent = user;
+    } else {
+        document.getElementById('nav-login-tabs').style.display = 'flex'; document.getElementById('pant-login').style.display = 'block'; document.getElementById('pant-sesion-activa').style.display = 'none'; document.querySelector('.fseg-btn[onclick="toggleForm(\'login\', this)"]').click();
+    }
+}
+function prepararYEnviar() {
+    let t = document.getElementById('reg-tipo').value; if (!t) return toast('Selecciona qué deseas hacer', 'err');
+    if (t === 'servicio') { t = document.getElementById('reg-sub-tipo').value; if (t === 'Otro') { const o = document.getElementById('reg-otro').value.trim(); if (!o) return toast('Escribe tu servicio', 'err'); t = o.charAt(0).toUpperCase() + o.slice(1).toLowerCase(); } }
+    enviarDirecto(t);
+}
+async function enviarDirecto(t) {
+    const n = document.getElementById('reg-nombre').value.trim(); const tel = document.getElementById('reg-tel').value.trim();
+    if (!n || !tel) return toast('Llena todos los campos', 'err');
+    const btn = document.getElementById('reg-btn'); btn.textContent = 'Enviando…'; btn.disabled = true;
+    try { await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'registro', tipo: t, nombre: n, telefono: tel }) });
+        toast('¡Registro exitoso! 👏', 'ok'); localStorage.setItem('turepo_usuario', tel); document.getElementById('reg-nombre').value = ''; document.getElementById('reg-tel').value = ''; verificarSesion(); recargarTodoSilencioso(); setTimeout(() => { navegar('inicio', document.querySelector('.bottom-nav .nav-item')); }, 800);
+    } catch (e) { toast('Error de conexión.', 'err'); } finally { btn.textContent = 'Completar Registro'; btn.disabled = false; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => { verificarSesion(); cargarDirectorio(); });
+</script>
+</body>
+</html>
+
