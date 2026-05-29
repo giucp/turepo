@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,37 +21,39 @@
             --white: #FFFFFF; --txt: #1A1A2E; --muted: #6B7280; --border: #E4E9E8; --skeleton: #E4EAE8;
             --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px;
             --shadow-sm: 0 2px 8px rgba(30,92,82,.07);
+            --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--txt); padding-bottom: 90px; -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+        body { font-family: var(--font); background: var(--bg); color: var(--txt); padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+        button, input, select { font-family: inherit; -webkit-tap-highlight-color: transparent; }
 
         /* ── HEADER & SEARCH ───────────────────────────────── */
-        .header { background: linear-gradient(150deg, #1E5C52 0%, #145046 100%); padding: 16px 16px 14px; position: sticky; top: 0; z-index: 100; border-radius: 0 0 22px 22px; box-shadow: 0 8px 24px rgba(20,80,70,.22); }
+        .header { background: linear-gradient(150deg, #1E5C52 0%, #145046 100%); padding: 16px 16px 14px; position: -webkit-sticky; position: sticky; top: 0; z-index: 100; border-radius: 0 0 22px 22px; box-shadow: 0 8px 24px rgba(20,80,70,.22); }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .logo { font-size: 27px; font-weight: 800; color: var(--white); letter-spacing: -1.2px; display: flex; align-items: center; gap: 2px; }
         .logo span { color: var(--accent); } .logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-bottom: 10px; margin-left: 1px; }
-        .location-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,.13); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--white); backdrop-filter: blur(8px); }
-        .location-pill select { background: transparent; color: var(--white); border: none; outline: none; font-size: 12px; font-weight: 700; font-family: inherit; appearance: none; cursor: pointer; }
+        .location-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,.13); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--white); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+        .location-pill select { background: transparent; color: var(--white); border: none; outline: none; font-size: 12px; font-weight: 700; font-family: inherit; -webkit-appearance: none; appearance: none; cursor: pointer; }
         .location-pill select option { color: var(--txt); background: var(--white); }
-        .search-wrap { background: rgba(255,255,255,.96); border-radius: var(--radius-md); display: flex; align-items: center; padding: 11px 14px; margin-bottom: 13px; box-shadow: 0 2px 10px rgba(0,0,0,.10); }
-        .search-wrap:focus-within { box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+        .search-wrap { background: rgba(255,255,255,.96); border-radius: var(--radius-md); display: flex; align-items: center; padding: 11px 14px; margin-bottom: 13px; box-shadow: 0 2px 10px rgba(0,0,0,.10); transition: box-shadow .2s; }
+        .search-wrap:focus-within { box-shadow: 0 2px 14px rgba(0,0,0,.20); }
         .search-icon { color: var(--muted); font-size: 16px; margin-right: 9px; flex-shrink:0; }
-        .search-input { flex: 1; border: none; outline: none; font-size: 14px; font-family: inherit; color: var(--txt); background: transparent; }
+        .search-input { flex: 1; border: none; outline: none; font-size: 16px; font-family: inherit; color: var(--txt); background: transparent; min-width: 0; }
         .search-input::placeholder { color: #A8B5B2; }
-        .clear-btn { background: var(--skeleton); border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 11px; color: var(--muted); display: none; align-items: center; justify-content: center; flex-shrink: 0; }
+        .clear-btn { background: var(--skeleton); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 11px; color: var(--muted); display: none; align-items: center; justify-content: center; flex-shrink: 0; }
         .clear-btn.visible { display: flex; }
 
         /* ── SEGMENTADOR Y CHIPS ───────────────────────────── */
         .segment { display: flex; background: rgba(255,255,255,.14); border-radius: var(--radius-sm); padding: 3px; gap: 3px; }
-        .seg-btn { flex: 1; padding: 9px 8px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,.7); font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s; }
+        .seg-btn { flex: 1; padding: 9px 8px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,.7); font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .2s, color .2s; }
         .seg-btn.active { background: var(--white); color: var(--p); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
-        .chips-row { display: flex; overflow-x: auto; padding: 14px 16px 4px; gap: 8px; scrollbar-width: none; }
+        .chips-row { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px 4px; gap: 8px; scrollbar-width: none; }
         .chips-row::-webkit-scrollbar { display: none; }
-        .chip { background: var(--white); padding: 7px 15px; border-radius: 20px; font-size: 12.5px; font-weight: 600; white-space: nowrap; color: var(--muted); border: 1.5px solid var(--border); cursor: pointer; transition: all .18s; user-select: none; }
+        .chip { background: var(--white); padding: 7px 15px; border-radius: 20px; font-size: 12.5px; font-weight: 600; white-space: nowrap; color: var(--muted); border: 1.5px solid var(--border); cursor: pointer; transition: background .18s, color .18s, border-color .18s; -webkit-user-select: none; user-select: none; }
         .chip.active { background: var(--p); color: var(--white); border-color: var(--p); box-shadow: 0 3px 10px rgba(30,92,82,.28); }
         .sort-row { display: flex; padding: 10px 16px 0; gap: 8px; }
-        .sort-btn { background: transparent; border: 1.5px solid var(--border); padding: 6px 13px; border-radius: 14px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .18s; }
+        .sort-btn { background: transparent; border: 1.5px solid var(--border); padding: 6px 13px; border-radius: 14px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; font-family: inherit; transition: background .18s, color .18s, border-color .18s; }
         .sort-btn.active { background: var(--white); color: var(--p); border-color: var(--p); }
 
         /* ── SECCIONES Y TARJETAS ──────────────────────────── */
@@ -61,34 +63,38 @@
         .card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 12px; transition: transform .18s, border-color .2s, box-shadow .2s; }
         .card:active { transform: scale(.993); }
         .card-top { display: flex; gap: 14px; align-items: flex-start; }
-        
+
         /* ── AVATARES Y RANGOS  ──────────────────── */
         .avatar-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
         .avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #C8E6E1, #8ECEC6); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: var(--p); flex-shrink: 0; border: 2px solid rgba(30,92,82,.12); }
-        .avatar.biz { border-radius: var(--radius-sm); background: linear-gradient(135deg, #FFE4CC, #FFBCB2); color: #C0392B; }
-        .avatar.tech { background: linear-gradient(135deg, #D4E8FF, #A8CBFF); color: #1565C0; }
-        .avatar.elec { background: linear-gradient(135deg, #FFF8D4, #FFE97A); color: #F57F17; }
-        .avatar.plom { background: linear-gradient(135deg, #D4F4FF, #7DDCFF); color: #0277BD; }
-        .avatar.rest { background: linear-gradient(135deg, #FFE0CC, #FFAB76); color: #E65100; }
-        
-        /* Rango Oro Destacado */
-        .card.rank-gold { border-color: #FDE68A; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.12); background: linear-gradient(to bottom right, #FFFFFF, #FFFBEB); }
-        .avatar.rank-gold { background: linear-gradient(135deg, #FDE68A, #F59E0B) !important; color: #78350F !important; border: 2px solid #FCD34D !important; }
+
+        /* Íconos SVG de rango (livianos, nítidos en cualquier pantalla) */
+        .rank-ic { width: 30px; height: 30px; display: block; }
+
+        /* Rango Bronce (base) */
+        .avatar.rank-bronze { background: linear-gradient(135deg, #F0CBA4, #C8814B); color: #5E3A18; border: 2px solid #E3B488; }
+        /* Rango Plata */
+        .avatar.rank-silver { background: linear-gradient(135deg, #EDF0F4, #AEB7C2); color: #3C4654; border: 2px solid #D6DBE2; }
+        /* Rango Oro */
+        .avatar.rank-gold { background: linear-gradient(135deg, #FDE68A, #F59E0B); color: #7A4A05; border: 2px solid #FCD34D; }
+        .card.rank-gold { border-color: #FDE68A; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.14); background: linear-gradient(to bottom right, #FFFFFF, #FFFBEB); }
 
         .card-info { flex: 1; min-width: 0; }
         .card-badge { font-size: 10px; padding: 3px 9px; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; margin-bottom: 5px; }
         .badge-good { background: #E0F2FE; color: #0369A1; }
         .card-name { font-size: 15.5px; font-weight: 700; color: var(--txt); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-type { font-size: 12.5px; color: var(--muted); margin-bottom: 9px; font-weight: 500; }
-        .card-stats { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; background: var(--bg); padding: 7px 10px; border-radius: 8px; color: var(--txt); }
+        .card-stats { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--txt); }
         .star-row { display: flex; align-items: center; gap: 3px; } .star-row span { color: var(--accent); font-size: 13px; }
         .sep { color: var(--border); font-weight: 400; } .card-meta { color: var(--muted); font-size: 11.5px; font-weight: 500; }
-        
-        /* ── BOTONES DE TARJETA (NUEVO: FAVORITOS) ─────────── */
+        .nav-ic { width: 22px; height: 22px; display: block; }
+        .wa-ic { display: inline-flex; align-items: center; }
+
+        /* ── BOTONES DE TARJETA (FAVORITOS) ────────────────── */
         .btn-row { display: flex; gap: 8px; margin-top: 2px; width: 100%;}
-        .btn-wa { flex: 1; display: flex; justify-content: center; align-items: center; gap: 9px; padding: 12px; border-radius: var(--radius-sm); background: #25D366; color: var(--white); border: none; cursor: pointer; font-weight: 700; font-size: 14px; font-family: inherit; transition: opacity .18s, transform .14s; letter-spacing: .2px; text-decoration: none;}
+        .btn-wa { flex: 1; display: flex; justify-content: center; align-items: center; gap: 9px; padding: 12px; border-radius: var(--radius-sm); background: #25D366; color: var(--white); border: none; cursor: pointer; font-weight: 700; font-size: 14px; font-family: inherit; transition: opacity .18s, transform .14s; letter-spacing: .2px; text-decoration: none; box-shadow: 0 3px 10px rgba(37,211,102,.28);}
         .btn-wa:active { opacity: .85; transform: scale(.985); }
-        .btn-fav { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: all .15s; flex-shrink: 0; color: #D1D5DB; }
+        .btn-fav { width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; flex-shrink: 0; color: #D1D5DB; }
         .btn-fav.active { background: #FEE2E2; border-color: #FCA5A5; color: #EF4444; }
         .btn-fav:active { transform: scale(.9); }
 
@@ -103,15 +109,15 @@
         .empty-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
         /* ── UI HISTORIAL Y ESTRELLAS ──────────────────────── */
-        .hist-card { contain: content; background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
+        .hist-card { background: var(--white); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
         .hist-title { font-size: 15px; font-weight: 700; color: var(--txt); margin-bottom: 4px; }
         .hist-meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
         .hist-status { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
-        .status-pen { background: #FEF3C7; color: #92400E; } 
-        .status-ter { background: #E0F2FE; color: #0369A1; } 
-        .status-cal { background: #DCFCE7; color: #166534; } 
+        .status-pen { background: #FEF3C7; color: #92400E; }
+        .status-ter { background: #E0F2FE; color: #0369A1; }
+        .status-cal { background: #DCFCE7; color: #166534; }
         .stars-wrap { display: flex; gap: 8px; font-size: 28px; margin-top: 8px; justify-content: center; background: var(--bg); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);}
-        
+
         /* Estrellas interactivas */
         .star-click { cursor: pointer; color: var(--skeleton); transition: color .1s, transform .1s; -webkit-tap-highlight-color: transparent; }
         .star-click.active { color: var(--accent); transform: scale(1.1); }
@@ -121,27 +127,35 @@
         .profile-wrap { padding: 18px 16px; }
         .profile-wrap h2 { font-size: 22px; font-weight: 800; color: var(--p); margin-bottom: 18px; }
         .form-seg { display: flex; background: var(--border); border-radius: var(--radius-sm); padding: 3px; gap: 3px; margin-bottom: 18px; }
-        .fseg-btn { flex: 1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all .2s; }
+        .fseg-btn { flex: 1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background .2s, color .2s; }
         .fseg-btn.active { background: var(--white); color: var(--p); box-shadow: var(--shadow-sm); }
         .form-card { background: var(--white); border-radius: var(--radius-md); padding: 20px; border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); }
         .form-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
         .form-card p { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
         .form-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; display: block; margin-top: 16px; margin-bottom: 5px; }
-        .form-input { width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); outline: none; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--txt); transition: border-color .18s; }
+        .form-input { width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); outline: none; font-size: 16px; font-family: inherit; background: var(--bg); color: var(--txt); transition: border-color .18s, box-shadow .18s; -webkit-appearance: none; appearance: none; }
         .form-input:focus { border-color: var(--p); background: var(--white); box-shadow: 0 0 0 3px rgba(30,92,82,.08); }
+        select.form-input { background-image: none; }
         .form-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--p2), var(--p)); color: var(--white); border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 20px; font-family: inherit; box-shadow: 0 4px 14px rgba(30,92,82,.30); transition: opacity .18s, transform .14s; }
         .form-btn:active { opacity: .88; transform: scale(.987); } .form-btn:disabled { opacity: .6; cursor: not-allowed; }
 
         /* ── TOAST Y NAV INFERIOR ──────────────────────────── */
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--txt); color: var(--white); padding: 12px 22px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: all .3s ease; pointer-events: none; white-space: nowrap; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--txt); color: var(--white); padding: 12px 22px; border-radius: 20px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: opacity .3s ease, transform .3s ease; pointer-events: none; white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,.22); }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.ok { background: var(--p); } .toast.err { background: #DC2626; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 18px; z-index: 100; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,.95); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 100; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted); cursor: pointer; transition: color .18s; padding: 4px 16px; }
         .nav-item.active { color: var(--p); } .nav-item.active .nav-dot { display: block; }
         .nav-dot { display: none; width: 4px; height: 4px; border-radius: 50%; background: var(--p); margin: 0 auto; }
         .sec-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 14px 16px 2px; }
+
         .card-enter { animation: cardIn .28s ease both; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Respeta usuarios con movimiento reducido y aligera equipos lentos */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+        }
     </style>
 </head>
 <body>
@@ -149,12 +163,12 @@
 <header class="header">
     <div class="header-top">
         <div class="logo">tu<span>repo</span><div class="logo-dot"></div></div>
-        <div class="location-pill">📍 <select><option selected>Barinas</option></select> ▾</div>
+        <div class="location-pill">📍 <select aria-label="Ciudad"><option selected>Barinas</option></select> ▾</div>
     </div>
     <div class="search-wrap" id="search-wrap">
         <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="search-input" placeholder="Buscar servicios…" autocomplete="off">
-        <button class="clear-btn" id="clear-btn">✕</button>
+        <input type="search" class="search-input" id="search-input" placeholder="Buscar servicios…" autocomplete="off" enterkeyhint="search" aria-label="Buscar">
+        <button class="clear-btn" id="clear-btn" aria-label="Limpiar búsqueda">✕</button>
     </div>
     <div class="segment" id="segmentador">
         <button class="seg-btn active" onclick="switchTab('servicios', this)">🔧 Servicios</button>
@@ -197,7 +211,7 @@
     <div class="list" id="lista-restaurantes"></div>
 </div>
 
-<!-- NUEVA SECCIÓN DE FAVORITOS -->
+<!-- SECCIÓN DE FAVORITOS -->
 <div id="favoritos-section" class="section-wrap">
     <div class="profile-wrap">
         <h2>Mis Favoritos</h2>
@@ -229,7 +243,7 @@
                 <h3>Bienvenido de nuevo</h3>
                 <p>Ingresa para gestionar tu perfil.</p>
                 <label class="form-label">Número Telefónico</label>
-                <input type="tel" class="form-input" id="login-tel" placeholder="Ej: 04141234567">
+                <input type="tel" inputmode="tel" class="form-input" id="login-tel" placeholder="Ej: 04141234567">
                 <button class="form-btn" onclick="iniciarSesion()">Ingresar</button>
             </div>
         </div>
@@ -238,7 +252,10 @@
             <div class="form-card">
                 <h3>Crea tu cuenta</h3>
                 <p>Únete al directorio local de Barinas.</p>
-               
+
+                <!-- Honeypot: invisible para humanos, los bots tienden a llenarlo. No borrar. -->
+                <input type="text" id="reg-web" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;">
+
                 <label class="form-label">¿Qué deseas hacer?</label>
                 <select class="form-input" id="reg-tipo" onchange="mostrarSubCategoria()">
                     <option value="" disabled selected>Selecciona una opción</option>
@@ -266,7 +283,7 @@
                 <label class="form-label">Nombre o Razón Social</label>
                 <input type="text" class="form-input" id="reg-nombre" placeholder="Ej: Juan Pérez">
                 <label class="form-label">Número Telefónico</label>
-                <input type="tel" class="form-input" id="reg-tel" placeholder="Ej: 04141234567">
+                <input type="tel" inputmode="tel" class="form-input" id="reg-tel" placeholder="Ej: 04141234567">
 
                 <button class="form-btn" id="reg-btn" onclick="prepararYEnviar()">Completar Registro</button>
             </div>
@@ -285,19 +302,19 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- MENÚ INFERIOR ACTUALIZADO CON FAVORITOS -->
+<!-- MENÚ INFERIOR -->
 <nav class="bottom-nav">
     <div class="nav-item active" onclick="navegar('inicio', this)">
-        <span class="nav-icon">🏠</span>Inicio<div class="nav-dot"></div>
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/><path d="M9 21v-6h6v6"/></svg>Inicio<div class="nav-dot"></div>
     </div>
     <div class="nav-item" onclick="navegar('favoritos', this)">
-        <span class="nav-icon">❤️</span>Favs<div class="nav-dot"></div>
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 6.5-6.5l1 1 1-1a4.6 4.6 0 0 1 6.5 6.5z"/></svg>Favs<div class="nav-dot"></div>
     </div>
     <div class="nav-item" onclick="navegar('historial', this)">
-        <span class="nav-icon">📜</span>Historial<div class="nav-dot"></div>
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>Historial<div class="nav-dot"></div>
     </div>
     <div class="nav-item" onclick="navegar('perfil', this)">
-        <span class="nav-icon">👤</span>Mi Perfil<div class="nav-dot"></div>
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Mi Perfil<div class="nav-dot"></div>
     </div>
 </nav>
 
@@ -306,7 +323,7 @@
    1. CONFIGURACIÓN
 ══════════════════════════════════════════════════════════════ */
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwBILHLFwpL0XFWUK6k37J3aX-zr8mLitttWgxOmh1VWjjA4LwTPnD884Z6PIh9aOUMJA/exec';
-const CACHE_KEY  = 'turepo_v2_final'; 
+const CACHE_KEY  = 'turepo_v2_final';
 const CACHE_TTL  = 3 * 60 * 1000;
 
 /* ════════════════════════════════════════════════════════════
@@ -318,18 +335,33 @@ function toast(msg, tipo = '') {
     clearTimeout(el._t); el._t = setTimeout(() => { el.className = 'toast'; }, 2800);
 }
 function quitarTildes(t) { return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+// Normaliza un teléfono a su "núcleo" comparable (quita símbolos, prefijo país y ceros iniciales).
+function normalizarTel(n) { return String(n).replace(/[^\d]/g, '').replace(/^58/, '').replace(/^0+/, ''); }
+// Marca de tiempo para detectar envíos demasiado rápidos (probables bots).
+let regAbiertoTs = Date.now();
 function avatarClass(t = '') {
     const tl = String(t).toLowerCase();
     if (tl.includes('restaurante') || tl.includes('comida')) return 'rest';
-    if (tl.includes('tecnología') || tl.includes('tecnologia')) return 'tech'; 
+    if (tl.includes('tecnología') || tl.includes('tecnologia')) return 'tech';
     if (tl.includes('electricidad')) return 'elec';
-    if (tl.includes('plomería') || tl.includes('plomeria')) return 'plom'; 
+    if (tl.includes('plomería') || tl.includes('plomeria')) return 'plom';
     if (tl.includes('local') || tl.includes('negocio')) return 'biz';
     return '';
 }
 
+/* Íconos SVG de rango: livianos como un emoji, pero limpios y nítidos */
+const SVG_RANK = {
+    corona: '<svg class="rank-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.3l4.27-3.67a.5.5 0 0 1 .8.52l-2.83 10.25a1 1 0 0 1-.96.73H5.81a1 1 0 0 1-.96-.73L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.67a1 1 0 0 0 1.52-.3z"/><path d="M5 21h14"/></svg>',
+    medalla: '<svg class="rank-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15.48 12.89 1.51 8.53a.5.5 0 0 1-.81.47l-3.58-2.69a1 1 0 0 0-1.2 0l-3.59 2.69a.5.5 0 0 1-.81-.47l1.51-8.53"/><circle cx="12" cy="8" r="6"/></svg>'
+};
+
+/* Ícono SVG de WhatsApp para el botón de contacto */
+const SVG_ICON = {
+    whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="18" height="18"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 0 0 4.74 1.21h.004c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 1.82c2.16 0 4.19.84 5.72 2.37a8.05 8.05 0 0 1 2.37 5.72c0 4.54-3.7 8.23-8.24 8.23-1.49 0-2.95-.4-4.22-1.16l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.24-8.23zm4.51 10.43c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.97-.14.17-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>'
+};
+
 // LOGICA DE FAVORITOS LOCALES
-function getFavs() { return JSON.parse(localStorage.getItem('turepo_favs') || '[]'); }
+function getFavs() { try { return JSON.parse(localStorage.getItem('turepo_favs') || '[]'); } catch (_) { return []; } }
 function isFavorito(tel) { return getFavs().includes(String(tel)); }
 window.toggleFav = function(tel, btnEl) {
     let favs = getFavs();
@@ -359,43 +391,49 @@ function estadoVacio(icon, title, sub) { return `<div class="empty-state"><div c
 /* ════════════════════════════════════════════════════════════
    3. RENDER DE TARJETAS CON BOTÓN DE FAVORITOS
 ══════════════════════════════════════════════════════════════ */
-function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, delay = 0) {
+function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, estado, delay = 0) {
     const v = parseInt(votos) || 0;
     const e = parseFloat(estrellas) || 0;
-    
+
     // LÓGICA DE RANGOS
     let isOro = v >= 15 && e >= 4.7;
     let isPlata = !isOro && v >= 5 && e >= 4.0;
-    
-    let cardClass = isOro ? 'rank-gold' : '';
-    let avatarGoldClass = isOro ? 'rank-gold' : '';
-    
-    // Asignación del ícono central eliminando las iniciales
-    let iconoCentral = '🥉'; 
-    if (isOro) iconoCentral = '👑'; 
-    else if (isPlata) iconoCentral = '🥈'; 
 
+    // Clase de rango para la tarjeta y el avatar
+    let rango = 'bronze';
+    let icono = SVG_RANK.medalla;
+    if (isOro) { rango = 'gold'; icono = SVG_RANK.corona; }
+    else if (isPlata) { rango = 'silver'; icono = SVG_RANK.medalla; }
+
+    const cardClass = isOro ? 'rank-gold' : '';
     const isFav = isFavorito(telProv);
+
+    // Badge "Verificado": SOLO si la columna Estado de la hoja dice "Verificado".
+    const verificado = /verif/i.test(String(estado || ''));
+    const badge = verificado ? '<div class="card-badge badge-good">✓ Verificado</div>' : '';
+
+    const reseñas = v === 1 ? 'reseña' : 'reseñas';
 
     return `
     <div class="card card-enter ${cardClass}" style="animation-delay:${delay}ms">
         <div class="card-top">
             <div class="avatar-wrap">
-                <div class="avatar ${avatarClass(tipo)} ${avatarGoldClass}" style="font-size: 28px;">${iconoCentral}</div>
+                <div class="avatar rank-${rango}">${icono}</div>
             </div>
             <div class="card-info">
-                <div class="card-badge badge-good">✅ Verificado</div>
+                ${badge}
                 <div class="card-name">${nombre}</div>
                 <div class="card-type">${tipo}</div>
                 <div class="card-stats">
-                    <div class="star-row"><span>★</span> ${e} <span style="color:var(--muted); font-size:11px;">(${v})</span></div>
-                    <span class="sep">|</span><span class="card-meta">Barinas, VE</span>
+                    <span class="star-row"><span>★</span></span>
+                    <span>${e}</span>
+                    <span style="color:var(--muted); font-weight:500; font-size:12px;">· ${v} ${reseñas}</span>
                 </div>
             </div>
         </div>
         <div class="btn-row">
-            <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')">💬 Contactar por WhatsApp</button>
-            <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${telProv}', this)">${isFav ? '❤️' : '🤍'}</button>
+            <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')"><span class="wa-ic">${SVG_ICON.whatsapp}</span> Contactar por WhatsApp</button>
+            <button class="btn-fav ${isFav ? 'active' : ''}" aria-label="Favorito" onclick="toggleFav('${telProv}', this)">${isFav ? '❤️' : '🤍'}</button>
         </div>
     </div>`;
 }
@@ -405,7 +443,7 @@ function contactarProveedor(telProv, urlWA) {
     if (miNumero) {
         fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'crear_trabajo', telCliente: miNumero, telProveedor: String(telProv) })
         }).catch(err => console.log('Registro silente'));
-       
+
         setTimeout(() => recargarTodoSilencioso(), 1500);
     }
     window.open(urlWA, '_blank');
@@ -417,27 +455,37 @@ function contactarProveedor(telProv, urlWA) {
 let allData = { servicios: [], restaurantes: [], historial: [] };
 
 async function cargarDirectorio(force = false) {
+    let teniaCache = false;
     if (!force) {
+        // Stale-while-revalidate: mostramos lo último guardado al instante
+        // y refrescamos en segundo plano para que la apertura sea fluida.
         try {
-            const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
-            if (cached && Date.now() - cached.ts < CACHE_TTL) { allData = cached.data; renderListas(); return; }
+            const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+            if (cached && cached.data) {
+                allData = cached.data;
+                renderListas();
+                teniaCache = true;
+                // Si el caché aún es fresco, evitamos la llamada de red.
+                if (Date.now() - cached.ts < CACHE_TTL) return;
+            }
         } catch (_) {}
     }
-    if(!force) { renderSkeletons('lista-servicios', 4); renderSkeletons('lista-restaurantes', 2); }
+    // Solo mostramos esqueletos en la primera carga real (sin datos previos).
+    if (!teniaCache && !force) { renderSkeletons('lista-servicios', 4); renderSkeletons('lista-restaurantes', 2); }
 
     try {
         const resp = await fetch(SHEETS_URL);
         const dataObj = await resp.json();
-       
+
         const rows = Array.isArray(dataObj.registros) ? dataObj.registros.slice(1) : [];
         const histRows = Array.isArray(dataObj.historial) ? dataObj.historial.slice(1) : [];
 
         allData.servicios = []; allData.restaurantes = [];
-       
+
         rows.forEach(([fecha, tipo = '', nombre = '', telefono = '', linkWA = '', estado = '', estrellas = 5, votos = 0]) => {
             const tl = tipo ? tipo.toString().toLowerCase() : '';
             if (tl === 'cliente' || tl.includes('cliente')) return;
-            const entry = { nombre, tipo, linkWA, telefono, estrellas, votos };
+            const entry = { nombre, tipo, linkWA, telefono, estrellas, votos, estado };
             if (tl.includes('restaurante') || tl.includes('comida') || tl.includes('postre') || tl.includes('fast food') || tl.includes('tradicional')) {
                 allData.restaurantes.push(entry);
             } else {
@@ -447,13 +495,17 @@ async function cargarDirectorio(force = false) {
 
         allData.historial = histRows.map(r => ({ id: r[0], telCliente: String(r[2]), telProv: String(r[3]), estado: r[4], calif: r[5] }));
 
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: allData }));
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: allData })); } catch (_) {}
         renderListas();
-    } catch (e) { document.getElementById('lista-servicios').innerHTML = estadoVacio('⚠️', 'Sin conexión', 'Verifica tu internet.'); }
+        if (document.getElementById('favoritos-section').classList.contains('active')) renderFavoritos();
+    } catch (e) {
+        // Si ya teníamos datos en pantalla, no los borramos por un fallo de red.
+        if (!teniaCache) { document.getElementById('lista-servicios').innerHTML = estadoVacio('⚠️', 'Sin conexión', 'Verifica tu internet.'); }
+    }
 }
 
 function renderListas(filtro = 'Todos', query = '') {
-    const q = quitarTildes(query.trim().toLowerCase()); 
+    const q = quitarTildes(query.trim().toLowerCase());
     const fLimpio = quitarTildes(filtro.toLowerCase());
 
     // DICCIONARIO SEMÁNTICO (Buscador Inteligente)
@@ -476,9 +528,9 @@ function renderListas(filtro = 'Todos', query = '') {
         const filtrados = items.filter(({ nombre, tipo: t }) => {
             const tLimpio = quitarTildes(String(t).toLowerCase());
             const nLimpio = quitarTildes(String(nombre).toLowerCase());
-            
+
             const coincideFiltro = filtro === 'Todos' || tLimpio.includes(fLimpio);
-            
+
             // Lógica de Búsqueda Inteligente
             let coincideBusqueda = false;
             if (!q) {
@@ -495,18 +547,19 @@ function renderListas(filtro = 'Todos', query = '') {
                     }
                 }
             }
-            
+
             return coincideFiltro && coincideBusqueda;
         });
 
-        const container = document.getElementById('lista-' + tipo); 
+        const container = document.getElementById('lista-' + tipo);
         const counter = document.getElementById('count-' + tipo);
-        
+
         if (filtrados.length === 0) {
-            container.innerHTML = estadoVacio('🔍', 'Sin resultados', 'Aún no hay registros en esta categoría.'); 
+            container.innerHTML = estadoVacio('🔍', 'Sin resultados', 'Aún no hay registros en esta categoría.');
             if(counter) counter.textContent = '';
         } else {
-            container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, i * 40)).join('');
+            // Escalonado con tope para que listas largas no tarden en aparecer.
+            container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, e.estado, Math.min(i, 12) * 35)).join('');
             if(counter) counter.textContent = `${filtrados.length} resultado${filtrados.length !== 1 ? 's' : ''}`;
         }
     });
@@ -515,16 +568,21 @@ function renderListas(filtro = 'Todos', query = '') {
 function renderFavoritos() {
     const favs = getFavs();
     const container = document.getElementById('lista-favoritos');
-    
+
     if(favs.length === 0) {
         container.innerHTML = estadoVacio('❤️', 'Sin favoritos', 'Tus proveedores de confianza aparecerán aquí guardados.');
         return;
     }
-    
+
     const todos = [...allData.servicios, ...allData.restaurantes];
     const filtrados = todos.filter(p => favs.includes(String(p.telefono)));
-    
-    container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, i * 40)).join('');
+
+    if (filtrados.length === 0) {
+        container.innerHTML = estadoVacio('❤️', 'Cargando favoritos…', 'Si no aparecen, revisa tu conexión e inténtalo de nuevo.');
+        return;
+    }
+
+    container.innerHTML = filtrados.map((e, i) => renderCard(e.nombre, e.tipo, e.linkWA, e.telefono, e.estrellas, e.votos, e.estado, Math.min(i, 12) * 35)).join('');
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -549,7 +607,7 @@ window.iluminarEstrellas = function(id, rating) {
     if(!wrap) return;
     const stars = wrap.querySelectorAll('.star-click');
     stars.forEach((s, index) => {
-        if(index < rating) { s.classList.add('active'); } 
+        if(index < rating) { s.classList.add('active'); }
         else { s.classList.remove('active'); }
     });
 }
@@ -609,26 +667,26 @@ function renderHistorial(vista) {
 function marcarTerminado(id) {
     const btn = document.getElementById(`btn-term-${id}`);
     if(btn) { btn.textContent = 'Procesando...'; btn.disabled = true; }
-    
+
     const idx = allData.historial.findIndex(h => h.id === id);
     if (idx > -1) allData.historial[idx].estado = 'Terminado';
-    
+
     toast('✅ Trabajo Terminado', 'ok');
-    renderHistorial('proveedor'); 
+    renderHistorial('proveedor');
 
     fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'marcar_terminado', idTrabajo: id }) })
     .then(() => { recargarTodoSilencioso('proveedor'); });
 }
 
 function calificar(id, telProv, estrellas) {
-    iluminarEstrellas(id, estrellas); 
-    
+    iluminarEstrellas(id, estrellas);
+
     const idx = allData.historial.findIndex(h => h.id === id);
     if (idx > -1) {
         allData.historial[idx].estado = 'Calificado';
         allData.historial[idx].calif = estrellas;
     }
-    
+
     toast('¡Gracias por calificar! ⭐', 'ok');
     setTimeout(() => { renderHistorial('cliente'); }, 300);
 
@@ -637,7 +695,7 @@ function calificar(id, telProv, estrellas) {
 }
 
 function recargarTodoSilencioso(vistaActual = 'cliente') {
-    sessionStorage.removeItem(CACHE_KEY);
+    try { localStorage.removeItem(CACHE_KEY); } catch (_) {}
     cargarDirectorio(true).then(() => {
         if(document.getElementById('historial-section').classList.contains('active')) { renderHistorial(vistaActual); }
     });
@@ -662,7 +720,7 @@ function navegar(dest, el) {
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active');
     const hdr = document.querySelector('.header');
     ['servicios-section', 'restaurantes-section', 'perfil-section', 'historial-section', 'favoritos-section'].forEach(id => document.getElementById(id).classList.remove('active'));
-   
+
     if (dest === 'inicio') {
         hdr.style.display = ''; switchTab(document.querySelector('#segmentador .seg-btn.active').textContent.toLowerCase().includes('restaurante') ? 'restaurantes' : 'servicios', document.querySelector('#segmentador .seg-btn.active'));
     } else if (dest === 'perfil') {
@@ -679,7 +737,7 @@ function navegar(dest, el) {
 /* ════════════════════════════════════════════════════════════
    7. SESIÓN Y REGISTRO
 ══════════════════════════════════════════════════════════════ */
-function toggleForm(tipo, el) { el.closest('.form-seg').querySelectorAll('.fseg-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); document.getElementById('pant-login').style.display = tipo === 'login' ? 'block' : 'none'; document.getElementById('pant-registro').style.display = tipo === 'registro' ? 'block' : 'none'; }
+function toggleForm(tipo, el) { el.closest('.form-seg').querySelectorAll('.fseg-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); document.getElementById('pant-login').style.display = tipo === 'login' ? 'block' : 'none'; document.getElementById('pant-registro').style.display = tipo === 'registro' ? 'block' : 'none'; if (tipo === 'registro') regAbiertoTs = Date.now(); }
 function mostrarSubCategoria() { document.getElementById('caja-subcategoria').style.display = document.getElementById('reg-tipo').value === 'servicio' ? 'block' : 'none'; }
 function mostrarOtro() { document.getElementById('reg-otro').style.display = document.getElementById('reg-sub-tipo').value === 'Otro' ? 'block' : 'none'; }
 
@@ -704,8 +762,36 @@ function prepararYEnviar() {
 async function enviarDirecto(t) {
     const n = document.getElementById('reg-nombre').value.trim(); const tel = document.getElementById('reg-tel').value.trim();
     if (!n || !tel) return toast('Llena todos los campos', 'err');
+
+    // ── FILTROS DE SEGURIDAD (automáticos, sin fricción para usuarios reales) ──
+    // 1) Honeypot: si el campo invisible viene lleno, es un bot. Se descarta en silencio.
+    const trampa = document.getElementById('reg-web');
+    if (trampa && trampa.value.trim() !== '') return;
+
+    // 2) Time-trap: envíos casi instantáneos suelen ser automatizados.
+    if (Date.now() - regAbiertoTs < 2000) return toast('Tómate un momento para revisar tus datos', 'err');
+
+    // 3) Teléfono plausible (filtra basura sin rechazar números válidos).
+    const soloDigitos = tel.replace(/[^\d]/g, '');
+    if (soloDigitos.length < 10 || soloDigitos.length > 13 || !/^(0|58)/.test(soloDigitos)) return toast('Revisa tu número telefónico', 'err');
+
+    // 4) Nombre razonable (sin enlaces ni textos vacíos).
+    if (n.length < 3 || /(https?:\/\/|www\.|\.com|\.net)/i.test(n)) return toast('Escribe un nombre válido', 'err');
+
+    // 5) Anti-duplicado con los datos ya cargados.
+    const yaExiste = [...allData.servicios, ...allData.restaurantes].some(p => normalizarTel(p.telefono) === normalizarTel(tel));
+    if (yaExiste) return toast('Ese número ya está registrado', 'err');
+
+    // 6) Límite por dispositivo: máximo 3 registros por hora.
+    const RL_KEY = 'turepo_reg_log', LIMITE = 3, VENTANA = 60 * 60 * 1000;
+    let log = [];
+    try { log = JSON.parse(localStorage.getItem(RL_KEY) || '[]'); } catch (_) {}
+    log = log.filter(ts => Date.now() - ts < VENTANA);
+    if (log.length >= LIMITE) return toast('Demasiados registros recientes. Intenta más tarde.', 'err');
+
     const btn = document.getElementById('reg-btn'); btn.textContent = 'Enviando…'; btn.disabled = true;
     try { await fetch(SHEETS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'registro', tipo: t, nombre: n, telefono: tel }) });
+        log.push(Date.now()); try { localStorage.setItem(RL_KEY, JSON.stringify(log)); } catch (_) {}
         toast('¡Registro exitoso! 👏', 'ok'); localStorage.setItem('turepo_usuario', tel); document.getElementById('reg-nombre').value = ''; document.getElementById('reg-tel').value = ''; verificarSesion(); recargarTodoSilencioso(); setTimeout(() => { navegar('inicio', document.querySelector('.bottom-nav .nav-item')); }, 800);
     } catch (e) { toast('Error de conexión.', 'err'); } finally { btn.textContent = 'Completar Registro'; btn.disabled = false; }
 }
