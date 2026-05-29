@@ -204,8 +204,8 @@
         <div class="chip" onclick="filtrar('Postres', this)">🍰 Postres</div>
     </div>
     <div class="sort-row">
-        <button class="sort-btn active">⭐ Más populares</button>
-        <button class="sort-btn">🛵 Abierto ahora</button>
+        <button class="sort-btn active">⭐ Mejor calificados</button>
+        <button class="sort-btn">🕒 Más recientes</button>
     </div>
     <p class="sec-title" id="count-restaurantes"></p>
     <div class="list" id="lista-restaurantes"></div>
@@ -280,6 +280,17 @@
                     <input type="text" class="form-input" id="reg-otro" placeholder="Ej: Carpintería" style="display:none; margin-top: 12px;">
                 </div>
 
+                <div id="caja-especialidad" style="display:none; margin-top: 15px;">
+                    <label class="form-label">¿Qué tipo de comida?</label>
+                    <select class="form-input" id="reg-especialidad">
+                        <option value="Fast Food">🍔 Fast Food</option>
+                        <option value="Tradicional">🍲 Tradicional</option>
+                        <option value="Postres">🍰 Postres</option>
+                    </select>
+                    <label class="form-label">Tu especialidad</label>
+                    <input type="text" class="form-input" id="reg-especialidad-texto" placeholder="Ej: Perros calientes, shawarmas, pizza…">
+                </div>
+
                 <label class="form-label">Nombre o Razón Social</label>
                 <input type="text" class="form-input" id="reg-nombre" placeholder="Ej: Juan Pérez">
                 <label class="form-label">Número Telefónico</label>
@@ -337,6 +348,17 @@ function toast(msg, tipo = '') {
 function quitarTildes(t) { return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
 // Normaliza un teléfono a su "núcleo" comparable (quita símbolos, prefijo país y ceros iniciales).
 function normalizarTel(n) { return String(n).replace(/[^\d]/g, '').replace(/^58/, '').replace(/^0+/, ''); }
+// Escapa texto del usuario antes de insertarlo en HTML (evita inyección de código).
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+// Puntaje de ranking: promedio ponderado para que un nuevo con 5★ y 0 reseñas
+// no salte por encima de uno con 4.8★ y muchas reseñas.
+function scoreRanking(estrellas, votos) {
+    const R = parseFloat(estrellas) || 0;
+    const v = parseInt(votos) || 0;
+    const m = 5;    // reseñas de "confianza"
+    const C = 4.3;  // línea base para quien aún no tiene reseñas
+    return (R * v + C * m) / (v + m);
+}
 // Marca de tiempo para detectar envíos demasiado rápidos (probables bots).
 let regAbiertoTs = Date.now();
 function avatarClass(t = '') {
@@ -422,8 +444,8 @@ function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, estado, del
             </div>
             <div class="card-info">
                 ${badge}
-                <div class="card-name">${nombre}</div>
-                <div class="card-type">${tipo}</div>
+                <div class="card-name">${esc(nombre)}</div>
+                <div class="card-type">${esc(tipo)}</div>
                 <div class="card-stats">
                     <span class="star-row"><span>★</span></span>
                     <span>${e}</span>
@@ -432,7 +454,7 @@ function renderCard(nombre, tipo, linkWA, telProv, estrellas, votos, estado, del
             </div>
         </div>
         <div class="btn-row">
-            <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')"><span class="wa-ic">${SVG_ICON.whatsapp}</span> Contactar por WhatsApp</button>
+            <button class="btn-wa" onclick="contactarProveedor('${telProv}', '${String(linkWA).replace(/'/g, "\\'")}')"><span class="wa-ic">${SVG_ICON.whatsapp}</span> WhatsApp</button>
             <button class="btn-fav ${isFav ? 'active' : ''}" aria-label="Favorito" onclick="toggleFav('${telProv}', this)">${isFav ? '❤️' : '🤍'}</button>
         </div>
     </div>`;
@@ -549,6 +571,13 @@ function renderListas(filtro = 'Todos', query = '') {
             }
 
             return coincideFiltro && coincideBusqueda;
+        });
+
+        // Orden por calificación: mejor calificados primero, con peso por nº de reseñas.
+        filtrados.sort((a, b) => {
+            const sa = scoreRanking(a.estrellas, a.votos), sb = scoreRanking(b.estrellas, b.votos);
+            if (sb !== sa) return sb - sa;
+            return (parseInt(b.votos) || 0) - (parseInt(a.votos) || 0);
         });
 
         const container = document.getElementById('lista-' + tipo);
@@ -738,7 +767,11 @@ function navegar(dest, el) {
    7. SESIÓN Y REGISTRO
 ══════════════════════════════════════════════════════════════ */
 function toggleForm(tipo, el) { el.closest('.form-seg').querySelectorAll('.fseg-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); document.getElementById('pant-login').style.display = tipo === 'login' ? 'block' : 'none'; document.getElementById('pant-registro').style.display = tipo === 'registro' ? 'block' : 'none'; if (tipo === 'registro') regAbiertoTs = Date.now(); }
-function mostrarSubCategoria() { document.getElementById('caja-subcategoria').style.display = document.getElementById('reg-tipo').value === 'servicio' ? 'block' : 'none'; }
+function mostrarSubCategoria() {
+    var tipo = document.getElementById('reg-tipo').value;
+    document.getElementById('caja-subcategoria').style.display = tipo === 'servicio' ? 'block' : 'none';
+    document.getElementById('caja-especialidad').style.display = tipo === 'restaurante' ? 'block' : 'none';
+}
 function mostrarOtro() { document.getElementById('reg-otro').style.display = document.getElementById('reg-sub-tipo').value === 'Otro' ? 'block' : 'none'; }
 
 function iniciarSesion() {
@@ -757,6 +790,12 @@ function verificarSesion() {
 function prepararYEnviar() {
     let t = document.getElementById('reg-tipo').value; if (!t) return toast('Selecciona qué deseas hacer', 'err');
     if (t === 'servicio') { t = document.getElementById('reg-sub-tipo').value; if (t === 'Otro') { const o = document.getElementById('reg-otro').value.trim(); if (!o) return toast('Escribe tu servicio', 'err'); t = o.charAt(0).toUpperCase() + o.slice(1).toLowerCase(); } }
+    else if (t === 'restaurante') { t = document.getElementById('reg-especialidad').value; }
+    else if (t === 'restaurante') {
+        var rama = document.getElementById('reg-especialidad').value;
+        var esp = document.getElementById('reg-especialidad-texto').value.trim();
+        t = esp ? (rama + ' · ' + esp.charAt(0).toUpperCase() + esp.slice(1)) : rama;
+    }
     enviarDirecto(t);
 }
 async function enviarDirecto(t) {
