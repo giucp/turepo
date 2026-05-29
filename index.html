@@ -790,7 +790,6 @@ function verificarSesion() {
 function prepararYEnviar() {
     let t = document.getElementById('reg-tipo').value; if (!t) return toast('Selecciona qué deseas hacer', 'err');
     if (t === 'servicio') { t = document.getElementById('reg-sub-tipo').value; if (t === 'Otro') { const o = document.getElementById('reg-otro').value.trim(); if (!o) return toast('Escribe tu servicio', 'err'); t = o.charAt(0).toUpperCase() + o.slice(1).toLowerCase(); } }
-    else if (t === 'restaurante') { t = document.getElementById('reg-especialidad').value; }
     else if (t === 'restaurante') {
         var rama = document.getElementById('reg-especialidad').value;
         var esp = document.getElementById('reg-especialidad-texto').value.trim();
@@ -812,7 +811,7 @@ async function enviarDirecto(t) {
 
     // 3) Teléfono plausible (filtra basura sin rechazar números válidos).
     const soloDigitos = tel.replace(/[^\d]/g, '');
-    if (soloDigitos.length < 10 || soloDigitos.length > 13 || !/^(0|58)/.test(soloDigitos)) return toast('Revisa tu número telefónico', 'err');
+    if (soloDigitos.length < 10 || soloDigitos.length > 13 || !/^(0|2|4|58)/.test(soloDigitos)) return toast('Revisa tu número telefónico', 'err');
 
     // 4) Nombre razonable (sin enlaces ni textos vacíos).
     if (n.length < 3 || /(https?:\/\/|www\.|\.com|\.net)/i.test(n)) return toast('Escribe un nombre válido', 'err');
