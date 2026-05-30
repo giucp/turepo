@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1E5C52">
     <title>turepo · Directorio Local</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTUiIGZpbGw9IiMxRTVDNTIiLz48Y2lyY2xlIGN4PSI0My41IiBjeT0iMTgiIHI9IjUiIGZpbGw9IiNGNEM1NDIiLz48dGV4dCB4PSIzMSIgeT0iNDciIGZvbnQtZmFtaWx5PSJIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0MiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iI0Y0QzU0MiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+dDwvdGV4dD48L3N2Zz4=">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,6 +137,12 @@
         .form-input { width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); outline: none; font-size: 16px; font-family: inherit; background: var(--bg); color: var(--txt); transition: border-color .18s, box-shadow .18s; -webkit-appearance: none; appearance: none; }
         .form-input:focus { border-color: var(--p); background: var(--white); box-shadow: 0 0 0 3px rgba(30,92,82,.08); }
         select.form-input { background-image: none; }
+        /* Casillas de categorías múltiples (servicios) */
+        .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .cat-chip { display: inline-flex; align-items: center; gap: 6px; padding: 9px 13px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; -webkit-user-select: none; user-select: none; transition: background .15s, color .15s, border-color .15s; }
+        .cat-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .cat-chip.on { background: var(--p); color: var(--white); border-color: var(--p); }
+        .cat-otro { margin-top: 10px; }
         .form-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--p2), var(--p)); color: var(--white); border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 20px; font-family: inherit; box-shadow: 0 4px 14px rgba(30,92,82,.30); transition: opacity .18s, transform .14s; }
         .form-btn:active { opacity: .88; transform: scale(.987); } .form-btn:disabled { opacity: .6; cursor: not-allowed; }
 
@@ -184,6 +191,7 @@
         <div class="chip" onclick="filtrar('Electricidad', this)">⚡ Electricidad</div>
         <div class="chip" onclick="filtrar('Plomería', this)">💧 Plomería</div>
         <div class="chip" onclick="filtrar('Herrería', this)">🛠️ Herrería</div>
+        <div class="chip" onclick="filtrar('Mecánica', this)">🚗 Mecánica</div>
         <div class="chip" onclick="filtrar('Tecnología', this)">💻 Tecnología</div>
         <div class="chip" onclick="filtrar('Limpieza', this)">🧹 Limpieza</div>
         <div class="chip" onclick="filtrar('Transporte', this)">🚚 Transporte</div>
@@ -265,18 +273,19 @@
                 </select>
 
                 <div id="caja-subcategoria" style="display:none; margin-top: 15px;">
-                    <label class="form-label">¿Qué tipo de servicio?</label>
-                    <select class="form-input" id="reg-sub-tipo" onchange="mostrarOtro()">
-                        <option value="Refrigeración">❄️ Refrigeración</option>
-                        <option value="Línea Blanca">🧊 Línea Blanca</option>
-                        <option value="Electricidad">⚡ Electricidad</option>
-                        <option value="Plomería">💧 Plomería</option>
-                        <option value="Herrería">🛠️ Herrería</option>
-                        <option value="Tecnología">💻 Tecnología</option>
-                        <option value="Limpieza">🧹 Limpieza</option>
-                        <option value="Transporte">🚚 Transporte</option>
-                        <option value="Otro">➕ Otro distinto...</option>
-                    </select>
+                    <label class="form-label">¿Qué tipo de servicio? (elige hasta 3)</label>
+                    <div class="cat-grid">
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Refrigeración" onchange="toggleCat(this)">❄️ Refrigeración</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Línea Blanca" onchange="toggleCat(this)">🧊 Línea Blanca</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Electricidad" onchange="toggleCat(this)">⚡ Electricidad</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Plomería" onchange="toggleCat(this)">💧 Plomería</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Herrería" onchange="toggleCat(this)">🛠️ Herrería</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Mecánica" onchange="toggleCat(this)">🚗 Mecánica</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Tecnología" onchange="toggleCat(this)">💻 Tecnología</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Limpieza" onchange="toggleCat(this)">🧹 Limpieza</label>
+                        <label class="cat-chip"><input type="checkbox" class="cat-cb" value="Transporte" onchange="toggleCat(this)">🚚 Transporte</label>
+                    </div>
+                    <label class="cat-chip cat-otro"><input type="checkbox" id="cat-otro-cb" onchange="mostrarOtro()">➕ Otro distinto</label>
                     <input type="text" class="form-input" id="reg-otro" placeholder="Ej: Carpintería" style="display:none; margin-top: 12px;">
                 </div>
 
@@ -468,13 +477,16 @@ function contactarProveedor(telProv, urlWA) {
 
         setTimeout(() => recargarTodoSilencioso(), 1500);
     }
-    window.open(urlWA, '_blank');
+    // Mensaje predefinido: identifica que viene de turepo (publicidad silenciosa). Edítalo a tu gusto.
+    var msg = 'Hola, te encontré en turepo y me interesa contactarte. ¿Me das más información, por favor?';
+    var sep = String(urlWA).indexOf('?') === -1 ? '?' : '&';
+    window.open(urlWA + sep + 'text=' + encodeURIComponent(msg), '_blank');
 }
 
 /* ════════════════════════════════════════════════════════════
    4. MOTOR DE DATOS Y BUSCADOR INTELIGENTE SEMÁNTICO
 ══════════════════════════════════════════════════════════════ */
-let allData = { servicios: [], restaurantes: [], historial: [] };
+let allData = { servicios: [], restaurantes: [], clientes: [], historial: [] };
 
 async function cargarDirectorio(force = false) {
     let teniaCache = false;
@@ -502,11 +514,11 @@ async function cargarDirectorio(force = false) {
         const rows = Array.isArray(dataObj.registros) ? dataObj.registros.slice(1) : [];
         const histRows = Array.isArray(dataObj.historial) ? dataObj.historial.slice(1) : [];
 
-        allData.servicios = []; allData.restaurantes = [];
+        allData.servicios = []; allData.restaurantes = []; allData.clientes = [];
 
         rows.forEach(([fecha, tipo = '', nombre = '', telefono = '', linkWA = '', estado = '', estrellas = 5, votos = 0]) => {
             const tl = tipo ? tipo.toString().toLowerCase() : '';
-            if (tl === 'cliente' || tl.includes('cliente')) return;
+            if (tl === 'cliente' || tl.includes('cliente')) { allData.clientes.push({ nombre, telefono }); return; }
             const entry = { nombre, tipo, linkWA, telefono, estrellas, votos, estado };
             if (tl.includes('restaurante') || tl.includes('comida') || tl.includes('postre') || tl.includes('fast food') || tl.includes('tradicional')) {
                 allData.restaurantes.push(entry);
@@ -537,9 +549,10 @@ function renderListas(filtro = 'Todos', query = '') {
         'electricidad': ['cable', 'enchufe', 'brequera', 'luz', 'iluminacion', 'tablero', 'cortocircuito'],
         'plomeria': ['tubo', 'agua', 'filtracion', 'poceta', 'fregadero', 'destape', 'bomba', 'fuga'],
         'herreria': ['soldadura', 'puerta', 'reja', 'porton', 'soldar', 'techo'],
+        'mecanica': ['taller', 'mecanico', 'carro', 'vehiculo', 'latoneria', 'pintura', 'motor', 'aceite', 'caucho', 'automotriz', 'frenos'],
         'tecnologia': ['computadora', 'pc', 'laptop', 'celular', 'telefono', 'software', 'formateo', 'wifi', 'redes'],
         'limpieza': ['aseo', 'mantenimiento', 'pulitura', 'desinfeccion'],
-        'transporte': ['flete', 'mudanza', 'taxi', 'viaje', 'carga'],
+        'transporte': ['flete', 'mudanza', 'taxi', 'mototaxi', 'moto', 'viaje', 'carga', 'encomienda'],
         'fast food': ['hamburguesa', 'perro', 'caliente', 'pizza', 'pepito', 'shawarma'],
         'tradicional': ['empanada', 'arepa', 'almuerzo', 'sopa', 'carne', 'pollo', 'criolla'],
         'postres': ['torta', 'dulce', 'helado', 'galleta', 'postre', 'cupcake']
@@ -658,7 +671,7 @@ function renderHistorial(vista) {
 
     container.innerHTML = misTrabajos.map(h => {
         const telOtro = vista === 'cliente' ? h.telProv : h.telCliente;
-        const provInfo = [...allData.servicios, ...allData.restaurantes].find(p => limpiarNum(p.telefono) === limpiarNum(telOtro));
+        const provInfo = [...allData.servicios, ...allData.restaurantes, ...(allData.clientes || [])].find(p => limpiarNum(p.telefono) === limpiarNum(telOtro));
         const nombreOtro = provInfo ? provInfo.nombre : telOtro;
 
         let sc = 'status-pen', st = 'Pendiente', ah = '';
@@ -772,10 +785,35 @@ function mostrarSubCategoria() {
     document.getElementById('caja-subcategoria').style.display = tipo === 'servicio' ? 'block' : 'none';
     document.getElementById('caja-especialidad').style.display = tipo === 'restaurante' ? 'block' : 'none';
 }
-function mostrarOtro() { document.getElementById('reg-otro').style.display = document.getElementById('reg-sub-tipo').value === 'Otro' ? 'block' : 'none'; }
+// Categorías múltiples de servicios: tope de 3, y excluyente con "Otro".
+function toggleCat(cb) {
+    const marcadas = document.querySelectorAll('.cat-cb:checked').length;
+    if (cb.checked && marcadas > 3) { cb.checked = false; toast('Máximo 3 categorías', 'err'); return; }
+    cb.closest('.cat-chip').classList.toggle('on', cb.checked);
+    const otroCb = document.getElementById('cat-otro-cb');
+    if (cb.checked && otroCb.checked) { otroCb.checked = false; otroCb.closest('.cat-chip').classList.remove('on'); document.getElementById('reg-otro').style.display = 'none'; }
+}
+function mostrarOtro() {
+    const otroCb = document.getElementById('cat-otro-cb');
+    otroCb.closest('.cat-chip').classList.toggle('on', otroCb.checked);
+    document.getElementById('reg-otro').style.display = otroCb.checked ? 'block' : 'none';
+    // Marcar "Otro" limpia las categorías fijas (son excluyentes).
+    if (otroCb.checked) {
+        document.querySelectorAll('.cat-cb:checked').forEach(c => { c.checked = false; c.closest('.cat-chip').classList.remove('on'); });
+    }
+}
 
-function iniciarSesion() {
+async function iniciarSesion() {
     const tel = document.getElementById('login-tel').value.trim(); if (!tel || tel.length < 10) return toast('Ingresa un número válido', 'err');
+
+    // Login ligero: solo puede entrar un número que ya esté registrado (servicio, restaurante o cliente).
+    const hayDatos = () => (allData.servicios.length + allData.restaurantes.length + (allData.clientes ? allData.clientes.length : 0)) > 0;
+    if (!hayDatos()) { try { await cargarDirectorio(true); } catch (_) {} }
+    if (!hayDatos()) return toast('No se pudo verificar, revisa tu conexión', 'err');
+
+    const registrado = [...allData.servicios, ...allData.restaurantes, ...(allData.clientes || [])].some(p => normalizarTel(p.telefono) === normalizarTel(tel));
+    if (!registrado) return toast('Ese número no está registrado. Regístrate primero.', 'err');
+
     localStorage.setItem('turepo_usuario', tel); document.getElementById('login-tel').value = ''; toast('¡Sesión iniciada! 🔓', 'ok'); verificarSesion(); recargarTodoSilencioso();
 }
 function cerrarSesion() { localStorage.removeItem('turepo_usuario'); toast('Sesión cerrada 👋', 'ok'); verificarSesion(); }
@@ -789,7 +827,18 @@ function verificarSesion() {
 }
 function prepararYEnviar() {
     let t = document.getElementById('reg-tipo').value; if (!t) return toast('Selecciona qué deseas hacer', 'err');
-    if (t === 'servicio') { t = document.getElementById('reg-sub-tipo').value; if (t === 'Otro') { const o = document.getElementById('reg-otro').value.trim(); if (!o) return toast('Escribe tu servicio', 'err'); t = o.charAt(0).toUpperCase() + o.slice(1).toLowerCase(); } }
+    if (t === 'servicio') {
+        const otroCb = document.getElementById('cat-otro-cb');
+        if (otroCb.checked) {
+            const o = document.getElementById('reg-otro').value.trim();
+            if (!o) return toast('Escribe tu servicio', 'err');
+            t = o.charAt(0).toUpperCase() + o.slice(1).toLowerCase();
+        } else {
+            const sel = Array.from(document.querySelectorAll('.cat-cb:checked')).map(c => c.value);
+            if (sel.length === 0) return toast('Elige al menos una categoría', 'err');
+            t = sel.join(' · ');
+        }
+    }
     else if (t === 'restaurante') {
         var rama = document.getElementById('reg-especialidad').value;
         var esp = document.getElementById('reg-especialidad-texto').value.trim();
@@ -821,7 +870,7 @@ async function enviarDirecto(t) {
     if (yaExiste) return toast('Ese número ya está registrado', 'err');
 
     // 6) Límite por dispositivo: máximo 3 registros por hora.
-    const RL_KEY = 'turepo_reg_log', LIMITE = 3, VENTANA = 60 * 60 * 1000;
+    const RL_KEY = 'turepo_reg_log', LIMITE = 50, VENTANA = 60 * 60 * 1000; // sube este número si necesitas inscribir más por hora
     let log = [];
     try { log = JSON.parse(localStorage.getItem(RL_KEY) || '[]'); } catch (_) {}
     log = log.filter(ts => Date.now() - ts < VENTANA);
@@ -841,3 +890,4 @@ document.addEventListener('DOMContentLoaded', () => { verificarSesion(); cargarD
 </script>
 </body>
 </html>
+
