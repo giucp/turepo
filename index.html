@@ -33,8 +33,9 @@
         .header { background: var(--bg); padding: 20px 20px 6px; position: -webkit-sticky; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .logo { font-size: 25px; font-weight: 800; color: var(--p-deep); letter-spacing: -1.2px; }
-        .logo span { color: var(--accent); }
-        .logo-dot { display: none; }
+        .logo span.repo { color: var(--accent); }
+        .logo .ltr-o { position: relative; }
+        .logo .ltr-o::after { content: ''; position: absolute; top: .06em; right: -.16em; width: .15em; height: .15em; border-radius: 50%; background: var(--accent); }
         .location-pill { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--p); }
         .location-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
         .location-pill select { background: transparent; color: var(--p); border: none; outline: none; font-size: 13px; font-weight: 700; font-family: inherit; -webkit-appearance: none; appearance: none; cursor: pointer; max-width: 150px; }
@@ -173,7 +174,7 @@
 
 <header class="header">
     <div class="header-top">
-        <div class="logo">tu<span>repo</span></div>
+        <div class="logo">tu<span class="repo">rep<span class="ltr-o">o</span></span></div>
         <div class="location-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><select id="sel-estado" aria-label="Estado"></select></div>
     </div>
     <div class="search-wrap">
@@ -244,11 +245,11 @@
         </div>
         <div id="pant-sesion" style="display:none">
             <div class="form-card" style="display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center;">
-                <div class="avatar rank-bronze" id="ses-inicial" style="width:70px; height:70px; font-size:28px; font-weight:800;">👤</div>
+                <div class="avatar avatar-ini" id="ses-inicial" style="width:70px; height:70px; font-size:28px;"></div>
                 <h3>Sesión iniciada</h3>
                 <p>Conectado como:<br><strong id="ses-email" style="color:var(--p); font-size:15px;"></strong></p>
-                <button class="form-btn" onclick="mostrarFormProveedor()" style="margin-top:6px;">➕ Publicar mi negocio</button>
-                <button class="form-btn" onclick="cerrarSesion()" style="background:#E74C3C; box-shadow:none; margin-top:2px;">Cerrar sesión</button>
+                <button class="form-btn" onclick="mostrarFormProveedor()" style="margin-top:6px;">Publicar mi negocio</button>
+                <button class="form-btn" onclick="cerrarSesion()" style="background:transparent; color:var(--muted); border:1.5px solid var(--line); box-shadow:none; margin-top:2px;">Cerrar sesión</button>
             </div>
 
             <div class="form-card" id="form-proveedor" style="display:none; margin-top:14px;">
@@ -295,17 +296,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ─── PEGA AQUÍ TUS DOS LLAVES (entre las comillas) ─── */
-const SUPABASE_URL = 'https://lrdarkxuoxososqoikgx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_gEHElogEU8Q9r8fdhQSctg_VWfS_3m4';
+const SUPABASE_URL = 'PEGA_AQUI_TU_PROJECT_URL';
+const SUPABASE_KEY = 'PEGA_AQUI_TU_PUBLISHABLE_KEY';
 /* ───────────────────────────────────────────────────── */
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Estado de la interfaz
-let proveedores = [];          // proveedores del estado seleccionado
-let estadosCache = [];         // lista de estados (para los selectores)
-let categoriasCache = [];      // lista de categorías (id, nombre, ambito)
-let favsSet = new Set();       // ids de proveedores favoritos del usuario
+let proveedores = []; // proveedores del estado seleccionado
+let estadosCache = []; // lista de estados (para los selectores)
+let categoriasCache = []; // lista de categorías (id, nombre, ambito)
+let favsSet = new Set(); // ids de proveedores favoritos del usuario
 let tabActivo = 'servicios';
 let orden = 'mejor';
 let filtroCat = { servicios: 'Todos', restaurantes: 'Todos' };
@@ -329,12 +330,12 @@ function navPronto() { toast('Esta sección la construimos en el próximo paso')
 
 // ── Contactar (abre WhatsApp y registra el contacto si hay sesión) ──
 function contactar(provId, tel) {
-    window.open(linkWhatsApp(tel), '_blank');   // primero, para no bloquear el popup
+    window.open(linkWhatsApp(tel), '_blank'); // primero, para no bloquear el popup
     registrarContacto(provId);
 }
 async function registrarContacto(provId) {
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) return;  // sin cuenta se puede contactar, pero no queda registrado para calificar
+    if (!session) return; // sin cuenta se puede contactar, pero no queda registrado para calificar
     // Crea el contacto. Si ya existía o es tu propio negocio, la base lo rechaza y lo ignoramos.
     await sb.from('trabajos').insert({ proveedor_id: provId, cliente_id: session.user.id });
 }
@@ -436,7 +437,7 @@ function vacio(icon, title, sub) {
     return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><p class="empty-sub">${sub}</p></div>`;
 }
 
-const UMBRAL_SOLICITADO = 10;  // a partir de cuántos contactos se muestra "Muy solicitado"
+const UMBRAL_SOLICITADO = 10; // a partir de cuántos contactos se muestra "Muy solicitado"
 
 // ── Íconos de oficio (uno por categoría) ──
 const ICONOS = {
@@ -481,7 +482,7 @@ function renderCard(p, delay = 0) {
     if (verif) sig.push(`<span class="tag-verif">${SVG_CHECK} Verificado</span>`);
     if ((p.opiniones || 0) > 0) {
         const r = p.recomendaciones || 0;
-        sig.push(`<span class="conf">${r} recomienda${r === 1 ? '' : 'n'}</span>`);
+        sig.push(`<span class="conf">${r} persona${r === 1 ? '' : 's'} lo recomienda${r === 1 ? '' : 'n'}</span>`);
     } else if (!verif) {
         sig.push('<span class="conf nuevo">Nuevo</span>');
     }
@@ -732,6 +733,9 @@ function pintarCatsProveedor() {
     document.getElementById('pv-cats').innerHTML = cats.map(c =>
         `<label class="cat-chip"><input type="checkbox" class="pv-cat" value="${c.id}" onchange="togglePvCat(this)">${c.nombre}</label>`
     ).join('');
+    document.getElementById('pv-esp').placeholder = tipo === 'restaurante'
+        ? 'Ej: pizzas, hamburguesas, postres criollos'
+        : 'Ej: aires, neveras, lavadoras';
 }
 function togglePvCat(cb) {
     const n = document.querySelectorAll('.pv-cat:checked').length;
