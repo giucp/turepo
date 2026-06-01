@@ -141,6 +141,12 @@
 
         /* ── HISTORIAL ── */
         .hist-card { background: var(--white); border-radius: var(--radius-md); padding: 18px; margin-bottom: 12px; border: 1px solid #F2F4F3; box-shadow: var(--shadow-sm); }
+        .mn-item { background: var(--white); border: 1px solid #F2F4F3; border-radius: var(--radius-md); padding: 13px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); }
+        .mn-info { flex: 1; min-width: 0; }
+        .mn-nombre { font-size: 14.5px; font-weight: 700; color: var(--txt); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mn-tipo { font-size: 11.5px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+        .mn-edit { flex-shrink: 0; background: var(--p-soft); color: var(--p); border: none; border-radius: 10px; padding: 8px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; cursor: pointer; transition: transform .12s; }
+        .mn-edit:active { transform: scale(.95); }
         .hist-title { font-size: 16px; font-weight: 700; color: var(--txt); margin-bottom: 4px; }
         .hist-meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
         .rec-row { display: flex; gap: 8px; margin-top: 6px; }
@@ -252,8 +258,13 @@
                 <button class="form-btn" onclick="cerrarSesion()" style="background:transparent; color:var(--muted); border:1.5px solid var(--line); box-shadow:none; margin-top:2px;">Cerrar sesión</button>
             </div>
 
+            <div id="mis-negocios-wrap" style="display:none; margin-top:16px;">
+                <p class="sec-title" style="padding-left:2px;">Mis negocios</p>
+                <div id="lista-mis-negocios"></div>
+            </div>
+
             <div class="form-card" id="form-proveedor" style="display:none; margin-top:14px;">
-                <h3>Publicar mi negocio</h3>
+                <h3 id="form-prov-titulo">Publicar mi negocio</h3>
                 <p>Aparecerás en el directorio de tu estado.</p>
                 <label class="form-label">¿Qué ofreces?</label>
                 <select class="form-input" id="pv-tipo" onchange="pintarCatsProveedor()">
@@ -311,6 +322,8 @@ let tabActivo = 'servicios';
 let orden = 'mejor';
 let filtroCat = { servicios: 'Todos', restaurantes: 'Todos' };
 let query = '';
+let editandoId = null;         // id del negocio en edición (null = creando)
+let misNegocios = [];          // negocios del usuario (para editar)
 
 // ── Helpers ──
 function toast(msg, tipo = '') {
@@ -702,6 +715,7 @@ function actualizarSesion(session) {
         document.getElementById('ses-inicial').textContent = ini;
     }
     sincronizarFavoritos(session);
+    cargarMisNegocios();
 }
 async function sincronizarFavoritos(session) {
     favsSet = new Set();
@@ -720,12 +734,62 @@ function mostrarFormProveedor() {
     const visible = f.style.display !== 'none';
     f.style.display = visible ? 'none' : 'block';
     if (!visible) {
+        editandoId = null;
+        document.getElementById('form-prov-titulo').textContent = 'Publicar mi negocio';
+        document.getElementById('pv-btn').textContent = 'Publicar';
+        document.getElementById('pv-nombre').value = '';
+        document.getElementById('pv-tel').value = '';
+        document.getElementById('pv-esp').value = '';
+        document.getElementById('pv-tipo').value = 'servicio';
         const selE = document.getElementById('pv-estado');
         selE.innerHTML = estadosCache.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
         selE.value = document.getElementById('sel-estado').value;
         pintarCatsProveedor();
         f.scrollIntoView({ behavior: 'smooth' });
     }
+}
+async function cargarMisNegocios() {
+    const { data: { session } } = await sb.auth.getSession();
+    const wrap = document.getElementById('mis-negocios-wrap');
+    const cont = document.getElementById('lista-mis-negocios');
+    if (!session) { wrap.style.display = 'none'; misNegocios = []; return; }
+    const { data, error } = await sb.from('proveedores')
+        .select('id, nombre, tipo, telefono, especialidad, estado_id, proveedor_categorias(categoria_id)')
+        .eq('cuenta_id', session.user.id)
+        .order('nombre');
+    if (error || !data || data.length === 0) { wrap.style.display = 'none'; misNegocios = []; return; }
+    misNegocios = data.map(p => ({ ...p, cats: (p.proveedor_categorias || []).map(pc => pc.categoria_id) }));
+    wrap.style.display = 'block';
+    cont.innerHTML = misNegocios.map(p => `
+        <div class="mn-item">
+            <div class="mn-info">
+                <div class="mn-nombre">${esc(p.nombre)}</div>
+                <div class="mn-tipo">${p.tipo === 'restaurante' ? 'Restaurante / comida' : 'Servicio'}</div>
+            </div>
+            <button class="mn-edit" onclick="editarNegocio('${p.id}')">Editar</button>
+        </div>`).join('');
+}
+function editarNegocio(id) {
+    const p = misNegocios.find(n => String(n.id) === String(id));
+    if (!p) return;
+    editandoId = p.id;
+    const f = document.getElementById('form-proveedor');
+    f.style.display = 'block';
+    document.getElementById('pv-tipo').value = p.tipo;
+    const selE = document.getElementById('pv-estado');
+    selE.innerHTML = estadosCache.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+    selE.value = p.estado_id;
+    pintarCatsProveedor();
+    (p.cats || []).forEach(cid => {
+        const cb = document.querySelector(`.pv-cat[value="${cid}"]`);
+        if (cb) { cb.checked = true; cb.closest('.cat-chip').classList.add('on'); }
+    });
+    document.getElementById('pv-nombre').value = p.nombre || '';
+    document.getElementById('pv-tel').value = p.telefono || '';
+    document.getElementById('pv-esp').value = p.especialidad || '';
+    document.getElementById('form-prov-titulo').textContent = 'Editar negocio';
+    document.getElementById('pv-btn').textContent = 'Guardar cambios';
+    f.scrollIntoView({ behavior: 'smooth' });
 }
 function pintarCatsProveedor() {
     const tipo = document.getElementById('pv-tipo').value;
@@ -759,29 +823,42 @@ async function registrarProveedor() {
     if (cats.length === 0) return toast('Elige al menos una categoría', 'err');
 
     const btn = document.getElementById('pv-btn');
-    btn.disabled = true; btn.textContent = 'Publicando…';
+    const editando = editandoId !== null;
+    btn.disabled = true; btn.textContent = editando ? 'Guardando…' : 'Publicando…';
     try {
-        const { data: prov, error } = await sb.from('proveedores').insert({
-            cuenta_id: session.user.id, estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null
-        }).select('id').single();
-        if (error) throw error;
-
-        const filas = cats.map(cid => ({ proveedor_id: prov.id, categoria_id: cid }));
-        const { error: e2 } = await sb.from('proveedor_categorias').insert(filas);
-        if (e2) throw e2;
-
-        toast('¡Negocio publicado!', 'ok');
+        if (editando) {
+            const { error } = await sb.from('proveedores').update({
+                estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null
+            }).eq('id', editandoId);
+            if (error) throw error;
+            const { error: ed } = await sb.from('proveedor_categorias').delete().eq('proveedor_id', editandoId);
+            if (ed) throw ed;
+            const { error: ei } = await sb.from('proveedor_categorias').insert(cats.map(cid => ({ proveedor_id: editandoId, categoria_id: cid })));
+            if (ei) throw ei;
+            toast('¡Cambios guardados!', 'ok');
+        } else {
+            const { data: prov, error } = await sb.from('proveedores').insert({
+                cuenta_id: session.user.id, estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null
+            }).select('id').single();
+            if (error) throw error;
+            const filas = cats.map(cid => ({ proveedor_id: prov.id, categoria_id: cid }));
+            const { error: e2 } = await sb.from('proveedor_categorias').insert(filas);
+            if (e2) throw e2;
+            toast('¡Negocio publicado!', 'ok');
+        }
+        editandoId = null;
         document.getElementById('pv-nombre').value = '';
         document.getElementById('pv-tel').value = '';
         document.getElementById('pv-esp').value = '';
         document.getElementById('form-proveedor').style.display = 'none';
         document.getElementById('sel-estado').value = estadoId;
         cargarProveedores(estadoId);
+        cargarMisNegocios();
         navegar('inicio', document.querySelector('.bottom-nav .nav-item'));
     } catch (e) {
-        toast('No se pudo publicar. ' + (e.message || ''), 'err');
+        toast('No se pudo guardar. ' + (e.message || ''), 'err');
     } finally {
-        btn.disabled = false; btn.textContent = 'Publicar';
+        btn.disabled = false; btn.textContent = editando ? 'Guardar cambios' : 'Publicar';
     }
 }
 
