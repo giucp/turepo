@@ -32,10 +32,10 @@
         /* ── HEADER (editorial: claro, tipografía protagonista) ── */
         .header { background: var(--bg); padding: 20px 20px 6px; position: -webkit-sticky; position: sticky; top: 0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .logo { font-size: 25px; font-weight: 800; color: var(--p-deep); letter-spacing: -1.2px; }
+        .logo { font-size: 25px; font-weight: 800; color: var(--p-deep); letter-spacing: -1.2px; line-height: 1; }
         .logo span.repo { color: var(--accent); }
         .logo .ltr-o { position: relative; }
-        .logo .ltr-o::after { content: ''; position: absolute; top: .12em; right: -.06em; width: .2em; height: .2em; border-radius: 50%; background: var(--accent); }
+        .logo .ltr-o::after { content: ''; position: absolute; top: .34em; right: -.13em; width: .16em; height: .16em; border-radius: 50%; background: var(--accent); }
         .location-pill { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; color: var(--p); }
         .location-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
         .location-pill select { background: transparent; color: var(--p); border: none; outline: none; font-size: 13px; font-weight: 700; font-family: inherit; -webkit-appearance: none; appearance: none; cursor: pointer; max-width: 150px; }
@@ -303,10 +303,10 @@ const SUPABASE_KEY = 'sb_publishable_gEHElogEU8Q9r8fdhQSctg_VWfS_3m4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Estado de la interfaz
-let proveedores = []; // proveedores del estado seleccionado
-let estadosCache = []; // lista de estados (para los selectores)
-let categoriasCache = []; // lista de categorías (id, nombre, ambito)
-let favsSet = new Set(); // ids de proveedores favoritos del usuario
+let proveedores = [];          // proveedores del estado seleccionado
+let estadosCache = [];         // lista de estados (para los selectores)
+let categoriasCache = [];      // lista de categorías (id, nombre, ambito)
+let favsSet = new Set();       // ids de proveedores favoritos del usuario
 let tabActivo = 'servicios';
 let orden = 'mejor';
 let filtroCat = { servicios: 'Todos', restaurantes: 'Todos' };
@@ -330,12 +330,12 @@ function navPronto() { toast('Esta sección la construimos en el próximo paso')
 
 // ── Contactar (abre WhatsApp y registra el contacto si hay sesión) ──
 function contactar(provId, tel) {
-    window.open(linkWhatsApp(tel), '_blank'); // primero, para no bloquear el popup
+    window.open(linkWhatsApp(tel), '_blank');   // primero, para no bloquear el popup
     registrarContacto(provId);
 }
 async function registrarContacto(provId) {
     const { data: { session } } = await sb.auth.getSession();
-    if (!session) return; // sin cuenta se puede contactar, pero no queda registrado para calificar
+    if (!session) return;  // sin cuenta se puede contactar, pero no queda registrado para calificar
     // Crea el contacto. Si ya existía o es tu propio negocio, la base lo rechaza y lo ignoramos.
     await sb.from('trabajos').insert({ proveedor_id: provId, cliente_id: session.user.id });
 }
@@ -437,7 +437,7 @@ function vacio(icon, title, sub) {
     return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><p class="empty-sub">${sub}</p></div>`;
 }
 
-const UMBRAL_SOLICITADO = 10; // a partir de cuántos contactos se muestra "Muy solicitado"
+const UMBRAL_SOLICITADO = 10;  // a partir de cuántos contactos se muestra "Muy solicitado"
 
 // ── Íconos de oficio (uno por categoría) ──
 const ICONOS = {
