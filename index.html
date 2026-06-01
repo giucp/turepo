@@ -190,7 +190,8 @@
     </div>
     <div class="segment" id="segmentador">
         <button class="seg-btn active" onclick="switchTab('servicios', this)">Servicios</button>
-        <button class="seg-btn" onclick="switchTab('restaurantes', this)">Restaurantes</button>
+        <button class="seg-btn" onclick="switchTab('restaurantes', this)">Comida</button>
+        <button class="seg-btn" onclick="switchTab('comercios', this)">Comercios</button>
     </div>
 </header>
 
@@ -212,6 +213,16 @@
     </div>
     <p class="sec-title" id="count-restaurantes"></p>
     <div class="list" id="lista-restaurantes"></div>
+</div>
+
+<div id="comercios-section" class="section-wrap">
+    <div class="chips-row" id="chips-comercios"></div>
+    <div class="sort-row">
+        <button class="sort-btn active" onclick="setOrden('mejor', this)">Más confiables</button>
+        <button class="sort-btn" onclick="setOrden('recientes', this)">Más recientes</button>
+    </div>
+    <p class="sec-title" id="count-comercios"></p>
+    <div class="list" id="lista-comercios"></div>
 </div>
 
 <div id="favoritos-section" class="section-wrap">
@@ -270,6 +281,7 @@
                 <select class="form-input" id="pv-tipo" onchange="pintarCatsProveedor()">
                     <option value="servicio">Un servicio</option>
                     <option value="restaurante">Restaurante / comida</option>
+                    <option value="comercio">Una tienda / comercio</option>
                 </select>
                 <label class="form-label">Nombre o razón social</label>
                 <input type="text" class="form-input" id="pv-nombre" placeholder="Ej: Refrigeración Pérez">
@@ -307,8 +319,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ─── PEGA AQUÍ TUS DOS LLAVES (entre las comillas) ─── */
-const SUPABASE_URL = 'https://lrdarkxuoxososqoikgx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_gEHElogEU8Q9r8fdhQSctg_VWfS_3m4';
+const SUPABASE_URL = 'PEGA_AQUI_TU_PROJECT_URL';
+const SUPABASE_KEY = 'PEGA_AQUI_TU_PUBLISHABLE_KEY';
 /* ───────────────────────────────────────────────────── */
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -320,7 +332,9 @@ let categoriasCache = [];      // lista de categorías (id, nombre, ambito)
 let favsSet = new Set();       // ids de proveedores favoritos del usuario
 let tabActivo = 'servicios';
 let orden = 'mejor';
-let filtroCat = { servicios: 'Todos', restaurantes: 'Todos' };
+let filtroCat = { servicios: 'Todos', restaurantes: 'Todos', comercios: 'Todos' };
+const TAB_AMBITO = { servicios: 'servicio', restaurantes: 'restaurante', comercios: 'comercio' };
+const AMBITO_TAB = { servicio: 'servicios', restaurante: 'restaurantes', comercio: 'comercios' };
 let query = '';
 let editandoId = null;         // id del negocio en edición (null = creando)
 let misNegocios = [];          // negocios del usuario (para editar)
@@ -465,7 +479,14 @@ const ICONOS = {
     'Transporte': '<path d="M14 17V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h1"/><path d="M14 9h4l3 3v5a1 1 0 0 1-1 1h-1"/><circle cx="7.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/><path d="M9.5 18h6"/>',
     'Fast Food': '<path d="M4 11a8 8 0 0 1 16 0z"/><path d="M4 15h16"/><path d="M5 18h14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/>',
     'Tradicional': '<path d="M3 18h18"/><path d="M4.5 18a7.5 7.5 0 0 1 15 0"/><path d="M12 7.5V5.5"/><path d="M11 5.5h2"/>',
-    'Postres': '<path d="M6 12h12l-1.4 8.2a1.5 1.5 0 0 1-1.5 1.3H8.9a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M6.5 12a3.5 3.5 0 0 1 .3-6.7A4 4 0 0 1 14 4a3.5 3.5 0 0 1 3.5 8"/><path d="M12 8.5V8"/>'
+    'Postres': '<path d="M6 12h12l-1.4 8.2a1.5 1.5 0 0 1-1.5 1.3H8.9a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M6.5 12a3.5 3.5 0 0 1 .3-6.7A4 4 0 0 1 14 4a3.5 3.5 0 0 1 3.5 8"/><path d="M12 8.5V8"/>',
+    'Salud': '<rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M12 8v8"/><path d="M8 12h8"/>',
+    'Automotriz': '<path d="M3 13l1.7-4.7A2.5 2.5 0 0 1 7 7h10a2.5 2.5 0 0 1 2.3 1.3L21 13"/><path d="M2.5 13h19v3.4a1 1 0 0 1-1 1h-1.3a1 1 0 0 1-1-1V16H6.8v.4a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1z"/><circle cx="7.2" cy="13.4" r="1.2"/><circle cx="16.8" cy="13.4" r="1.2"/>',
+    'Mercados': '<circle cx="9.5" cy="20" r="1.3"/><circle cx="16.5" cy="20" r="1.3"/><path d="M2.5 3.5h2.3l2.2 11a1.5 1.5 0 0 0 1.5 1.2h7.8a1.5 1.5 0 0 0 1.5-1.2L20.5 8H6"/>',
+    'Ferretería': '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M8 9V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13.5h18"/><path d="M10.5 13.7v1.8M13.5 13.7v1.8"/>',
+    'Víveres y Hortalizas': '<path d="M12 8.6c-1.4-1.3-3.8-1.5-5.3 0-1.9 1.9-1.5 5.8 0 8.2 1 1.6 2 2.3 2.9 2.3.7 0 1.1-.3 2.4-.3s1.7.3 2.4.3c.9 0 1.9-.7 2.9-2.3 1.5-2.4 1.9-6.3 0-8.2-1.5-1.5-3.9-1.3-5.3 0z"/><path d="M12 8.6c0-2 1.2-3.4 3.2-3.8"/>',
+    'Licorerías': '<path d="M10 3.5h4v2.8l1.1 2.1a3 3 0 0 1 .4 1.4V19a1.5 1.5 0 0 1-1.5 1.5h-4A1.5 1.5 0 0 1 8.5 19V9.8a3 3 0 0 1 .4-1.4L10 6.3z"/><path d="M8.5 13h7"/>',
+    'Accesorios de Carro': '<path d="M12 3.5l7 4v9l-7 4-7-4v-9z"/><circle cx="12" cy="12" r="3"/>'
 };
 const ICONO_GENERICO = '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/>';
 function svgOficio(p) {
@@ -536,17 +557,19 @@ async function cargarCategorias() {
     if (error) return;
     categoriasCache = data;
     const pinta = (ambito, id) => {
+        const tab = AMBITO_TAB[ambito];
         const cats = data.filter(c => c.ambito === ambito).map(c => c.nombre);
         document.getElementById(id).innerHTML =
-            `<div class="chip active" onclick="filtrar('${ambito === 'servicio' ? 'servicios' : 'restaurantes'}','Todos',this)">Todos</div>` +
-            cats.map(c => `<div class="chip" onclick="filtrar('${ambito === 'servicio' ? 'servicios' : 'restaurantes'}','${c}',this)">${c}</div>`).join('');
+            `<div class="chip active" onclick="filtrar('${tab}','Todos',this)">Todos</div>` +
+            cats.map(c => `<div class="chip" onclick="filtrar('${tab}','${c}',this)">${c}</div>`).join('');
     };
     pinta('servicio', 'chips-servicios');
     pinta('restaurante', 'chips-restaurantes');
+    pinta('comercio', 'chips-comercios');
 }
 
 async function cargarProveedores(estadoId) {
-    skeletons('lista-servicios'); skeletons('lista-restaurantes', 2);
+    skeletons('lista-servicios'); skeletons('lista-restaurantes', 2); skeletons('lista-comercios', 2);
     const { data, error } = await sb
         .from('proveedores')
         .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, proveedor_categorias(categorias(nombre))')
@@ -554,6 +577,7 @@ async function cargarProveedores(estadoId) {
     if (error) {
         document.getElementById('lista-servicios').innerHTML = vacio(VAC.alert, 'Error', 'No se pudo cargar. Revisa tu conexión.');
         document.getElementById('lista-restaurantes').innerHTML = '';
+        document.getElementById('lista-comercios').innerHTML = '';
         return;
     }
     // Aplanamos las categorías de cada proveedor a un array de nombres.
@@ -561,14 +585,14 @@ async function cargarProveedores(estadoId) {
         ...p,
         categorias: (p.proveedor_categorias || []).map(pc => pc.categorias ? pc.categorias.nombre : '').filter(Boolean)
     }));
-    render('servicios'); render('restaurantes');
+    render('servicios'); render('restaurantes'); render('comercios');
 }
 
 // ── Render con filtros ──
 function render(tab) {
     const q = quitarTildes(query.trim().toLowerCase());
     const cat = filtroCat[tab];
-    const tipo = tab === 'servicios' ? 'servicio' : 'restaurante';
+    const tipo = TAB_AMBITO[tab];
 
     let lista = proveedores.filter(p => p.tipo === tipo);
     if (cat !== 'Todos') lista = lista.filter(p => p.categorias.includes(cat));
@@ -605,7 +629,9 @@ function switchTab(tab, el) {
     el.classList.add('active');
     document.getElementById('servicios-section').classList.toggle('active', tab === 'servicios');
     document.getElementById('restaurantes-section').classList.toggle('active', tab === 'restaurantes');
-    document.getElementById('search-input').placeholder = tab === 'restaurantes' ? 'Buscar restaurantes…' : 'Buscar servicios…';
+    document.getElementById('comercios-section').classList.toggle('active', tab === 'comercios');
+    const ph = { servicios: 'Buscar servicios…', restaurantes: 'Buscar comida…', comercios: 'Buscar tiendas…' };
+    document.getElementById('search-input').placeholder = ph[tab] || 'Buscar…';
 }
 function filtrar(tab, cat, el) {
     filtroCat[tab] = cat;
@@ -723,7 +749,7 @@ async function sincronizarFavoritos(session) {
         const { data } = await sb.from('favoritos').select('proveedor_id');
         if (data) data.forEach(f => favsSet.add(f.proveedor_id));
     }
-    if (proveedores.length) { render('servicios'); render('restaurantes'); }
+    if (proveedores.length) { render('servicios'); render('restaurantes'); render('comercios'); }
 }
 sb.auth.onAuthStateChange((_evento, session) => actualizarSesion(session));
 sb.auth.getSession().then(({ data }) => actualizarSesion(data.session));
@@ -764,7 +790,7 @@ async function cargarMisNegocios() {
         <div class="mn-item">
             <div class="mn-info">
                 <div class="mn-nombre">${esc(p.nombre)}</div>
-                <div class="mn-tipo">${p.tipo === 'restaurante' ? 'Restaurante / comida' : 'Servicio'}</div>
+                <div class="mn-tipo">${p.tipo === 'restaurante' ? 'Comida' : p.tipo === 'comercio' ? 'Comercio / tienda' : 'Servicio'}</div>
             </div>
             <button class="mn-edit" onclick="editarNegocio('${p.id}')">Editar</button>
         </div>`).join('');
@@ -797,8 +823,9 @@ function pintarCatsProveedor() {
     document.getElementById('pv-cats').innerHTML = cats.map(c =>
         `<label class="cat-chip"><input type="checkbox" class="pv-cat" value="${c.id}" onchange="togglePvCat(this)">${c.nombre}</label>`
     ).join('');
-    document.getElementById('pv-esp').placeholder = tipo === 'restaurante'
-        ? 'Ej: pizzas, hamburguesas, postres criollos'
+    document.getElementById('pv-esp').placeholder =
+        tipo === 'restaurante' ? 'Ej: pizzas, hamburguesas, postres criollos'
+        : tipo === 'comercio' ? 'Ej: víveres, bebidas, charcutería'
         : 'Ej: aires, neveras, lavadoras';
 }
 function togglePvCat(cb) {
