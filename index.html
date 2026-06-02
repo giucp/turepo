@@ -147,6 +147,42 @@
         .mn-tipo { font-size: 11.5px; color: var(--muted); font-weight: 500; margin-top: 1px; }
         .mn-edit { flex-shrink: 0; background: var(--p-soft); color: var(--p); border: none; border-radius: 10px; padding: 8px 15px; font-size: 12.5px; font-weight: 700; font-family: inherit; cursor: pointer; transition: transform .12s; }
         .mn-edit:active { transform: scale(.95); }
+
+        /* Perfil del negocio */
+        #negocio-section { padding: 10px 18px 48px; }
+        .np-bar { display: flex; align-items: center; justify-content: space-between; padding: 4px 0 14px; }
+        .np-tb { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: var(--white); color: var(--p-deep); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .12s; }
+        .np-tb svg { width: 20px; height: 20px; }
+        .np-tb:active { transform: scale(.92); }
+        .np-tb.fav-on { background: #FCEEF3; border-color: #FCEEF3; color: #E0457B; }
+        .np-tb.fav-on svg { fill: #E0457B; stroke: #E0457B; }
+        .np-head { text-align: center; padding: 10px 0 4px; }
+        .np-icon { width: 92px; height: 92px; border-radius: 26px; background: var(--p-soft); color: var(--p); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .np-icon svg { width: 46px; height: 46px; }
+        .np-icon.off { color: var(--muted); background: #F2F4F3; }
+        .np-name { font-size: 26px; font-weight: 800; letter-spacing: -.5px; line-height: 1.15; color: var(--txt); }
+        .np-verif { display: inline-flex; align-items: center; gap: 5px; color: var(--p); font-weight: 700; font-size: 14px; margin-top: 8px; }
+        .np-verif svg { width: 16px; height: 16px; }
+        .np-cats { color: var(--muted); font-size: 14.5px; font-weight: 500; margin-top: 10px; line-height: 1.4; }
+        .np-conf { margin-top: 14px; display: inline-block; background: var(--p-soft); color: var(--p); font-size: 13px; font-weight: 700; padding: 7px 14px; border-radius: 20px; }
+        .np-esp { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px 18px; margin-top: 22px; box-shadow: var(--shadow-sm); }
+        .np-esp .lbl { font-size: 11.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+        .np-esp .val { font-size: 15px; font-weight: 500; line-height: 1.45; color: var(--txt); }
+        .np-actions { margin-top: 22px; display: flex; flex-direction: column; gap: 11px; }
+        .np-wa { display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--p); color: #fff; border: none; border-radius: 15px; padding: 17px; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 6px 18px rgba(30,92,82,.22); }
+        .np-wa svg { width: 22px; height: 22px; }
+        .np-link { display: flex; align-items: center; gap: 13px; background: var(--white); border: 1px solid var(--line); border-radius: 15px; padding: 14px 16px; text-decoration: none; color: var(--txt); box-shadow: var(--shadow-sm); }
+        .np-link .ic { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .np-link .ic svg { width: 22px; height: 22px; }
+        .ic-ig { background: #FCEEF3; color: #C13584; }
+        .ic-tt { background: #EAF7F7; color: #111; }
+        .np-link .tx { flex: 1; min-width: 0; }
+        .np-link .tx b { display: block; font-size: 14.5px; font-weight: 700; }
+        .np-link .tx span { font-size: 13px; color: var(--muted); }
+        .np-link .arrow { color: var(--muted); }
+        .np-link .arrow svg { width: 18px; height: 18px; }
+        .np-share-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 18px; background: transparent; border: 1.5px solid var(--line); color: var(--p-deep); border-radius: 15px; padding: 14px; font-size: 14.5px; font-weight: 700; font-family: inherit; cursor: pointer; }
+        .np-share-btn svg { width: 19px; height: 19px; }
         .hist-title { font-size: 16px; font-weight: 700; color: var(--txt); margin-bottom: 4px; }
         .hist-meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
         .rec-row { display: flex; gap: 8px; margin-top: 6px; }
@@ -225,6 +261,17 @@
     <div class="list" id="lista-comercios"></div>
 </div>
 
+<div id="negocio-section" class="section-wrap">
+    <div class="np-bar">
+        <button class="np-tb" onclick="cerrarNegocio()" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div style="display:flex; gap:10px;">
+            <button class="np-tb" onclick="compartirNegocio()" aria-label="Compartir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+            <button class="np-tb" id="np-fav" onclick="favDesdePerfil()" aria-label="Favorito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 6.5-6.5l1 1 1-1a4.6 4.6 0 0 1 6.5 6.5z"/></svg></button>
+        </div>
+    </div>
+    <div id="np-body"></div>
+</div>
+
 <div id="favoritos-section" class="section-wrap">
     <div class="profile-wrap">
         <h2>Mis Favoritos</h2>
@@ -293,6 +340,10 @@
                 <div class="cat-grid" id="pv-cats"></div>
                 <label class="form-label">Especialidad (opcional)</label>
                 <input type="text" class="form-input" id="pv-esp" placeholder="Ej: Aires, neveras, lavadoras">
+                <label class="form-label">Instagram (opcional)</label>
+                <input type="text" class="form-input" id="pv-instagram" placeholder="Ej: minegocio (sin la @)" autocapitalize="off">
+                <label class="form-label">TikTok (opcional)</label>
+                <input type="text" class="form-input" id="pv-tiktok" placeholder="Ej: minegocio (sin la @)" autocapitalize="off">
                 <button class="form-btn" id="pv-btn" onclick="registrarProveedor()">Publicar</button>
             </div>
         </div>
@@ -350,7 +401,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').repla
 function linkWhatsApp(tel) {
     let n = String(tel).replace(/[^\d]/g, '').replace(/^0+/, '');
     if (!n.startsWith('58')) n = '58' + n;
-    const msg = 'Hola, te encontré en turepo y me interesa contactarte. ¿Me das más información, por favor?';
+    const msg = 'Hola, vi tu negocio en turepo.com. ';
     return 'https://wa.me/' + n + '?text=' + encodeURIComponent(msg);
 }
 function navPronto() { toast('Esta sección la construimos en el próximo paso'); }
@@ -360,6 +411,113 @@ function contactar(provId, tel) {
     window.open(linkWhatsApp(tel), '_blank');   // primero, para no bloquear el popup
     registrarContacto(provId);
 }
+
+let negocioActual = null;
+
+function igLink(u) { u = String(u || '').trim().replace(/^@/, '').replace(/\s/g, ''); return u ? 'https://instagram.com/' + u : ''; }
+function ttLink(u) { u = String(u || '').trim().replace(/^@/, '').replace(/\s/g, ''); return u ? 'https://tiktok.com/@' + u : ''; }
+
+function abrirNegocio(id) {
+    const p = proveedores.find(x => String(x.id) === String(id));
+    if (!p) return;
+    negocioActual = p;
+    const verif = p.verificado;
+    const tipoTxt = [p.categorias.join(' · '), p.especialidad].filter(Boolean).join(' · ');
+
+    const sig = [];
+    if (verif) sig.push(`<span class="np-conf"><span style="display:inline-flex;align-items:center;gap:5px;">${SVG_CHECK} Verificado</span></span>`);
+    if ((p.opiniones || 0) > 0) {
+        const r = p.recomendaciones || 0;
+        sig.push(`<span class="np-conf">${r} persona${r === 1 ? '' : 's'} lo recomienda${r === 1 ? '' : 'n'}</span>`);
+    }
+    if ((p.contactos || 0) >= UMBRAL_SOLICITADO) sig.push('<span class="np-conf">Muy solicitado</span>');
+
+    const ig = String(p.instagram || '').trim().replace(/^@/, '');
+    const tt = String(p.tiktok || '').trim().replace(/^@/, '');
+
+    let html = `
+        <div class="np-head">
+            <div class="np-icon ${verif ? '' : 'off'}">${svgOficio(p)}</div>
+            <h1 class="np-name">${esc(p.nombre)}</h1>
+            ${verif ? `<div class="np-verif">${SVG_CHECK} Verificado</div>` : ''}
+            ${tipoTxt ? `<div class="np-cats">${esc(tipoTxt)}</div>` : ''}
+            <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">${sig.join('')}</div>
+        </div>`;
+    if (p.especialidad) {
+        html += `<div class="np-esp"><div class="lbl">Especialidad</div><div class="val">${esc(p.especialidad)}</div></div>`;
+    }
+    html += `<div class="np-actions">
+            <button class="np-wa" onclick="contactar('${p.id}','${p.telefono}')">${SVG_WA} Contactar por WhatsApp</button>`;
+    if (ig) html += `<a class="np-link" href="${igLink(ig)}" target="_blank" rel="noopener"><span class="ic ic-ig">${SVG_IG}</span><span class="tx"><b>Instagram</b><span>@${esc(ig)}</span></span><span class="arrow">${SVG_ARROW}</span></a>`;
+    if (tt) html += `<a class="np-link" href="${ttLink(tt)}" target="_blank" rel="noopener"><span class="ic ic-tt">${SVG_TT}</span><span class="tx"><b>TikTok</b><span>@${esc(tt)}</span></span><span class="arrow">${SVG_ARROW}</span></a>`;
+    html += `</div>
+        <button class="np-share-btn" onclick="compartirNegocio()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> Compartir negocio</button>`;
+
+    document.getElementById('np-body').innerHTML = html;
+    // estado del corazón
+    document.getElementById('np-fav').classList.toggle('fav-on', favsSet.has(p.id));
+    // mostrar la pantalla
+    document.querySelector('.header').style.display = 'none';
+    ['servicios-section','restaurantes-section','comercios-section','perfil-section','favoritos-section','historial-section','negocio-section'].forEach(s => {
+        const el = document.getElementById(s); if (el) el.classList.remove('active');
+    });
+    document.getElementById('negocio-section').classList.add('active');
+    window.scrollTo(0, 0);
+    if (location.hash.replace(/^#/, '') !== slugify(p.nombre)) {
+        history.pushState(null, '', '#' + slugify(p.nombre));
+    }
+}
+
+function cerrarNegocio() {
+    negocioActual = null;
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    navegar('inicio', document.querySelector('.bottom-nav .nav-item'));
+}
+
+function favDesdePerfil() {
+    if (!negocioActual) return;
+    toggleFav(negocioActual.id, null).then(() => {
+        document.getElementById('np-fav').classList.toggle('fav-on', favsSet.has(negocioActual.id));
+    });
+}
+
+async function compartirNegocio() {
+    if (!negocioActual) return;
+    const url = 'https://turepo.com/#' + slugify(negocioActual.nombre);
+    const datos = { title: negocioActual.nombre + ' · turepo', text: `${negocioActual.nombre} en turepo`, url };
+    try {
+        if (navigator.share) { await navigator.share(datos); return; }
+    } catch (e) { return; }  // el usuario canceló
+    try {
+        await navigator.clipboard.writeText(url);
+        toast('Enlace copiado', 'ok');
+    } catch (e) {
+        toast(url);
+    }
+}
+
+async function abrirDesdeHash() {
+    const slug = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+    if (!slug) return;
+    let p = proveedores.find(x => slugify(x.nombre) === slug);
+    if (p) { abrirNegocio(p.id); return; }
+    // Está en otro estado: lo buscamos liviano en toda la base
+    const { data } = await sb.from('proveedores').select('id, estado_id, nombre');
+    const m = (data || []).find(x => slugify(x.nombre) === slug);
+    if (m) {
+        document.getElementById('sel-estado').value = m.estado_id;
+        await cargarProveedores(m.estado_id);
+        abrirNegocio(m.id);
+    }
+}
+window.addEventListener('popstate', () => {
+    const slug = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+    if (slug) {
+        abrirDesdeHash();
+    } else if (document.getElementById('negocio-section').classList.contains('active')) {
+        navegar('inicio', document.querySelector('.bottom-nav .nav-item'));
+    }
+});
 async function registrarContacto(provId) {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return;  // sin cuenta se puede contactar, pero no queda registrado para calificar
@@ -441,7 +599,7 @@ async function renderFavoritos() {
     if (favsSet.size === 0) { cont.innerHTML = vacio(VAC.heart, 'Sin favoritos', 'Toca el corazón en un proveedor para guardarlo aquí.'); return; }
     cont.innerHTML = '<p class="sec-title">Cargando…</p>';
     const { data, error } = await sb.from('proveedores')
-        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, proveedor_categorias(categorias(nombre))')
+        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, proveedor_categorias(categorias(nombre))')
         .in('id', [...favsSet]);
     if (error) { cont.innerHTML = vacio(VAC.alert, 'Error', 'No se pudo cargar.'); return; }
     const lista = (data || []).map(p => ({
@@ -496,6 +654,13 @@ function svgOficio(p) {
 }
 const SVG_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>';
 const SVG_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 6.5-6.5l1 1 1-1a4.6 4.6 0 0 1 6.5 6.5z"/></svg>';
+const SVG_IG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>';
+const SVG_TT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3h-2.8v12.1a2.6 2.6 0 1 1-2-2.5V9.7a5.6 5.6 0 1 0 4.8 5.5V8.9c.9.7 2 1.1 3.2 1.2V7.2c-1.8-.1-3.2-1.6-3.2-3.4V3z"/></svg>';
+const SVG_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+function slugify(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 function svgIc(paths, sw) { return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw || 1.8}" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`; }
 const SVG_UP = svgIc('<path d="M7 10v11"/><path d="M15 5.9 14 10h5.8a2 2 0 0 1 1.95 2.45l-1.6 7A2 2 0 0 1 18.2 21H7"/><path d="M7 10 4 10a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3"/>');
 const SVG_DOWN = svgIc('<path d="M17 14V3"/><path d="M9 18.1 10 14H4.2a2 2 0 0 1-1.95-2.45l1.6-7A2 2 0 0 1 5.8 3H17"/><path d="M17 14h3a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-3"/>');
@@ -524,7 +689,7 @@ function renderCard(p, delay = 0) {
 
     const fav = favsSet.has(p.id);
     return `
-    <div class="card card-enter" style="animation-delay:${delay}ms">
+    <div class="card card-enter" style="animation-delay:${delay}ms" onclick="abrirNegocio('${p.id}')">
         <div class="ic-oficio ${verif ? 'on' : 'off'}">${svgOficio(p)}</div>
         <div class="card-info">
             <div class="card-name">${esc(p.nombre)}</div>
@@ -532,8 +697,8 @@ function renderCard(p, delay = 0) {
             <div class="conf-row">${sig.join('')}</div>
         </div>
         <div class="card-actions">
-            <button class="btn-fav ${fav ? 'active' : ''}" aria-label="Favorito" onclick="toggleFav('${p.id}', this)">${SVG_HEART}</button>
-            <button class="btn-wa" aria-label="WhatsApp" onclick="contactar('${p.id}', '${p.telefono}')">${SVG_WA}</button>
+            <button class="btn-fav ${fav ? 'active' : ''}" aria-label="Favorito" onclick="event.stopPropagation(); toggleFav('${p.id}', this)">${SVG_HEART}</button>
+            <button class="btn-wa" aria-label="WhatsApp" onclick="event.stopPropagation(); contactar('${p.id}', '${p.telefono}')">${SVG_WA}</button>
         </div>
     </div>`;
 }
@@ -549,7 +714,8 @@ async function cargarEstados() {
     const barinas = data.find(e => e.nombre === 'Barinas');
     sel.value = barinas ? barinas.id : data[0].id;
     sel.addEventListener('change', () => cargarProveedores(sel.value));
-    cargarProveedores(sel.value);
+    await cargarProveedores(sel.value);
+    if (location.hash) abrirDesdeHash();
 }
 
 async function cargarCategorias() {
@@ -572,7 +738,7 @@ async function cargarProveedores(estadoId) {
     skeletons('lista-servicios'); skeletons('lista-restaurantes', 2); skeletons('lista-comercios', 2);
     const { data, error } = await sb
         .from('proveedores')
-        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, proveedor_categorias(categorias(nombre))')
+        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, proveedor_categorias(categorias(nombre))')
         .eq('estado_id', estadoId);
     if (error) {
         document.getElementById('lista-servicios').innerHTML = vacio(VAC.alert, 'Error', 'No se pudo cargar. Revisa tu conexión.');
@@ -660,7 +826,7 @@ function navegar(dest, el) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
     if (el) el.classList.add('active');
     const hdr = document.querySelector('.header');
-    ['servicios-section', 'restaurantes-section', 'perfil-section', 'favoritos-section', 'historial-section'].forEach(id => document.getElementById(id).classList.remove('active'));
+    ['servicios-section', 'restaurantes-section', 'comercios-section', 'negocio-section', 'perfil-section', 'favoritos-section', 'historial-section'].forEach(id => document.getElementById(id).classList.remove('active'));
     if (dest === 'inicio') {
         hdr.style.display = '';
         document.getElementById(tabActivo + '-section').classList.add('active');
@@ -766,6 +932,8 @@ function mostrarFormProveedor() {
         document.getElementById('pv-nombre').value = '';
         document.getElementById('pv-tel').value = '';
         document.getElementById('pv-esp').value = '';
+        document.getElementById('pv-instagram').value = '';
+        document.getElementById('pv-tiktok').value = '';
         document.getElementById('pv-tipo').value = 'servicio';
         const selE = document.getElementById('pv-estado');
         selE.innerHTML = estadosCache.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
@@ -780,7 +948,7 @@ async function cargarMisNegocios() {
     const cont = document.getElementById('lista-mis-negocios');
     if (!session) { wrap.style.display = 'none'; misNegocios = []; return; }
     const { data, error } = await sb.from('proveedores')
-        .select('id, nombre, tipo, telefono, especialidad, estado_id, proveedor_categorias(categoria_id)')
+        .select('id, nombre, tipo, telefono, especialidad, estado_id, instagram, tiktok, proveedor_categorias(categoria_id)')
         .eq('cuenta_id', session.user.id)
         .order('nombre');
     if (error || !data || data.length === 0) { wrap.style.display = 'none'; misNegocios = []; return; }
@@ -813,6 +981,8 @@ function editarNegocio(id) {
     document.getElementById('pv-nombre').value = p.nombre || '';
     document.getElementById('pv-tel').value = p.telefono || '';
     document.getElementById('pv-esp').value = p.especialidad || '';
+    document.getElementById('pv-instagram').value = p.instagram || '';
+    document.getElementById('pv-tiktok').value = p.tiktok || '';
     document.getElementById('form-prov-titulo').textContent = 'Editar negocio';
     document.getElementById('pv-btn').textContent = 'Guardar cambios';
     f.scrollIntoView({ behavior: 'smooth' });
@@ -842,6 +1012,8 @@ async function registrarProveedor() {
     const tipo = document.getElementById('pv-tipo').value;
     const estadoId = parseInt(document.getElementById('pv-estado').value);
     const esp = document.getElementById('pv-esp').value.trim();
+    const ig = document.getElementById('pv-instagram').value.trim().replace(/^@/, '').replace(/\s/g, '');
+    const tt = document.getElementById('pv-tiktok').value.trim().replace(/^@/, '').replace(/\s/g, '');
     const cats = Array.from(document.querySelectorAll('.pv-cat:checked')).map(c => parseInt(c.value));
 
     if (nombre.length < 3) return toast('Escribe un nombre válido', 'err');
@@ -855,7 +1027,7 @@ async function registrarProveedor() {
     try {
         if (editando) {
             const { error } = await sb.from('proveedores').update({
-                estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null
+                estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null, instagram: ig || null, tiktok: tt || null
             }).eq('id', editandoId);
             if (error) throw error;
             const { error: ed } = await sb.from('proveedor_categorias').delete().eq('proveedor_id', editandoId);
@@ -865,7 +1037,7 @@ async function registrarProveedor() {
             toast('¡Cambios guardados!', 'ok');
         } else {
             const { data: prov, error } = await sb.from('proveedores').insert({
-                cuenta_id: session.user.id, estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null
+                cuenta_id: session.user.id, estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null, instagram: ig || null, tiktok: tt || null
             }).select('id').single();
             if (error) throw error;
             const filas = cats.map(cid => ({ proveedor_id: prov.id, categoria_id: cid }));
@@ -877,6 +1049,8 @@ async function registrarProveedor() {
         document.getElementById('pv-nombre').value = '';
         document.getElementById('pv-tel').value = '';
         document.getElementById('pv-esp').value = '';
+        document.getElementById('pv-instagram').value = '';
+        document.getElementById('pv-tiktok').value = '';
         document.getElementById('form-proveedor').style.display = 'none';
         document.getElementById('sel-estado').value = estadoId;
         cargarProveedores(estadoId);
