@@ -176,6 +176,8 @@
         .np-link .ic svg { width: 22px; height: 22px; }
         .ic-ig { background: #FCEEF3; color: #C13584; }
         .ic-tt { background: #EAF7F7; color: #111; }
+        .ic-cat { background: var(--p-soft); color: var(--p); }
+        .np-desc { font-size: 15px; line-height: 1.55; color: var(--txt); text-align: center; margin-top: 16px; padding: 0 4px; }
         .np-link .tx { flex: 1; min-width: 0; }
         .np-link .tx b { display: block; font-size: 14.5px; font-weight: 700; }
         .np-link .tx span { font-size: 13px; color: var(--muted); }
@@ -343,6 +345,12 @@
                 <div class="cat-grid" id="pv-cats"></div>
                 <label class="form-label">Especialidad (opcional)</label>
                 <input type="text" class="form-input" id="pv-esp" placeholder="Ej: Aires, neveras, lavadoras">
+                <label class="form-label">Descripción corta (opcional)</label>
+                <textarea class="form-input" id="pv-desc" rows="3" maxlength="200" placeholder="Ej: Reparación de neveras y aires. 10 años de experiencia." style="resize:none;"></textarea>
+                <label class="form-label">Horario de atención (opcional)</label>
+                <input type="text" class="form-input" id="pv-horario" placeholder="Ej: Lun a Sáb, 8am - 6pm">
+                <label class="form-label" id="pv-cat-label">Catálogo · enlace (opcional)</label>
+                <input type="url" inputmode="url" class="form-input" id="pv-catalogo" placeholder="Ej: https://..." autocapitalize="off">
                 <label class="form-label">Instagram (opcional)</label>
                 <input type="text" class="form-input" id="pv-instagram" placeholder="Ej: minegocio (sin la @)" autocapitalize="off">
                 <label class="form-label">TikTok (opcional)</label>
@@ -463,7 +471,6 @@ function abrirNegocio(id) {
     const tipoTxt = [p.categorias.join(' · '), p.especialidad].filter(Boolean).join(' · ');
 
     const sig = [];
-    if (verif) sig.push(`<span class="np-conf"><span style="display:inline-flex;align-items:center;gap:5px;">${SVG_CHECK} Verificado</span></span>`);
     if ((p.opiniones || 0) > 0) {
         const r = p.recomendaciones || 0;
         sig.push(`<span class="np-conf">${r} persona${r === 1 ? '' : 's'} lo recomienda${r === 1 ? '' : 'n'}</span>`);
@@ -472,6 +479,11 @@ function abrirNegocio(id) {
 
     const ig = String(p.instagram || '').trim().replace(/^@/, '');
     const tt = String(p.tiktok || '').trim().replace(/^@/, '');
+    const desc = String(p.descripcion || '').trim();
+    const horario = String(p.horario || '').trim();
+    const catalogo = String(p.catalogo || '').trim();
+    const catLabel = p.tipo === 'restaurante' ? 'Menú' : 'Catálogo';
+    const catUrl = catalogo ? (/^https?:\/\//i.test(catalogo) ? catalogo : 'https://' + catalogo) : '';
 
     let html = `
         <div class="np-head">
@@ -481,13 +493,16 @@ function abrirNegocio(id) {
             ${tipoTxt ? `<div class="np-cats">${esc(tipoTxt)}</div>` : ''}
             <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center;">${sig.join('')}</div>
         </div>`;
+    if (desc) html += `<p class="np-desc">${esc(desc)}</p>`;
     if (p.especialidad) {
         html += `<div class="np-esp"><div class="lbl">Especialidad</div><div class="val">${esc(p.especialidad)}</div></div>`;
     }
+    if (horario) html += `<div class="np-esp"><div class="lbl">Horario de atención</div><div class="val">${esc(horario)}</div></div>`;
     html += `<div class="np-actions">
             <button class="np-wa" onclick="contactar('${p.id}','${p.telefono}')">${SVG_WA} Contactar por WhatsApp</button>`;
     if (ig) html += `<a class="np-link" href="${igLink(ig)}" target="_blank" rel="noopener"><span class="ic ic-ig">${SVG_IG}</span><span class="tx"><b>Instagram</b><span>@${esc(ig)}</span></span><span class="arrow">${SVG_ARROW}</span></a>`;
     if (tt) html += `<a class="np-link" href="${ttLink(tt)}" target="_blank" rel="noopener"><span class="ic ic-tt">${SVG_TT}</span><span class="tx"><b>TikTok</b><span>@${esc(tt)}</span></span><span class="arrow">${SVG_ARROW}</span></a>`;
+    if (catUrl) html += `<a class="np-link" href="${catUrl}" target="_blank" rel="noopener"><span class="ic ic-cat">${SVG_CAT}</span><span class="tx"><b>${catLabel}</b><span>Ver ${catLabel.toLowerCase()}</span></span><span class="arrow">${SVG_ARROW}</span></a>`;
     html += `</div>
         <button class="np-share-btn" onclick="compartirNegocio()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg> Compartir negocio</button>`;
 
@@ -637,7 +652,7 @@ async function renderFavoritos() {
     if (favsSet.size === 0) { cont.innerHTML = vacio(VAC.heart, 'Sin favoritos', 'Toca el corazón en un proveedor para guardarlo aquí.'); return; }
     cont.innerHTML = '<p class="sec-title">Cargando…</p>';
     const { data, error } = await sb.from('proveedores')
-        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, proveedor_categorias(categorias(nombre))')
+        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, descripcion, horario, catalogo, proveedor_categorias(categorias(nombre))')
         .in('id', [...favsSet]);
     if (error) { cont.innerHTML = vacio(VAC.alert, 'Error', 'No se pudo cargar.'); return; }
     const lista = (data || []).map(p => ({
@@ -696,6 +711,7 @@ const SVG_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const SVG_IG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>';
 const SVG_TT = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3h-2.8v12.1a2.6 2.6 0 1 1-2-2.5V9.7a5.6 5.6 0 1 0 4.8 5.5V8.9c.9.7 2 1.1 3.2 1.2V7.2c-1.8-.1-3.2-1.6-3.2-3.4V3z"/></svg>';
 const SVG_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+const SVG_CAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H18a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.5.5H6a2 2 0 0 1-2-2z"/><path d="M8 8h7M8 11.5h7M8 15h4"/></svg>';
 function slugify(s) {
     return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -777,7 +793,7 @@ async function cargarProveedores(estadoId) {
     skeletons('lista-servicios'); skeletons('lista-restaurantes', 2); skeletons('lista-comercios', 2);
     const { data, error } = await sb
         .from('proveedores')
-        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, proveedor_categorias(categorias(nombre))')
+        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, descripcion, horario, catalogo, proveedor_categorias(categorias(nombre))')
         .eq('estado_id', estadoId);
     if (error) {
         document.getElementById('lista-servicios').innerHTML = vacio(VAC.alert, 'Error', 'No se pudo cargar. Revisa tu conexión.');
@@ -1003,6 +1019,9 @@ function mostrarFormProveedor() {
         document.getElementById('pv-nombre').value = '';
         document.getElementById('pv-tel').value = '';
         document.getElementById('pv-esp').value = '';
+        document.getElementById('pv-desc').value = '';
+        document.getElementById('pv-horario').value = '';
+        document.getElementById('pv-catalogo').value = '';
         document.getElementById('pv-instagram').value = '';
         document.getElementById('pv-tiktok').value = '';
         document.getElementById('pv-tipo').value = 'servicio';
@@ -1019,7 +1038,7 @@ async function cargarMisNegocios() {
     const cont = document.getElementById('lista-mis-negocios');
     if (!session) { wrap.style.display = 'none'; misNegocios = []; return; }
     const { data, error } = await sb.from('proveedores')
-        .select('id, nombre, tipo, telefono, especialidad, estado_id, instagram, tiktok, proveedor_categorias(categoria_id)')
+        .select('id, nombre, tipo, telefono, especialidad, estado_id, instagram, tiktok, descripcion, horario, catalogo, proveedor_categorias(categoria_id)')
         .eq('cuenta_id', session.user.id)
         .order('nombre');
     if (error || !data || data.length === 0) { wrap.style.display = 'none'; misNegocios = []; return; }
@@ -1052,6 +1071,9 @@ function editarNegocio(id) {
     document.getElementById('pv-nombre').value = p.nombre || '';
     document.getElementById('pv-tel').value = p.telefono || '';
     document.getElementById('pv-esp').value = p.especialidad || '';
+    document.getElementById('pv-desc').value = p.descripcion || '';
+    document.getElementById('pv-horario').value = p.horario || '';
+    document.getElementById('pv-catalogo').value = p.catalogo || '';
     document.getElementById('pv-instagram').value = p.instagram || '';
     document.getElementById('pv-tiktok').value = p.tiktok || '';
     document.getElementById('form-prov-titulo').textContent = 'Editar negocio';
@@ -1068,6 +1090,8 @@ function pintarCatsProveedor() {
         tipo === 'restaurante' ? 'Ej: pizzas, hamburguesas, postres criollos'
         : tipo === 'comercio' ? 'Ej: víveres, bebidas, charcutería'
         : 'Ej: aires, neveras, lavadoras';
+    document.getElementById('pv-cat-label').textContent =
+        (tipo === 'restaurante' ? 'Menú' : 'Catálogo') + ' · enlace (opcional)';
 }
 function togglePvCat(cb) {
     const n = document.querySelectorAll('.pv-cat:checked').length;
@@ -1083,6 +1107,9 @@ async function registrarProveedor() {
     const tipo = document.getElementById('pv-tipo').value;
     const estadoId = parseInt(document.getElementById('pv-estado').value);
     const esp = document.getElementById('pv-esp').value.trim();
+    const descrip = document.getElementById('pv-desc').value.trim();
+    const horario = document.getElementById('pv-horario').value.trim();
+    const catalogo = document.getElementById('pv-catalogo').value.trim();
     const ig = document.getElementById('pv-instagram').value.trim().replace(/^@/, '').replace(/\s/g, '');
     const tt = document.getElementById('pv-tiktok').value.trim().replace(/^@/, '').replace(/\s/g, '');
     const cats = Array.from(document.querySelectorAll('.pv-cat:checked')).map(c => parseInt(c.value));
@@ -1098,7 +1125,7 @@ async function registrarProveedor() {
     try {
         if (editando) {
             const { error } = await sb.from('proveedores').update({
-                estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null, instagram: ig || null, tiktok: tt || null
+                estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null, descripcion: descrip || null, horario: horario || null, catalogo: catalogo || null, instagram: ig || null, tiktok: tt || null
             }).eq('id', editandoId);
             if (error) throw error;
             const { error: ed } = await sb.from('proveedor_categorias').delete().eq('proveedor_id', editandoId);
@@ -1108,7 +1135,7 @@ async function registrarProveedor() {
             toast('¡Cambios guardados!', 'ok');
         } else {
             const { data: prov, error } = await sb.from('proveedores').insert({
-                cuenta_id: session.user.id, estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null, instagram: ig || null, tiktok: tt || null
+                cuenta_id: session.user.id, estado_id: estadoId, nombre, telefono: tel, tipo, especialidad: esp || null, descripcion: descrip || null, horario: horario || null, catalogo: catalogo || null, instagram: ig || null, tiktok: tt || null
             }).select('id').single();
             if (error) throw error;
             const filas = cats.map(cid => ({ proveedor_id: prov.id, categoria_id: cid }));
@@ -1120,6 +1147,9 @@ async function registrarProveedor() {
         document.getElementById('pv-nombre').value = '';
         document.getElementById('pv-tel').value = '';
         document.getElementById('pv-esp').value = '';
+        document.getElementById('pv-desc').value = '';
+        document.getElementById('pv-horario').value = '';
+        document.getElementById('pv-catalogo').value = '';
         document.getElementById('pv-instagram').value = '';
         document.getElementById('pv-tiktok').value = '';
         document.getElementById('form-proveedor').style.display = 'none';
