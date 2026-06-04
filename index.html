@@ -231,6 +231,42 @@
         .card-enter { animation: cardIn .3s ease both; }
         @keyframes cardIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+
+        /* ── Vitrinas (Antojos / Ofertas) ── */
+        .v-head { padding: 14px 20px 0; }
+        .v-seg { display: flex; gap: 22px; border-bottom: 1.5px solid var(--line); margin-top: 8px; }
+        .v-seg button { padding: 8px 0 12px; border: none; background: transparent; color: var(--muted); font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; position: relative; }
+        .v-seg button.active { color: var(--p-deep); }
+        .v-seg button.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1.5px; height: 2.5px; background: var(--p); border-radius: 2px; }
+        .v-body { padding: 4px 20px 20px; }
+        .v-sub { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.1px; margin: 22px 0 12px; }
+        .v-dest { background: linear-gradient(135deg, var(--p-deep), var(--p)); border-radius: 18px; padding: 18px 18px 20px; color: #fff; position: relative; overflow: hidden; cursor: pointer; }
+        .v-dest .dot { position: absolute; right: -30px; top: -30px; width: 120px; height: 120px; border-radius: 50%; background: rgba(201,162,39,.16); }
+        .v-dest .tag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 1.4px; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; }
+        .v-dest h3 { font-size: 20px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 3px; }
+        .v-dest p { font-size: 13px; opacity: .82; font-weight: 500; }
+        .v-surp { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; margin-top: 12px; background: var(--white); border: 1.5px solid var(--line); border-radius: 14px; padding: 14px; font-size: 14.5px; font-weight: 700; color: var(--p-deep); cursor: pointer; font-family: inherit; }
+        .v-surp svg { width: 18px; height: 18px; color: var(--accent); }
+        .v-cup { background: var(--white); border-radius: 14px; margin-bottom: 9px; display: flex; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 3px 13px rgba(30,92,82,.05); }
+        .v-cup .left { background: linear-gradient(160deg, var(--p), var(--p-deep)); color: #fff; padding: 11px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 72px; position: relative; }
+        .v-cup .left .big { font-size: 18px; font-weight: 800; line-height: 1; color: #fff; text-align: center; word-break: break-word; }
+        .v-cup .left .sm { font-size: 9px; font-weight: 600; opacity: .85; margin-top: 3px; text-align: center; letter-spacing: .2px; }
+        .v-cup .left::after { content: ''; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border-radius: 50%; background: var(--bg); }
+        .v-cup .left::before { content: ''; position: absolute; right: 1px; top: 0; bottom: 0; border-right: 2px dashed rgba(255,255,255,.25); }
+        .v-cup .right { padding: 11px 15px; flex: 1; min-width: 0; cursor: pointer; }
+        .v-cup .right .nm { font-size: 14.5px; font-weight: 800; }
+        .v-cup .right .of { font-size: 12px; color: #556; margin-top: 2px; line-height: 1.35; }
+        .v-cup .right .ven { font-size: 10.5px; color: var(--p); font-weight: 700; margin-top: 7px; background: var(--p-soft); display: inline-block; padding: 3px 9px; border-radius: 20px; }
+        .v-qr { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+        .v-qr button { background: var(--white); border: 1.5px solid var(--line); border-radius: 13px; padding: 13px 14px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: var(--p-deep); box-shadow: 0 2px 10px rgba(30,92,82,.04); font-family: inherit; cursor: pointer; text-align: left; }
+        .v-qr button .ic { width: 34px; height: 34px; border-radius: 10px; background: var(--p-soft); color: var(--p); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .v-qr button .ic svg { width: 19px; height: 19px; }
+        .v-empty { text-align: center; color: var(--muted); font-size: 13.5px; padding: 26px 10px; line-height: 1.5; }
+        .v-invite { margin-top: 26px; background: var(--p-soft); border-radius: 16px; padding: 18px; text-align: center; }
+        .v-invite p { font-size: 13.5px; color: var(--p-deep); font-weight: 600; line-height: 1.5; margin-bottom: 12px; }
+        .v-invite a { display: inline-flex; align-items: center; gap: 7px; background: var(--p); color: #fff; font-size: 13.5px; font-weight: 700; padding: 10px 18px; border-radius: 11px; text-decoration: none; }
+        .v-invite a svg { width: 15px; height: 15px; }
+        .v-otra { display: block; margin: 4px auto 0; background: transparent; border: none; color: var(--p); font-size: 13.5px; font-weight: 700; font-family: inherit; cursor: pointer; padding: 10px; }
     </style>
 </head>
 <body>
@@ -400,7 +436,7 @@
 
 <div id="acerca-section" class="section-wrap">
     <div style="padding:10px 18px 0;">
-        <button class="np-tb" onclick="navegar('perfil', document.querySelectorAll('.bottom-nav .nav-item')[3])" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="np-tb" onclick="navegar('perfil', document.querySelectorAll('.bottom-nav .nav-item')[4])" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
     </div>
     <div class="profile-wrap" style="padding-top:14px;">
         <div style="text-align:center; margin-bottom:6px;">
@@ -432,9 +468,26 @@
     </div>
 </div>
 
+<div id="hoy-section" class="section-wrap">
+    <div class="v-head">
+        <div class="header-top">
+            <div class="logo">tu<span class="repo">rep<span class="ltr-o">o</span></span></div>
+            <div class="location-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span id="v-ciudad" style="font-weight:700;color:var(--p);font-size:14px;"></span></div>
+        </div>
+        <div class="v-seg">
+            <button class="active" onclick="switchVitrina('antojos', this)">Antojos</button>
+            <button onclick="switchVitrina('ofertas', this)">Ofertas</button>
+        </div>
+    </div>
+    <div class="v-body" id="v-body"></div>
+</div>
+
 <nav class="bottom-nav">
     <div class="nav-item active" onclick="navegar('inicio', this)">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/><path d="M9 21v-6h6v6"/></svg>Inicio
+    </div>
+    <div class="nav-item" onclick="navegar('hoy', this)">
+        <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.3 13.3 20.5a1.5 1.5 0 0 1-2.1 0l-7.7-7.7V4h8.8l8.2 8.2a1.5 1.5 0 0 1 0 1.1z"/><circle cx="7.8" cy="7.8" r="1.3" fill="currentColor" stroke="none"/></svg>Hoy
     </div>
     <div class="nav-item" onclick="navegar('favoritos', this)">
         <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12.6 12 20l-7.5-7.4a4.6 4.6 0 0 1 6.5-6.5l1 1 1-1a4.6 4.6 0 0 1 6.5 6.5z"/></svg>Favs
@@ -841,7 +894,7 @@ async function cargarProveedores(estadoId) {
     skeletons('lista-servicios'); skeletons('lista-restaurantes', 2); skeletons('lista-comercios', 2);
     const { data, error } = await sb
         .from('proveedores')
-        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, descripcion, horario, catalogo, logo, ubicacion, proveedor_categorias(categorias(nombre))')
+        .select('id, nombre, telefono, tipo, especialidad, verificado, recomendaciones, opiniones, contactos, creado_en, instagram, tiktok, descripcion, horario, catalogo, logo, ubicacion, destacado, destacado_nota, proveedor_categorias(categorias(nombre))')
         .eq('estado_id', estadoId);
     if (error) {
         document.getElementById('lista-servicios').innerHTML = vacio(VAC.alert, 'Error', 'No se pudo cargar. Revisa tu conexión.');
@@ -925,18 +978,139 @@ sInput.addEventListener('input', e => {
 cBtn.addEventListener('click', () => { sInput.value = ''; query = ''; cBtn.classList.remove('visible'); render(tabActivo); sInput.focus(); });
 
 // ── Navegación entre secciones ──
+// ── Vitrinas: Antojos (comida) y Ofertas (comercios) ──
+let vitrinaActiva = 'antojos';
+let promosCache = [];
+const TUREPO_WA = '584244069768';
+
+function switchVitrina(cual, btn) {
+    vitrinaActiva = cual;
+    document.querySelectorAll('.v-seg button').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderVitrina();
+}
+
+async function cargarVitrina() {
+    const sel = document.getElementById('sel-estado');
+    const estadoId = sel ? sel.value : null;
+    const ciudad = sel && sel.selectedOptions[0] ? sel.selectedOptions[0].textContent : '';
+    document.getElementById('v-ciudad').textContent = ciudad;
+    const hoy = new Date().toISOString().slice(0, 10);
+    const { data } = await sb
+        .from('promos')
+        .select('id, gancho, descripcion, vence, proveedor:proveedores(id, nombre, telefono, tipo, logo, verificado, especialidad, estado_id)')
+        .or(`vence.gte.${hoy},vence.is.null`)
+        .order('creado_en', { ascending: false });
+    promosCache = (data || []).filter(pr => pr.proveedor && String(pr.proveedor.estado_id) === String(estadoId));
+    renderVitrina();
+}
+
+function renderVitrina() {
+    const ambito = vitrinaActiva === 'antojos' ? 'restaurante' : 'comercio';
+    const body = document.getElementById('v-body');
+    let html = '';
+
+    // 1) Destacado (negocios marcados como destacado en este ámbito)
+    const dest = proveedores.filter(p => p.destacado && p.tipo === ambito);
+    if (dest.length) {
+        const d = dest[Math.floor(Math.random() * dest.length)];
+        const sub = [d.especialidad].filter(Boolean).join(' · ');
+        html += `<p class="v-sub">Destacado</p>
+        <div class="v-dest" onclick="abrirNegocio('${d.id}')">
+            <div class="dot"></div>
+            <span class="tag">${esc(d.destacado_nota || 'Destacado')}</span>
+            <h3>${esc(d.nombre)}</h3>
+            ${sub ? `<p>${esc(sub)}</p>` : ''}
+        </div>`;
+    }
+
+    // 2) Antojos: botón "decide por mí" · Ofertas: accesos rápidos
+    if (vitrinaActiva === 'antojos') {
+        html += `<button class="v-surp" onclick="decidePorMi()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/><circle cx="16" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="16" r="1.3" fill="currentColor"/></svg> Tengo hambre, decide por mí</button>
+        <div id="v-sorteo"></div>`;
+    } else {
+        const cats = categoriasCache.filter(c => c.ambito === 'comercio').slice(0, 4);
+        if (cats.length) {
+            html += `<p class="v-sub">Lo más buscado</p><div class="v-qr">`;
+            cats.forEach(c => {
+                html += `<button onclick="irACategoria('${esc(c.nombre)}')"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONOS[c.nombre] || ICONO_GENERICO}</svg></span>${esc(c.nombre)}</button>`;
+            });
+            html += `</div>`;
+        }
+    }
+
+    // 3) Promos / Ofertas activas
+    const promos = promosCache.filter(pr => pr.proveedor.tipo === ambito);
+    html += `<p class="v-sub">${vitrinaActiva === 'antojos' ? 'Promos activas' : 'Ofertas activas'}</p>`;
+    if (promos.length) {
+        promos.forEach(pr => {
+            const venceTxt = pr.vence ? formateaVence(pr.vence) : '';
+            html += `<div class="v-cup">
+                <div class="left"><div class="big">${esc(pr.gancho)}</div></div>
+                <div class="right" onclick="abrirNegocio('${pr.proveedor.id}')">
+                    <div class="nm">${esc(pr.proveedor.nombre)}</div>
+                    <div class="of">${esc(pr.descripcion || '')}</div>
+                    ${venceTxt ? `<span class="ven">${venceTxt}</span>` : ''}
+                </div>
+            </div>`;
+        });
+    } else {
+        html += `<div class="v-empty">Todavía no hay ${vitrinaActiva === 'antojos' ? 'promos' : 'ofertas'} por aquí.<br>¡Pronto habrá!</div>`;
+    }
+
+    // 4) Invitación a registrarse
+    html += `<div class="v-invite">
+        <p>¿Tienes un negocio en Barinas?<br>Aparece en turepo, es gratis.</p>
+        <a href="https://wa.me/${TUREPO_WA}?text=${encodeURIComponent('Hola, quiero que mi negocio aparezca en turepo')}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2z"/></svg> Escríbenos</a>
+    </div>`;
+
+    body.innerHTML = html;
+}
+
+function decidePorMi() {
+    const lista = proveedores.filter(p => p.tipo === 'restaurante');
+    const cont = document.getElementById('v-sorteo');
+    if (!lista.length) { if (cont) cont.innerHTML = `<div class="v-empty">Aún no hay restaurantes cargados aquí.</div>`; return; }
+    const r = lista[Math.floor(Math.random() * lista.length)];
+    cont.innerHTML = renderCard(r) + `<button class="v-otra" onclick="decidePorMi()">Otra vez</button>`;
+}
+
+function irACategoria(nombre) {
+    navegar('inicio', document.querySelectorAll('.bottom-nav .nav-item')[0]);
+    switchTab('comercios', document.querySelectorAll('#segmentador .seg-btn')[2]);
+    setTimeout(() => {
+        const chip = [...document.querySelectorAll('#chips-comercios .chip')].find(c => c.textContent === nombre);
+        if (chip) chip.click();
+    }, 50);
+}
+
+function formateaVence(fecha) {
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const v = new Date(fecha + 'T00:00:00');
+    const dias = Math.round((v - hoy) / 86400000);
+    if (dias <= 0) return 'Hoy';
+    if (dias === 1) return 'Hasta mañana';
+    if (dias <= 7) return 'Hasta el ' + v.toLocaleDateString('es-VE', { weekday: 'long' });
+    return 'Hasta ' + v.toLocaleDateString('es-VE', { day: 'numeric', month: 'short' });
+}
+
 function navegar(dest, el) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
     if (el) el.classList.add('active');
     const hdr = document.querySelector('.header');
-    ['servicios-section', 'restaurantes-section', 'comercios-section', 'negocio-section', 'perfil-section', 'favoritos-section', 'historial-section', 'acerca-section'].forEach(id => document.getElementById(id).classList.remove('active'));
+    ['servicios-section', 'restaurantes-section', 'comercios-section', 'negocio-section', 'perfil-section', 'favoritos-section', 'historial-section', 'acerca-section', 'hoy-section'].forEach(id => document.getElementById(id).classList.remove('active'));
     if (dest === 'inicio') {
         hdr.style.display = '';
         document.getElementById(tabActivo + '-section').classList.add('active');
+    } else if (dest === 'hoy') {
+        hdr.style.display = 'none';
+        document.getElementById('hoy-section').classList.add('active');
+        window.scrollTo(0, 0);
+        cargarVitrina();
     } else if (dest === 'acerca') {
         hdr.style.display = 'none';
         document.getElementById('acerca-section').classList.add('active');
-        document.querySelectorAll('.bottom-nav .nav-item')[3].classList.add('active');
+        document.querySelectorAll('.bottom-nav .nav-item')[4].classList.add('active');
         window.scrollTo(0, 0);
     } else if (dest === 'perfil') {
         hdr.style.display = 'none';
@@ -1282,4 +1456,3 @@ cargarEstados();
 </script>
 </body>
 </html>
-
