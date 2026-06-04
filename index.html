@@ -282,13 +282,12 @@
         <button class="clear-btn" id="clear-btn" aria-label="Limpiar">✕</button>
     </div>
     <div class="segment" id="segmentador">
-        <button class="seg-btn active" onclick="switchTab('servicios', this)">Servicios</button>
-        <button class="seg-btn" onclick="switchTab('restaurantes', this)">Comida</button>
+        <button class="seg-btn active" onclick="switchTab('restaurantes', this)">Comida</button>
         <button class="seg-btn" onclick="switchTab('comercios', this)">Comercios</button>
     </div>
 </header>
 
-<div id="servicios-section" class="section-wrap active">
+<div id="servicios-section" class="section-wrap">
     <div class="chips-row" id="chips-servicios"></div>
     <div class="sort-row">
         <button class="sort-btn active" onclick="setOrden('mejor', this)">Más confiables</button>
@@ -298,7 +297,7 @@
     <div class="list" id="lista-servicios"></div>
 </div>
 
-<div id="restaurantes-section" class="section-wrap">
+<div id="restaurantes-section" class="section-wrap active">
     <div class="chips-row" id="chips-restaurantes"></div>
     <div class="sort-row">
         <button class="sort-btn active" onclick="setOrden('mejor', this)">Más confiables</button>
@@ -514,7 +513,7 @@ let proveedores = [];          // proveedores del estado seleccionado
 let estadosCache = [];         // lista de estados (para los selectores)
 let categoriasCache = [];      // lista de categorías (id, nombre, ambito)
 let favsSet = new Set();       // ids de proveedores favoritos del usuario
-let tabActivo = 'servicios';
+let tabActivo = 'restaurantes';
 let orden = 'mejor';
 let filtroCat = { servicios: 'Todos', restaurantes: 'Todos', comercios: 'Todos' };
 const TAB_AMBITO = { servicios: 'servicio', restaurantes: 'restaurante', comercios: 'comercio' };
@@ -916,7 +915,9 @@ function render(tab) {
     const cat = filtroCat[tab];
     const tipo = TAB_AMBITO[tab];
 
-    let lista = proveedores.filter(p => p.tipo === tipo);
+    let lista = tab === 'comercios'
+        ? proveedores.filter(p => p.tipo === 'comercio' || p.tipo === 'servicio')
+        : proveedores.filter(p => p.tipo === tipo);
     if (cat !== 'Todos') lista = lista.filter(p => p.categorias.includes(cat));
     if (q) {
         lista = lista.filter(p => {
@@ -1077,7 +1078,7 @@ function decidePorMi() {
 
 function irACategoria(nombre) {
     navegar('inicio', document.querySelectorAll('.bottom-nav .nav-item')[0]);
-    switchTab('comercios', document.querySelectorAll('#segmentador .seg-btn')[2]);
+    switchTab('comercios', document.querySelectorAll('#segmentador .seg-btn')[1]);
     setTimeout(() => {
         const chip = [...document.querySelectorAll('#chips-comercios .chip')].find(c => c.textContent === nombre);
         if (chip) chip.click();
