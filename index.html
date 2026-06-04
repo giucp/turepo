@@ -553,14 +553,15 @@ function abrirNegocio(id) {
     });
     document.getElementById('negocio-section').classList.add('active');
     window.scrollTo(0, 0);
-    if (location.hash.replace(/^#/, '') !== slugify(p.nombre)) {
-        history.pushState(null, '', '#' + slugify(p.nombre));
+    const _slug = slugify(p.nombre);
+    if (decodeURIComponent(location.pathname.replace(/^\//, '').replace(/\/$/, '')) !== _slug) {
+        history.pushState(null, '', '/' + _slug);
     }
 }
 
 function cerrarNegocio() {
     negocioActual = null;
-    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    history.replaceState(null, '', '/');
     navegar('inicio', document.querySelector('.bottom-nav .nav-item'));
 }
 
@@ -573,7 +574,7 @@ function favDesdePerfil() {
 
 async function compartirNegocio() {
     if (!negocioActual) return;
-    const url = 'https://turepo.com/#' + slugify(negocioActual.nombre);
+    const url = 'https://turepo.com/' + slugify(negocioActual.nombre);
     const datos = { title: negocioActual.nombre + ' · turepo', text: `${negocioActual.nombre} en turepo`, url };
     try {
         if (navigator.share) { await navigator.share(datos); return; }
@@ -587,7 +588,9 @@ async function compartirNegocio() {
 }
 
 async function abrirDesdeHash() {
-    const slug = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+    // Soporta el formato nuevo (turepo.com/nombre) y el viejo (turepo.com/#nombre)
+    let slug = decodeURIComponent(location.pathname.replace(/^\//, '').replace(/\/$/, '')).trim();
+    if (!slug && location.hash) slug = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
     if (!slug) return;
     let p = proveedores.find(x => slugify(x.nombre) === slug);
     if (p) { abrirNegocio(p.id); return; }
@@ -601,7 +604,8 @@ async function abrirDesdeHash() {
     }
 }
 window.addEventListener('popstate', () => {
-    const slug = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
+    let slug = decodeURIComponent(location.pathname.replace(/^\//, '').replace(/\/$/, '')).trim();
+    if (!slug && location.hash) slug = decodeURIComponent(location.hash.replace(/^#/, '')).trim();
     if (slug) {
         abrirDesdeHash();
     } else if (document.getElementById('negocio-section').classList.contains('active')) {
@@ -814,7 +818,7 @@ async function cargarEstados() {
         cargarProveedores(sel.value);
     });
     await cargarProveedores(sel.value);
-    if (location.hash) abrirDesdeHash();
+    abrirDesdeHash();
 }
 
 async function cargarCategorias() {
