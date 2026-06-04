@@ -267,6 +267,28 @@
         .v-invite a { display: inline-flex; align-items: center; gap: 7px; background: var(--p); color: #fff; font-size: 13.5px; font-weight: 700; padding: 10px 18px; border-radius: 11px; text-decoration: none; }
         .v-invite a svg { width: 15px; height: 15px; }
         .v-otra { display: block; margin: 4px auto 0; background: transparent; border: none; color: var(--p); font-size: 13.5px; font-weight: 700; font-family: inherit; cursor: pointer; padding: 10px; }
+
+        /* ── Gestor de promos (modal) ── */
+        .mn-promos { background: var(--p-soft); color: var(--p); border: none; border-radius: 9px; padding: 8px 13px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; margin-right: 6px; }
+        .promos-modal { display: none; position: fixed; inset: 0; background: rgba(20,52,46,.45); z-index: 200; align-items: flex-end; justify-content: center; }
+        .promos-modal.show { display: flex; }
+        .promos-box { background: var(--bg); width: 100%; max-width: 480px; border-radius: 22px 22px 0 0; padding: 18px 20px calc(24px + env(safe-area-inset-bottom, 0px)); max-height: 90vh; overflow-y: auto; animation: slideUp .28s ease; }
+        .promos-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .promos-head b { font-size: 17px; color: var(--p-deep); }
+        .promos-x { background: var(--p-soft); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 15px; color: var(--p); cursor: pointer; }
+        .promos-sub { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 18px 0 10px; }
+        .promos-form .form-input, .promos-dest .form-input { margin-bottom: 10px; }
+        .promos-lbl { display: block; font-size: 12.5px; color: var(--muted); font-weight: 600; margin-bottom: 5px; }
+        .promos-check { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; color: var(--txt); margin-bottom: 11px; cursor: pointer; }
+        .promos-check input { width: 18px; height: 18px; accent-color: var(--p); }
+        .form-btn-soft { background: var(--p-soft); color: var(--p); }
+        .pm-row { display: flex; align-items: center; gap: 10px; background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; margin-bottom: 8px; }
+        .pm-gancho { font-size: 15px; font-weight: 800; color: var(--p); min-width: 52px; }
+        .pm-info { flex: 1; min-width: 0; }
+        .pm-info .d { font-size: 13px; color: var(--txt); font-weight: 600; }
+        .pm-info .v { font-size: 11px; color: var(--muted); margin-top: 2px; }
+        .pm-del { background: #FBEEEA; color: #C0492F; border: none; width: 30px; height: 30px; border-radius: 8px; font-size: 14px; cursor: pointer; flex-shrink: 0; }
+        .pm-empty { font-size: 13px; color: var(--muted); padding: 6px 2px 2px; }
     </style>
 </head>
 <body>
@@ -479,6 +501,31 @@
         </div>
     </div>
     <div class="v-body" id="v-body"></div>
+</div>
+
+<div id="promos-modal" class="promos-modal">
+    <div class="promos-box">
+        <div class="promos-head">
+            <b id="promos-titulo">Promos</b>
+            <button class="promos-x" onclick="cerrarPromos()" aria-label="Cerrar">✕</button>
+        </div>
+        <p class="promos-sub">Promos activas</p>
+        <div id="promos-lista"></div>
+        <p class="promos-sub">Nueva promo</p>
+        <div class="promos-form">
+            <input id="promo-gancho" class="form-input" placeholder="Gancho corto: 2x1, -20%, $6, GRATIS" maxlength="10" autocapitalize="characters">
+            <input id="promo-desc" class="form-input" placeholder="Descripción (ej: en hamburguesas clásicas)" maxlength="90">
+            <label class="promos-lbl">Vence el (opcional)</label>
+            <input id="promo-vence" class="form-input" type="date">
+            <button class="form-btn" onclick="agregarPromo()">Agregar promo</button>
+        </div>
+        <p class="promos-sub">Destacado</p>
+        <div class="promos-dest">
+            <label class="promos-check"><input type="checkbox" id="promo-destacado"> Mostrar este negocio como destacado</label>
+            <input id="promo-destnota" class="form-input" placeholder="Nota: Nuevo en turepo / Recomendado" maxlength="40">
+            <button class="form-btn form-btn-soft" onclick="guardarDestacado()">Guardar destacado</button>
+        </div>
+    </div>
 </div>
 
 <nav class="bottom-nav">
@@ -1095,6 +1142,68 @@ function formateaVence(fecha) {
     return 'Hasta ' + v.toLocaleDateString('es-VE', { day: 'numeric', month: 'short' });
 }
 
+// ── Gestor de promos (por negocio) ──
+let promoNegocioId = null;
+function abrirPromos(id) {
+    const p = misNegocios.find(n => String(n.id) === String(id));
+    if (!p) return;
+    promoNegocioId = p.id;
+    document.getElementById('promos-titulo').textContent = p.nombre;
+    document.getElementById('promo-gancho').value = '';
+    document.getElementById('promo-desc').value = '';
+    document.getElementById('promo-vence').value = '';
+    document.getElementById('promo-destacado').checked = !!p.destacado;
+    document.getElementById('promo-destnota').value = p.destacado_nota || '';
+    cargarPromosDe(p.id);
+    document.getElementById('promos-modal').classList.add('show');
+}
+function cerrarPromos() {
+    document.getElementById('promos-modal').classList.remove('show');
+    promoNegocioId = null;
+}
+async function cargarPromosDe(id) {
+    const cont = document.getElementById('promos-lista');
+    cont.innerHTML = '<p class="pm-empty">Cargando…</p>';
+    const { data } = await sb.from('promos').select('id, gancho, descripcion, vence').eq('proveedor_id', id).order('creado_en', { ascending: false });
+    if (!data || !data.length) { cont.innerHTML = '<p class="pm-empty">Este negocio aún no tiene promos.</p>'; return; }
+    cont.innerHTML = data.map(pr => `
+        <div class="pm-row">
+            <div class="pm-gancho">${esc(pr.gancho)}</div>
+            <div class="pm-info"><div class="d">${esc(pr.descripcion || '')}</div><div class="v">${pr.vence ? formateaVence(pr.vence) : 'Sin fecha'}</div></div>
+            <button class="pm-del" onclick="borrarPromo('${pr.id}')" aria-label="Borrar">✕</button>
+        </div>`).join('');
+}
+async function agregarPromo() {
+    if (!promoNegocioId) return;
+    const gancho = document.getElementById('promo-gancho').value.trim();
+    const desc = document.getElementById('promo-desc').value.trim();
+    const vence = document.getElementById('promo-vence').value || null;
+    if (!gancho) { toast('Escribe el gancho (ej: 2x1)', 'err'); return; }
+    const { error } = await sb.from('promos').insert({ proveedor_id: promoNegocioId, gancho, descripcion: desc || null, vence });
+    if (error) { toast('No se pudo guardar', 'err'); return; }
+    toast('Promo agregada', 'ok');
+    document.getElementById('promo-gancho').value = '';
+    document.getElementById('promo-desc').value = '';
+    document.getElementById('promo-vence').value = '';
+    cargarPromosDe(promoNegocioId);
+}
+async function borrarPromo(pid) {
+    const { error } = await sb.from('promos').delete().eq('id', pid);
+    if (error) { toast('No se pudo borrar', 'err'); return; }
+    toast('Promo eliminada', 'ok');
+    cargarPromosDe(promoNegocioId);
+}
+async function guardarDestacado() {
+    if (!promoNegocioId) return;
+    const destacado = document.getElementById('promo-destacado').checked;
+    const nota = document.getElementById('promo-destnota').value.trim();
+    const { error } = await sb.from('proveedores').update({ destacado, destacado_nota: nota || null }).eq('id', promoNegocioId);
+    if (error) { toast('No se pudo guardar', 'err'); return; }
+    const n = misNegocios.find(x => String(x.id) === String(promoNegocioId));
+    if (n) { n.destacado = destacado; n.destacado_nota = nota || null; }
+    toast('Destacado actualizado', 'ok');
+}
+
 function navegar(dest, el) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(i => i.classList.remove('active'));
     if (el) el.classList.add('active');
@@ -1263,7 +1372,7 @@ async function cargarMisNegocios() {
     const cont = document.getElementById('lista-mis-negocios');
     if (!session) { wrap.style.display = 'none'; misNegocios = []; return; }
     const { data, error } = await sb.from('proveedores')
-        .select('id, nombre, tipo, telefono, especialidad, estado_id, verificado, instagram, tiktok, descripcion, horario, catalogo, logo, ubicacion, proveedor_categorias(categoria_id)')
+        .select('id, nombre, tipo, telefono, especialidad, estado_id, verificado, instagram, tiktok, descripcion, horario, catalogo, logo, ubicacion, destacado, destacado_nota, proveedor_categorias(categoria_id)')
         .eq('cuenta_id', session.user.id)
         .order('nombre');
     if (error || !data || data.length === 0) { wrap.style.display = 'none'; misNegocios = []; return; }
@@ -1275,6 +1384,7 @@ async function cargarMisNegocios() {
                 <div class="mn-nombre">${esc(p.nombre)}</div>
                 <div class="mn-tipo">${p.tipo === 'restaurante' ? 'Comida' : p.tipo === 'comercio' ? 'Comercio / tienda' : 'Servicio'}</div>
             </div>
+            <button class="mn-promos" onclick="abrirPromos('${p.id}')">Promos</button>
             <button class="mn-edit" onclick="editarNegocio('${p.id}')">Editar</button>
         </div>`).join('');
 }
