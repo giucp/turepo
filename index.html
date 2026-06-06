@@ -417,9 +417,9 @@ function textoNoPermitido(t){ return hayGroseria(t) || tieneCaracteresRaros(t); 
 // Configuración de cada tipo de servicio. "lugarTipo" decide de qué lista de
 // sugerencias (aprendidas por la comunidad) saca los nombres.
 const SERVICIOS = {
-  luz:      {titulo:'⚡ Luz',          ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Alto Barinas…', ttl:'4 horas',
+  luz:      {titulo:'⚡ Luz',          ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'4 horas',
     sit:[['🔴','Se fue la luz','sin_luz'],['🟢','Llegó la luz','con_luz'],['🟡','Bajones / fluctuación','bajones']]},
-  agua:     {titulo:'💧 Agua',         ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Alto Barinas…', ttl:'4 horas',
+  agua:     {titulo:'💧 Agua',         ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'4 horas',
     sit:[['🟢','Llegó con fuerza','con_agua'],['🟡','Poca presión','poca_agua'],['🔴','Sin agua','sin_agua']]},
   gasolina: {titulo:'⛽ Gasolina',     ubLabel:'¿Cuál estación?',   lugarTipo:'estacion', ph:'Ej: E/S Venezuela…', ttl:'2 horas',
     sit:[['🟢','Fluyendo / sin cola','fluyendo'],['🟡','Cola moderada','cola_media'],['🔴','Cola pesada','cola_pesada'],['❌','Cerrada / sin gasolina','cerrada']]},
