@@ -287,6 +287,16 @@
     cursor:pointer;font-family:'DM Sans';transition:.12s}
   .modcard .mbtn:active{transform:scale(.97)}
   .mbtn.ok{background:#def0e3;color:#2c7a3e} .mbtn.no{background:#fbe3e1;color:#b5322a}
+  /* === Lightbox de fotos === */
+  .lightbox{position:fixed;inset:0;background:rgba(20,15,8,.92);z-index:200;display:none;
+    align-items:center;justify-content:center;padding:20px;animation:fade .2s ease}
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;
+    box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .lb-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:42px;height:42px;
+    border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:700;
+    cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(4px)}
+  .lb-close:active{transform:scale(.92)}
 </style>
 </head>
 <body>
@@ -773,7 +783,7 @@ function renderChooser(){
     </div>
     <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" style="flex:1" onclick="closeReport()">Cerrar</button></div>`;
 }
-  /* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
+/* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
 let svcTipo, svcStep, svcSel;
 function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined}; renderServicio(); }
 function renderServicio(){
@@ -1187,6 +1197,20 @@ function pintarFotoFiltros(){
   }).join('');
 }
 function setFotoFiltro(c){ fotoCatFiltro = (c==='todas') ? null : c; cargarFotos(); }
+function abrirFoto(src){
+  let lb=$('lightbox');
+  if(!lb){
+    lb=document.createElement('div'); lb.id='lightbox'; lb.className='lightbox';
+    lb.onclick=cerrarFoto;
+    lb.innerHTML=`<button class="lb-close" onclick="cerrarFoto()" aria-label="Cerrar">✕</button>`+
+      `<img id="lb-img" alt="foto ampliada" onclick="event.stopPropagation()">`;
+    document.body.appendChild(lb);
+  }
+  $('lb-img').src=src;
+  lb.classList.add('open');
+}
+function cerrarFoto(){ const lb=$('lightbox'); if(lb) lb.classList.remove('open'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarFoto(); });
 
 async function cargarFotos(){
   pintarFotoFiltros();
@@ -1208,7 +1232,7 @@ async function cargarFotos(){
   cont.innerHTML='<div class="fotogrid">'+fotos.map(f=>{
     const cat=FOTO_CAT_LABEL[f.categoria];
     const ins=f.autor?insignia(f.autor_nivel):'';
-    return `<div class="foto"><img class="ph" loading="lazy" src="${urlFoto(f.storage_path)}" alt="foto de la comunidad">
+    return `<div class="foto"><img class="ph" loading="lazy" src="${urlFoto(f.storage_path)}" onclick="abrirFoto(this.src)" style="cursor:zoom-in" alt="foto de la comunidad">
       <div class="fbody"><div class="ftags">${cat?`<span class="ftag">${cat}</span>`:''}</div>
       ${f.descripcion?`<div class="fdesc">${escapeHtml(f.descripcion)}</div>`:''}
       <div class="fmeta">🕐 ${hace(f.aprobada_at)}${ins}</div></div></div>`;
