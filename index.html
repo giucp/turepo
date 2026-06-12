@@ -297,6 +297,24 @@
     border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:700;
     cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(4px)}
   .lb-close:active{transform:scale(.92)}
+  /* === Interacción: toast, comentarios, reacciones === */
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 104px);
+    background:var(--ink);color:#fff5e6;padding:11px 20px;border-radius:999px;font-size:13px;font-weight:700;
+    z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;max-width:92%;
+    overflow:hidden;text-overflow:ellipsis}
+  .toast.show{opacity:1}
+  .ccard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 13px;margin-bottom:8px}
+  .ccard .chead{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#8a7a63;font-weight:600;flex-wrap:wrap}
+  .ccard .ctext{font-size:13.5px;line-height:1.4;margin-top:3px;word-break:break-word}
+  .crow{display:flex;gap:8px;margin-top:12px}
+  .crow .tinput{flex:1}
+  .ccount{font-size:11px;color:#a99a83;text-align:right;margin-top:5px}
+  .factions{display:flex;gap:8px;margin-top:8px}
+  .fbtn{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 4px;font-size:12px;
+    font-weight:700;color:#6b5d49;cursor:pointer;transition:.15s}
+  .fbtn:active{transform:scale(.95)}
+  .fbtn.liked{background:#fbe3e1;color:#c0392f;border-color:#f3c4c0}
+  .brand small{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -456,7 +474,9 @@ function normalizar(t){
     .replace(/5/g,'s').replace(/7/g,'t').replace(/8/g,'b')
     .replace(/@/g,'a').replace(/\$/g,'s').replace(/[^a-z]/g,'');
 }
-function hayGroseria(t){ const n=normalizar(t); return BLOQUEADAS.some(w=>n.includes(w)); }
+// Palabras inocentes que contienen groserías por dentro (diputado→puta, conocer→cono…)
+const PALABRAS_SEGURAS = ['conoc','conoz','diputad','disput','reputac','comput','imput','amput'];
+function hayGroseria(t){ let n=normalizar(t); PALABRAS_SEGURAS.forEach(w=>{ n=n.split(w).join(''); }); return BLOQUEADAS.some(w=>n.includes(w)); }
 // Rango de emojis comunes (caras, símbolos, pictogramas, banderas)
 const RE_EMOJI = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
 // Se permiten letras (con acentos/ñ), números, espacios, . - y hasta 2 emojis.
@@ -465,7 +485,7 @@ function tieneCaracteresRaros(t){
   const emojis = (t.match(RE_EMOJI)||[]);
   if(emojis.length > 2) return true;            // máximo 2 emojis
   const sinEmojis = t.replace(RE_EMOJI,'').replace(/\uFE0F/g,''); // quito emojis y variation selector
-  return /[^a-zA-Z0-9 áéíóúüñÁÉÍÓÚÜÑ.\-]/.test(sinEmojis);
+  return /[^a-zA-Z0-9 áéíóúüñÁÉÍÓÚÜÑ.,;:¡!¿?()#\/'\-]/.test(sinEmojis);
 }
 function textoNoPermitido(t){ return hayGroseria(t) || tieneCaracteresRaros(t); }
 
@@ -473,13 +493,13 @@ function textoNoPermitido(t){ return hayGroseria(t) || tieneCaracteresRaros(t); 
 // sugerencias (aprendidas por la comunidad) saca los nombres.
 const SERVICIOS = {
   luz:      {titulo:'⚡ Luz',          ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'4 horas',
-    sit:[['🔴','Se fue la luz','sin_luz'],['🟢','Llegó la luz','con_luz'],['🟡','Bajones / fluctuación','bajones']]},
+    sit:[['🔴','Se fue la luz','sin_luz'],['🟢','Llegó la luz','con_luz'],['🟡','Bajones / fluctuación','bajones'],['✍️','Otra situación','otro']]},
   agua:     {titulo:'💧 Agua',         ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'4 horas',
     sit:[['🟢','Llegó con fuerza','con_agua'],['🟡','Poca presión','poca_agua'],['🔴','Sin agua','sin_agua']]},
   gasolina: {titulo:'⛽ Gasolina',     ubLabel:'¿Cuál estación?',   lugarTipo:'estacion', ph:'Ej: E/S Venezuela…', ttl:'2 horas',
     sit:[['🟢','Fluyendo / sin cola','fluyendo'],['🟡','Cola moderada','cola_media'],['🔴','Cola pesada','cola_pesada'],['❌','Cerrada / sin gasolina','cerrada']]},
   via:      {titulo:'🚦 Tráfico / vías',ubLabel:'¿En qué vía o zona?',lugarTipo:'zona',     ph:'Ej: Av. 23 de Enero…', ttl:'2 horas',
-    sit:[['⚠️','Accidente','accidente'],['🛑','Trancón / cola fuerte','trancon'],['🚧','Calle cerrada','cerrada_via'],['🚦','Semáforo dañado','semaforo']]}
+    sit:[['⚠️','Accidente','accidente'],['🛑','Trancón / cola fuerte','trancon'],['🚧','Calle cerrada','cerrada_via'],['🚦','Semáforo dañado','semaforo'],['✍️','Otra situación','otro']]}
 };
 
 /* ======================= De aquí abajo es la lógica ======================= */
@@ -498,6 +518,15 @@ const EST_INFO = {
   accidente:{dot:'d-red',badge:'b-red',label:'⚠️ Accidente'}, trancon:{dot:'d-amber',badge:'b-amber',label:'Trancón'}, cerrada_via:{dot:'d-red',badge:'b-red',label:'Calle cerrada'}, semaforo:{dot:'d-amber',badge:'b-amber',label:'Semáforo dañado'}
 };
 const ICONO_TIPO = {luz:'⚡',agua:'💧',gasolina:'⛽',via:'🚦'};
+// Color/etiqueta de un reporte; si es 'otro', usa el texto que escribió el usuario
+function infoEstado(r){
+  if(r.estado==='otro'){
+    const d=String(r.detalle||'').trim();
+    const corto=d.length>22 ? d.slice(0,22)+'…' : d;
+    return {dot:'d-amber',badge:'b-amber',label: d? '✍️ '+escapeHtml(corto) : '✍️ Otro'};
+  }
+  return EST_INFO[r.estado]||{dot:'d-gray',badge:'b-gray',label:r.estado||'—'};
+}
 
 // Niveles llaneros por puntos (cada reporte = 10 pts, referido = 20)
 const NIVELES = [
@@ -582,12 +611,14 @@ async function cargarInicio(){
   if(!data.length){ cont.innerHTML = vacio('Todavía no hay reportes. ¡Sé el primero en avisar! 📣'); return; }
   cont.innerHTML = data.slice(0,6).map(r=>{
     const ins = r.autor ? insignia(r.autor_nivel) : '';
+    const acc = accionesRow(r,'inicio');
+    const votos = `<span>· 👍 ${r.votos_ok||0} / 👎 ${r.votos_no||0}</span>`;
     if(r.tipo==='oferta'){
-      return `<div class="row"><span class="dot d-green"></span><div class="info"><h5>${EMOJI[r.producto]||'🛒'} ${r.producto} · ${r.lugar||r.zona||''}${ins}</h5><div class="meta"><span>🕐 ${hace(r.created_at)}</span></div></div><span class="stbadge b-green">$${r.precio}</span></div>`;
+      return `<div class="row"><span class="dot d-green"></span><div class="info"><h5>${EMOJI[r.producto]||'🛒'} ${r.producto} · ${r.lugar||r.zona||''}${ins}</h5><div class="meta"><span>🕐 ${hace(r.created_at)}</span>${votos}</div>${acc}</div><span class="stbadge b-green">$${r.precio}</span></div>`;
     }
-    const i = EST_INFO[r.estado]||{dot:'d-gray',badge:'b-gray',label:r.estado||'—'};
+    const i = infoEstado(r);
     const ic = ICONO_TIPO[r.tipo]||'';
-    return `<div class="row"><span class="dot ${i.dot}"></span><div class="info"><h5>${ic} ${r.zona||estadoActual}${ins}</h5><div class="meta"><span>🕐 ${hace(r.created_at)}</span></div></div><span class="stbadge ${i.badge}">${i.label}</span></div>`;
+    return `<div class="row"><span class="dot ${i.dot}"></span><div class="info"><h5>${ic} ${r.zona||estadoActual}${ins}</h5><div class="meta"><span>🕐 ${hace(r.created_at)}</span>${votos}</div>${acc}</div><span class="stbadge ${i.badge}">${i.label}</span></div>`;
   }).join('');
 }
 /* Genera titulares vivos agrupando los reportes activos del estado */
@@ -605,7 +636,9 @@ function pintarTicker(data){
   const grupos = {};
   data.forEach(r=>{
     if(r.tipo==='oferta') return;
-    const et = ALERTA[r.estado]; if(!et) return;
+    let et = ALERTA[r.estado];
+    if(!et && r.estado==='otro' && r.detalle) et = '✍️ '+escapeHtml(String(r.detalle).slice(0,28));
+    if(!et) return;
     const lugar = (r.zona||r.lugar||'').trim();
     const clave = et+'|'+lugar.toLowerCase();
     if(!grupos[clave]) grupos[clave] = {et, lugar, n:0};
@@ -677,12 +710,11 @@ function rowVacio(u){
   return `<div class="row"><span class="dot d-gray"></span><div class="info"><h5>${u}</h5><div class="meta"><span>Sin reportes recientes</span></div></div><span class="stbadge b-gray">Sin datos</span></div>`;
 }
 function rowEstatus(u, r){
-  const i = EST_INFO[r.estado] || {dot:'d-gray',badge:'b-gray',label:r.estado||'—'};
+  const i = infoEstado(r);
   const ins = r.autor ? insignia(r.autor_nivel) : '';
   return `<div class="row"><span class="dot ${i.dot}"></span><div class="info"><h5>${u}${ins}</h5>
     <div class="meta"><span>🕐 ${hace(r.created_at)}</span><span>· 👍 ${r.votos_ok} / 👎 ${r.votos_no}</span></div>
-    <div class="validate"><button class="vbtn" onclick="votar('${r.id}',true)">👍 Sigue igual</button>
-    <button class="vbtn" onclick="votar('${r.id}',false)">👎 Ya cambió</button></div></div>
+    ${accionesRow(r,'estatus')}</div>
     <span class="stbadge ${i.badge}">${i.label}</span></div>`;
 }
 
@@ -746,16 +778,31 @@ function tarjetaOferta(r, esMejor, esCarero){
 }
 function vacio(msg){ return `<div class="empty"><span class="big">📭</span>${msg}</div>`; }
 
-/* ---- Votar ---- */
-async function votar(id, ok){
+/* ---- Votar (1 voto por reporte por dispositivo) ---- */
+async function votar(id, ok, origen){
   if(!db) return;
+  if(localStorage.getItem('voto_'+id)){ toast('Ya votaste en este reporte 🙂'); return; }
+  localStorage.setItem('voto_'+id,'1');
   await db.rpc('votar', { reporte:id, ok });
-  cargarEstatus();
+  toast(ok ? '👍 Voto registrado' : '👎 Voto registrado');
+  if(origen==='inicio') cargarInicio(); else cargarEstatus();
+}
+/* Botonera de interacción (votos + comentarios) usada en Inicio y Estatus */
+function accionesRow(r, origen){
+  return `<div class="validate"><button class="vbtn" onclick="votar('${r.id}',true,'${origen}')">👍 Sigue igual</button><button class="vbtn" onclick="votar('${r.id}',false,'${origen}')">👎 Ya cambió</button><button class="vbtn" onclick="openComentarios('reporte','${r.id}')">💬 <span id="cn-${r.id}">${r.comentarios_n||0}</span></button></div>`;
+}
+/* Avisito flotante */
+let _toastT=null;
+function toast(msg){
+  let t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(_toastT); _toastT=setTimeout(()=>{ t.classList.remove('show'); },2200);
 }
 
 /* ---- Anti-spam por dispositivo ---- */
-/* ---- Anti-spam: 3 reportes cada 20 min por tipo (ilimitado si el perfil lo permite) ---- */
-const COOLDOWN_MAX = 3, COOLDOWN_WIN_MIN = 20;
+/* ---- Anti-spam: 4 reportes cada 10 min por tipo (ilimitado si el perfil lo permite) ---- */
+const COOLDOWN_MAX = 4, COOLDOWN_WIN_MIN = 10;
 function enCooldown(tipo){
   if(usuario && usuario.ilimitado) return false;
   const arr = JSON.parse(localStorage.getItem('cd_'+tipo)||'[]').filter(t=>Date.now()-t < COOLDOWN_WIN_MIN*60000);
@@ -783,9 +830,9 @@ function renderChooser(){
     </div>
     <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" style="flex:1" onclick="closeReport()">Cerrar</button></div>`;
 }
-/* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
+  /* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
 let svcTipo, svcStep, svcSel;
-function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined}; renderServicio(); }
+function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined,detalle:''}; renderServicio(); }
 function renderServicio(){
   const cfg = SERVICIOS[svcTipo];
   const dots=[0,1].map(i=>`<div class="stepdot ${i<=svcStep?'on':''}"></div>`).join('');
@@ -799,8 +846,12 @@ function renderServicio(){
         <div class="sugg-hint">💡 Escribe el nombre. Si ya existe, tócalo en las sugerencias.</div>
       </div>`;
   } else {
+    const esOtroSit = svcSel.sit!==undefined && cfg.sit[svcSel.sit][2]==='otro';
     body=`<h3>¿Cuál es la situación?</h3><div class="q">Toca lo que pasa · paso 2 de 2</div>
-      <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>`;
+      <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>
+      ${esOtroSit?`<div class="field" style="margin-top:4px">
+        <input id="sitInput" class="tinput" maxlength="40" placeholder="Cuéntalo corto. Ej: Poste caído…" value="${(svcSel.detalle||'').replace(/"/g,'&quot;')}" oninput="svcDetalle(this.value)" autocomplete="off">
+        <div class="warn" id="sitWarn">🚫 Revisa el texto: corto y sin groserías.</div></div>`:''}`;
   }
   const last = svcStep<1?`<button class="btn btn-prim" onclick="svcNext()">Siguiente</button>`:`<button class="btn btn-prim" onclick="svcSend()">Enviar reporte</button>`;
   $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}
@@ -820,6 +871,12 @@ function svcUb(v){
 }
 function svcUsarSugg(s){ svcSel.ub=s; const el=$('ubInput'); if(el){el.value=s; svcUb(s);} }
 function svcPick(k,i){ svcSel[k]=i; renderServicio(); }
+function svcDetalle(v){
+  svcSel.detalle=v;
+  const bad=textoNoPermitido(v);
+  const inp=$('sitInput'); if(inp) inp.classList.toggle('bad',bad);
+  const w=$('sitWarn'); if(w) w.classList.toggle('show',bad);
+}
 function svcBack(){ if(svcStep>0){svcStep--; renderServicio();} }
 function svcNext(){
   const u=(svcSel.ub||'').trim();
@@ -833,9 +890,15 @@ async function svcSend(){
   const cfg=SERVICIOS[svcTipo];
   const zona=svcSel.ub.trim();
   const estado=cfg.sit[svcSel.sit][2];
+  let detalle=null;
+  if(estado==='otro'){
+    detalle=(svcSel.detalle||'').trim();
+    if(detalle.length<3){ const w=$('sitWarn'); if(w){ w.textContent='Cuéntanos qué pasa (mínimo 3 letras).'; w.classList.add('show'); } return; }
+    if(textoNoPermitido(detalle)){ const w=$('sitWarn'); if(w) w.classList.add('show'); const inp=$('sitInput'); if(inp) inp.classList.add('bad'); return; }
+  }
   enviando();
   const extra = usuario ? { autor: usuario.username, autor_nivel: nivelIdx(usuario.puntos) } : {};
-  const { error } = await db.from('reportes').insert({ tipo:svcTipo, zona, estado, region:estadoActual, ...extra });
+  const { error } = await db.from('reportes').insert({ tipo:svcTipo, zona, estado, detalle, region:estadoActual, ...extra });
   if(error){ renderAviso(error.message || JSON.stringify(error)); return; }
   await registrarLugar(cfg.lugarTipo, zona);
   marcarCooldown(svcTipo);
@@ -1235,7 +1298,8 @@ async function cargarFotos(){
     return `<div class="foto"><img class="ph" loading="lazy" src="${urlFoto(f.storage_path)}" onclick="abrirFoto(this.src)" style="cursor:zoom-in" alt="foto de la comunidad">
       <div class="fbody"><div class="ftags">${cat?`<span class="ftag">${cat}</span>`:''}</div>
       ${f.descripcion?`<div class="fdesc">${escapeHtml(f.descripcion)}</div>`:''}
-      <div class="fmeta">🕐 ${hace(f.aprobada_at)}${ins}</div></div></div>`;
+      <div class="fmeta">🕐 ${hace(f.aprobada_at)}${ins}</div>
+      <div class="factions"><button class="fbtn ${localStorage.getItem('like_'+f.id)?'liked':''}" id="lkb-${f.id}" onclick="likeFoto('${f.id}')">❤️ <span id="lk-${f.id}">${f.corazones||0}</span></button><button class="fbtn" onclick="openComentarios('foto','${f.id}')">💬 <span id="cn-${f.id}">${f.comentarios_n||0}</span></button></div></div></div>`;
   }).join('')+'</div>';
 }
 
@@ -1358,6 +1422,64 @@ async function rechazarFoto(id, path){
   if(path){ await db.storage.from('fotos').remove([path]).catch(()=>{}); }
   if(card) card.remove();
   _quedanPendientes();
+}
+
+/* ======================= COMENTARIOS y REACCIONES ======================= */
+let comCtx=null; // sobre qué se está comentando: {tipo:'reporte'|'foto', id}
+function openComentarios(tipo,id){
+  comCtx={tipo,id};
+  $('modal').classList.add('open');
+  $('sheet').innerHTML=`<div class="grip"></div><h3>💬 Comentarios</h3>
+    <div class="q">Corto y con respeto · máximo 100 caracteres.</div>
+    <div id="com-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
+    <div class="crow"><input id="comInput" class="tinput" maxlength="100" placeholder="Escribe un comentario…" oninput="comTyping(this.value)" autocomplete="off"><button class="btn btn-prim" style="flex:0 0 auto;padding:14px 18px" onclick="enviarComentario()">➤</button></div>
+    <div class="ccount" id="comCount">0/100</div>
+    <div class="warn" id="comWarn">🚫 Revisa el texto: sin groserías y máximo 100 caracteres.</div>
+    <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" style="flex:1" onclick="closeReport()">Cerrar</button></div>`;
+  cargarComentarios();
+}
+async function cargarComentarios(){
+  const cont=$('com-list'); if(!cont||!db||!comCtx) return;
+  const { data, error } = await db.from('comentarios').select('*')
+    .eq('tipo',comCtx.tipo).eq('ref_id',comCtx.id)
+    .order('created_at',{ascending:true}).limit(60);
+  if(error){ cont.innerHTML=vacio('No se pudieron cargar los comentarios.'); return; }
+  const list=data||[];
+  if(!list.length){ cont.innerHTML=`<div class="empty" style="padding:16px"><span class="big">💬</span>Sé el primero en comentar.</div>`; return; }
+  cont.innerHTML=list.map(c=>`<div class="ccard"><div class="chead"><b>${escapeHtml(c.autor||'Anónimo')}</b>${c.autor?insignia(c.autor_nivel):''}<span>· ${hace(c.created_at)}</span></div><div class="ctext">${escapeHtml(c.texto)}</div></div>`).join('');
+}
+function comTyping(v){
+  const n=(v||'').length;
+  const cc=$('comCount'); if(cc) cc.textContent=n+'/100';
+  const bad=textoNoPermitido(v);
+  const inp=$('comInput'); if(inp) inp.classList.toggle('bad',bad);
+  const w=$('comWarn'); if(w) w.classList.toggle('show',bad);
+}
+async function enviarComentario(){
+  if(!db||!comCtx) return;
+  const inp=$('comInput'); const t=((inp&&inp.value)||'').trim();
+  if(t.length<2){ const w=$('comWarn'); if(w){ w.textContent='Escribe algo (mínimo 2 letras).'; w.classList.add('show'); } return; }
+  if(t.length>100 || textoNoPermitido(t)){ const w=$('comWarn'); if(w) w.classList.add('show'); if(inp) inp.classList.add('bad'); return; }
+  if(enCooldown('coment')){ toast('Muy seguido. Espera unos minutos 🙏'); return; }
+  if(inp){ inp.value=''; } comTyping('');
+  const args = usuario
+    ? { p_tipo:comCtx.tipo, p_ref:comCtx.id, p_texto:t, p_autor:usuario.username, p_autor_nivel:nivelIdx(usuario.puntos) }
+    : { p_tipo:comCtx.tipo, p_ref:comCtx.id, p_texto:t };
+  const { error } = await db.rpc('comentar', args);
+  if(error){ toast('No se pudo enviar 😕'); return; }
+  marcarCooldown('coment');
+  const cn=$('cn-'+comCtx.id); if(cn) cn.textContent=parseInt(cn.textContent||'0',10)+1;
+  cargarComentarios();
+}
+/* ❤️ a una foto: una vez por dispositivo */
+async function likeFoto(id){
+  if(!db) return;
+  if(localStorage.getItem('like_'+id)){ toast('Ya te gustó esta foto 💛'); return; }
+  localStorage.setItem('like_'+id,'1');
+  const el=$('lk-'+id); if(el) el.textContent=(parseInt(el.textContent||'0',10)+1);
+  const b=$('lkb-'+id); if(b) b.classList.add('liked');
+  try{ await db.rpc('reaccionar_foto',{ foto_id:id }); }catch(e){}
+  toast('❤️ ¡Te gustó!');
 }
 
 pintarEstado();
