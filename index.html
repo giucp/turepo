@@ -415,6 +415,36 @@
     background:none;border:none;cursor:pointer;padding:5px 6px;border-radius:9px;font-family:inherit;transition:.12s}
   .act:active{transform:scale(.92);background:var(--chip2)}
   .act svg{width:17px;height:17px;stroke-width:1.9}
+  .act.on-ok{color:var(--okC)}
+  .act.on-no{color:var(--badC)}
+  .act.on-chat{color:var(--sun-deep)}
+  body.dark .act.on-chat{color:#f2913b}
+  .act.on-foto{color:#1f9e8f}
+  body.dark .act.on-foto{color:#3cc7b4}
+  .acts4{max-width:330px}
+  .addfoto{display:flex;align-items:center;gap:8px;margin:4px 2px 2px;flex-wrap:wrap}
+  .addfoto-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-weight:700;font-size:13px;
+    color:var(--ink2);background:var(--chip2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;cursor:pointer}
+  .addfoto-btn svg{width:16px;height:16px;stroke-width:2}
+  .addfoto-btn:active{transform:scale(.96)}
+  .addfoto-hint{font-size:12px;color:var(--ink3);font-weight:600}
+  .addfoto.haspic{align-items:center}
+  .addfoto-prev{width:46px;height:46px;border-radius:11px;object-fit:cover;flex:none}
+  .addfoto-x{font-family:inherit;font-weight:700;font-size:12.5px;color:var(--badC);background:none;border:none;cursor:pointer;padding:6px}
+  .frep{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--sun-deep);
+    background:var(--accS);border-radius:8px;padding:3px 8px;margin-bottom:5px}
+  .frep svg{width:12px;height:12px;stroke-width:2.2}
+  body.dark .frep{color:#f4a04a}
+  .solicrow{display:flex;align-items:center;gap:11px;background:var(--paper);border:1px solid var(--line);
+    border-radius:14px;padding:11px 12px;margin-bottom:8px}
+  .solicrow .pr-ic{width:36px;height:36px;border-radius:10px;background:var(--accS);color:var(--sun-deep);display:grid;place-items:center;flex:none}
+  .solicrow .pr-ic svg{width:18px;height:18px}
+  .solicrow .pr-tx{flex:1;min-width:0}
+  .solicrow .pr-tx h4{font-family:'Bricolage Grotesque';font-weight:700;font-size:14px;color:var(--ink)}
+  .solicrow .pr-tx p{font-size:11.5px;color:var(--ink3)}
+  .solicaviso{font-size:12.5px;color:var(--sun-deep);background:var(--accS);border-radius:12px;
+    padding:9px 12px;margin:10px auto 0;max-width:280px;line-height:1.4;font-weight:600}
+  body.dark .solicaviso{color:#f4a04a}
   /* FAB + nav */
   .fab{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom) + 80px);height:50px;border-radius:17px;
     z-index:60;padding:0 16px 0 12px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));
@@ -559,6 +589,7 @@
       <button class="backbtn" onclick="go('s-fotos')">← Volver</button>
       <div class="sec-title" style="margin-top:6px">Moderar fotos</div>
       <div class="q" style="font-size:13px;color:#8a7a63;margin:-4px 4px 12px">Las fotos que apruebes se publican y viven unas horas. Las que rechaces se borran.</div>
+      <div id="solic-list"></div>
       <div id="admin-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
 
@@ -1066,7 +1097,12 @@ function accionesRow(r, origen){
   const mini = origen==='inicio';
   const lOk = mini ? '' : ' Igual';
   const lNo = mini ? '' : ' Cambió';
-  return `<div class="acts"><button class="act" onclick="votar('${r.id}',true,'${origen}')">${ICONS.up}${r.votos_ok||0}${lOk}</button><button class="act" onclick="votar('${r.id}',false,'${origen}')">${ICONS.down}${r.votos_no||0}${lNo}</button><button class="act" onclick="openComentarios('reporte','${r.id}')">${ICONS.chat}<span id="cn-${r.id}">${r.comentarios_n||0}</span></button></div>`;
+  const ok=r.votos_ok||0, no=r.votos_no||0, cm=r.comentarios_n||0;
+  const tieneF = !!r.foto_path;
+  const fbtn = tieneF
+    ? `<button class="act on-foto" onclick="abrirFotoRep('${r.foto_path}')">${ICONS.camera}</button>`
+    : `<button class="act" disabled style="opacity:.45">${ICONS.camera}</button>`;
+  return `<div class="acts acts4"><button class="act${ok>0?' on-ok':''}" onclick="votar('${r.id}',true,'${origen}')">${ICONS.up}${ok}${lOk}</button><button class="act${no>0?' on-no':''}" onclick="votar('${r.id}',false,'${origen}')">${ICONS.down}${no}${lNo}</button><button class="act${cm>0?' on-chat':''}" onclick="openComentarios('reporte','${r.id}')">${ICONS.chat}<span id="cn-${r.id}">${cm}</span></button>${fbtn}</div>`;
 }
 /* Avisito flotante */
 let _toastT=null;
@@ -1093,7 +1129,7 @@ function marcarCooldown(tipo){
 }
 
 /* ======================= Reportar ======================= */
-function openReport(){ $('modal').classList.add('open'); renderChooser(); }
+function openReport(){ fotoRepBlob=null; fotoRepSolicitada=false; $('modal').classList.add('open'); renderChooser(); }
 function closeReport(){ $('modal').classList.remove('open'); }
 function renderChooser(){
   $('sheet').innerHTML=`<div class="grip"></div>
@@ -1132,8 +1168,10 @@ function renderServicio(){
         <div class="warn" id="sitWarn">Revisa el texto: corto y sin groserías.</div></div>`:''}`;
   }
   const last = svcStep<1?`<button class="btn btn-prim" onclick="svcNext()">Siguiente</button>`:`<button class="btn btn-prim" onclick="svcSend()">Enviar reporte</button>`;
-  $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}
+  const foto = svcStep===1 ? bloqueFotoRep() : '';
+  $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}${foto}
     <div class="actions"><button class="btn btn-ghost" onclick="${svcStep>0?'svcBack()':'renderChooser()'}">←</button>${last}</div>`;
+  if(svcStep===1 && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
   if(svcStep===0) pintarSuggsUb('');
 }
 async function pintarSuggsUb(texto){
@@ -1176,8 +1214,12 @@ async function svcSend(){
   }
   enviando();
   const extra = usuario ? { autor: usuario.username, autor_nivel: nivelIdx(usuario.puntos) } : {};
-  const { error } = await db.from('reportes').insert({ tipo:svcTipo, zona, estado, detalle, region:estadoActual, ...extra });
+  const { data:ins, error } = await db.from('reportes').insert({ tipo:svcTipo, zona, estado, detalle, region:estadoActual, ...extra }).select('id').single();
   if(error){ renderAviso(error.message || JSON.stringify(error)); return; }
+  if(ins && fotoRepBlob && usuario && usuario.ilimitado){
+    const etq = `${cfg.sit[svcSel.sit][1]} en ${zona}`;
+    await publicarFotoReporte(ins.id, etq);
+  }
   await registrarLugar(cfg.lugarTipo, zona);
   marcarCooldown(svcTipo);
   estatusTipo=svcTipo;
@@ -1225,8 +1267,10 @@ function renderOferta(){
   }
   const txtEnviar = oModo==='carero' ? 'Enviar reporte' : 'Enviar oferta';
   const last = oStep<3?`<button class="btn btn-prim" onclick="oNext()">Siguiente</button>`:`<button class="btn btn-prim" onclick="oSend()">${txtEnviar}</button>`;
-  $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}
+  const foto = oStep===3 ? bloqueFotoRep() : '';
+  $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}${foto}
     <div class="actions" style="margin-top:18px"><button class="btn btn-ghost" onclick="${oStep>0?'oBack()':'renderChooser()'}">←</button>${last}</div>`;
+  if(oStep===3 && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
   if(oStep===2) pintarSuggsZona('');
   if(oStep===3) pintarSuggsLugar('');
 }
@@ -1297,11 +1341,14 @@ async function oSend(){
   const zona=oData.zona.trim();
   const prodNombre=nombreProducto();
   const extra = usuario ? { autor: usuario.username, autor_nivel: nivelIdx(usuario.puntos) } : {};
-  const { error } = await db.from('reportes').insert({
+  const { data:ins, error } = await db.from('reportes').insert({
     tipo:tipoR, producto:prodNombre, precio:parseFloat(oData.precio),
     zona, lugar:oData.lugar||null, region:estadoActual, ...extra
-  });
+  }).select('id').single();
   if(error){ renderAviso(error.message || JSON.stringify(error)); return; }
+  if(ins && fotoRepBlob && usuario && usuario.ilimitado){
+    await publicarFotoReporte(ins.id, `${prodNombre}${oData.lugar?' en '+oData.lugar:''}`);
+  }
   await registrarLugar('zona', zona);
   if(oData.lugar && oData.lugar.trim().length>=2) await registrarLugar('sitio', oData.lugar);
   marcarCooldown(tipoR);
@@ -1322,13 +1369,14 @@ function renderAviso(msg){
     <div class="actions" style="margin-top:18px"><button class="btn btn-prim" onclick="closeReport()">Entendido</button></div>`;
 }
 function renderDone(msg,goto,oferta){
+  const aviso = fotoRepSolicitada ? `<div class="solicaviso">Activamos tu solicitud para enviar fotos — te avisaremos cuando esté lista.</div>` : '';
   const premio = usuario
     ? `<div class="earn">${ICONS.star} +10 Puntos Ciudadanos</div>`
     : `<div class="earn" onclick="closeReport();go('s-yo')" style="cursor:pointer">${ICONS.star} Crea tu cuenta y gana puntos</div>`;
   $('sheet').innerHTML=`<div class="grip"></div><div class="done"><div class="check">✓</div>
     <h3>¡Reporte enviado!</h3><p>Gracias por avisarle a ${estadoActual}. ${msg}</p>
     ${oferta?'<div class="freshtag">Caduca solo en pocas horas</div>':''}
-    ${premio}</div>
+    ${aviso}${premio}</div>
     <div class="actions" style="margin-top:20px"><button class="btn btn-prim" onclick="closeReport();go('${goto}')">Ver resultado</button></div>`;
 }
 $('modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeReport(); });
@@ -1561,6 +1609,7 @@ let fotoBlob = null, fotoCatSel = '', fotoDesc = '';
 
 function escapeHtml(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function urlFoto(p){ try{ return db.storage.from('fotos').getPublicUrl(p).data.publicUrl; }catch(e){ return ''; } }
+function abrirFotoRep(p){ if(p) abrirFoto(urlFoto(p)); }
 
 function pintarFotoFiltros(){
   const cont=$('foto-filtros'); if(!cont) return;
@@ -1607,6 +1656,7 @@ async function cargarFotos(){
     const ins=f.autor?insignia(f.autor_nivel):'';
     return `<div class="foto"><img class="ph" loading="lazy" src="${urlFoto(f.storage_path)}" onclick="abrirFoto(this.src)" style="cursor:zoom-in" alt="foto de la comunidad">
       <div class="fbody"><div class="ftags">${cat?`<span class="ftag">${cat}</span>`:''}</div>
+      ${f.reporte_label?`<div class="frep">${ICONS.bolt} ${escapeHtml(f.reporte_label)}</div>`:''}
       ${f.descripcion?`<div class="fdesc">${escapeHtml(f.descripcion)}</div>`:''}
       <div class="fmeta">${hace(f.aprobada_at)}${ins}</div>
       <div class="factions"><button class="fbtn ${localStorage.getItem('like_'+f.id)?'liked':''}" id="lkb-${f.id}" onclick="likeFoto('${f.id}')">${ICONS.heart} <span id="lk-${f.id}">${f.corazones||0}</span></button><button class="fbtn" onclick="openComentarios('foto','${f.id}')">${ICONS.chat} <span id="cn-${f.id}">${f.comentarios_n||0}</span></button></div></div></div>`;
@@ -1614,6 +1664,51 @@ async function cargarFotos(){
 }
 
 /* --- Subir foto (modal) --- */
+/* ===== Foto adjunta a un reporte (solo usuarios con permiso) ===== */
+let fotoRepBlob=null, fotoRepSolicitada=false;
+function bloqueFotoRep(){
+  if(!usuario){
+    return `<div class="addfoto"><button class="addfoto-btn" onclick="tocarAddFoto()">${ICONS.camera} Añadir foto</button><span class="addfoto-hint">Solo con cuenta</span></div>`;
+  }
+  if(!usuario.ilimitado){
+    return `<div class="addfoto"><button class="addfoto-btn" onclick="tocarAddFoto()">${ICONS.camera} Añadir foto</button><span class="addfoto-hint" id="addfotoHint">${fotoRepSolicitada?'Solicitud en revisión ✓':''}</span></div>`;
+  }
+  if(fotoRepBlob){
+    return `<div class="addfoto haspic"><img class="addfoto-prev" id="fotoRepPrev" alt="foto del reporte"><button class="addfoto-x" onclick="quitarFotoRep()">Quitar foto</button>
+      <input id="fotoRepCam" type="file" accept="image/*" capture="environment" onchange="onFotoRepElegida(event)" style="display:none">
+      <input id="fotoRepFile" type="file" accept="image/*" onchange="onFotoRepElegida(event)" style="display:none"></div>`;
+  }
+  return `<div class="addfoto"><button class="addfoto-btn" onclick="document.getElementById('fotoRepCam').click()">${ICONS.camera} Tomar</button><button class="addfoto-btn" onclick="document.getElementById('fotoRepFile').click()">${ICONS.image} Galería</button>
+    <input id="fotoRepCam" type="file" accept="image/*" capture="environment" onchange="onFotoRepElegida(event)" style="display:none">
+    <input id="fotoRepFile" type="file" accept="image/*" onchange="onFotoRepElegida(event)" style="display:none"></div>`;
+}
+function _refrescarAddFoto(){
+  const cont=document.querySelector('.addfoto');
+  if(cont){ cont.outerHTML=bloqueFotoRep(); const p=$('fotoRepPrev'); if(p&&fotoRepBlob) p.src=URL.createObjectURL(fotoRepBlob); }
+}
+async function tocarAddFoto(){
+  if(!usuario){ toast('Para añadir fotos necesitas una cuenta. Créala en Yo.'); return; }
+  if(!usuario.ilimitado){
+    if(!fotoRepSolicitada){ try{ await db.rpc('solicitar_foto'); }catch(e){} fotoRepSolicitada=true; }
+    _refrescarAddFoto();
+  }
+}
+async function onFotoRepElegida(ev){
+  const f=ev.target.files && ev.target.files[0]; if(!f) return;
+  try{ fotoRepBlob=await comprimirImagen(f); ev.target.value=''; _refrescarAddFoto(); }
+  catch(e){ ev.target.value=''; renderAviso('No se pudo procesar esa imagen. Prueba con otra.'); }
+}
+function quitarFotoRep(){ fotoRepBlob=null; _refrescarAddFoto(); }
+async function publicarFotoReporte(reporteId, label){
+  if(!fotoRepBlob || !usuario || !usuario.ilimitado) return;
+  const carpeta = estadoActual.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'venezuela';
+  const p=`${carpeta}/${Date.now()}-${Math.random().toString(36).slice(2,9)}.jpg`;
+  try{
+    const { error:upErr }=await db.storage.from('fotos').upload(p, fotoRepBlob, { contentType:'image/jpeg', upsert:false });
+    if(upErr) throw upErr;
+    await db.rpc('publicar_foto_reporte', { p_path:p, p_label:label, p_reporte:reporteId, p_region:estadoActual, p_autor:usuario.username, p_nivel:nivelIdx(usuario.puntos) });
+  }catch(e){ /* el reporte ya quedó; si la foto falla no bloqueamos el flujo */ }
+}
 function openSubirFoto(){ fotoBlob=null; fotoCatSel=''; fotoDesc=''; $('modal').classList.add('open'); renderSubirFoto(); }
 function renderSubirFoto(){
   $('sheet').innerHTML=`<div class="grip"></div>
@@ -1700,10 +1795,32 @@ async function enviarFoto(){
 }
 
 /* --- Moderación (solo admin) --- */
+async function cargarSolicitudesFoto(){
+  const cont=$('solic-list'); if(!cont) return;
+  if(!(usuario && usuario.admin)){ cont.innerHTML=''; return; }
+  const { data, error }=await db.rpc('solicitudes_foto');
+  if(error){ cont.innerHTML=''; return; }
+  const s=data||[];
+  if(!s.length){ cont.innerHTML=''; return; }
+  cont.innerHTML=`<div class="sec-title" style="margin:4px 0 8px">Solicitudes de foto</div>`+s.map(u=>
+    `<div class="solicrow" id="sol-${u.id}"><div class="pr-ic">${ICONS.camera}</div>
+      <div class="pr-tx"><h4>${escapeHtml(u.username)}</h4><p>${u.puntos} puntos · quiere enviar fotos</p></div>
+      <button class="mbtn ok" onclick="aprobarUsuarioFoto('${u.id}')">Aprobar</button></div>`
+  ).join('');
+}
+async function aprobarUsuarioFoto(uid){
+  const row=$('sol-'+uid); if(row) row.style.opacity='.4';
+  const { error }=await db.rpc('aprobar_foto_usuario',{ uid });
+  if(error){ if(row) row.style.opacity='1'; toast('No se pudo aprobar'); return; }
+  toast('Usuario aprobado para fotos');
+  if(row) row.remove();
+  const cont=$('solic-list'); if(cont && !cont.querySelector('.solicrow')) cont.innerHTML='';
+}
 async function cargarAdminFotos(){
   const cont=$('admin-list');
   if(!db){ cont.innerHTML=vacio('No disponible.'); return; }
   if(!(usuario && usuario.admin)){ cont.innerHTML=vacio('Solo el administrador puede ver esta sección.'); return; }
+  cargarSolicitudesFoto();
   cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando pendientes…</div>';
   const { data, error }=await db.rpc('fotos_pendientes');
   if(error){ cont.innerHTML=vacio('No se pudo cargar la cola. '+(error.message||'')); return; }
