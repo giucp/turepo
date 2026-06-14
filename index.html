@@ -349,7 +349,10 @@
   .fbtn{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 4px;font-size:12px;
     font-weight:700;color:#6b5d49;cursor:pointer;transition:.15s}
   .fbtn:active{transform:scale(.95)}
-  .fbtn.liked{background:#fbe3e1;color:#c0392f;border-color:#f3c4c0}
+  .fbtn.liked{color:var(--badC)}
+  .fbtn.liked svg{fill:var(--badC)}
+  .fbtn.has-cm{color:var(--sun-deep)}
+  body.dark .fbtn.has-cm{color:#f2913b}
   .brand small{white-space:nowrap}
   /* ======== LA PLAZA: sistema visual ======== */
   body{--okC:#21965a;--warnC:#d8990a;--badC:#d6452e;
@@ -421,7 +424,7 @@
   body.dark .act.on-chat{color:#f2913b}
   .act.on-foto{color:#1f9e8f}
   body.dark .act.on-foto{color:#3cc7b4}
-  .acts4{max-width:330px}
+  .acts4{max-width:362px}
   .addfoto{display:flex;align-items:center;gap:8px;margin:4px 2px 2px;flex-wrap:wrap}
   .addfoto-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-weight:700;font-size:13px;
     color:var(--ink2);background:var(--chip2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;cursor:pointer}
@@ -445,6 +448,21 @@
   .solicaviso{font-size:12.5px;color:var(--sun-deep);background:var(--accS);border-radius:12px;
     padding:9px 12px;margin:10px auto 0;max-width:280px;line-height:1.4;font-weight:600}
   body.dark .solicaviso{color:#f4a04a}
+  .act-mas{margin-left:auto}
+  .btn-bad{background:var(--badC);color:#fff;border:none}
+  .btn-bad:active{transform:scale(.97)}
+  .cbov{position:fixed;inset:0;background:rgba(20,15,9,.55);backdrop-filter:blur(3px);z-index:120;
+    display:none;align-items:center;justify-content:center;padding:26px}
+  .cbov.open{display:flex}
+  .cbcard{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;
+    max-width:330px;width:100%;text-align:center}
+  .cbic{width:48px;height:48px;border-radius:14px;background:var(--badS);color:var(--badC);
+    display:grid;place-items:center;margin:0 auto 12px}
+  .cbic svg{width:24px;height:24px;stroke-width:2}
+  .cbcard h3{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--ink);margin-bottom:6px}
+  .cbcard p{font-size:13px;color:var(--ink3);line-height:1.45;margin-bottom:18px}
+  .cbrow{display:flex;gap:10px}
+  .cbrow .btn{flex:1}
   /* FAB + nav */
   .fab{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom) + 80px);height:50px;border-radius:17px;
     z-index:60;padding:0 16px 0 12px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));
@@ -721,7 +739,9 @@ const ICONS = {
   star:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9 2.9-6z"/></svg>',
   tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H4a2 2 0 0 0-2 2v5.6c0 .5.2 1 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l5.6-5.6a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg>',
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M8 10l4 4 4-4"/><path d="M12 2v12"/></svg>',
-  chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'
+  chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+  mas:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>'
 };
 const ICONO_TIPO_SVG = {luz:ICONS.bolt, agua:ICONS.drop, gasolina:ICONS.pump, via:ICONS.traffic, oferta:ICONS.cart, carero:ICONS.cart};
 /* Severidad de un reporte: ok / warn / bad / mid (neutro) */
@@ -1102,7 +1122,9 @@ function accionesRow(r, origen){
   const fbtn = tieneF
     ? `<button class="act on-foto" onclick="abrirFotoRep('${r.foto_path}')">${ICONS.camera}</button>`
     : `<button class="act" disabled style="opacity:.45">${ICONS.camera}</button>`;
-  return `<div class="acts acts4"><button class="act${ok>0?' on-ok':''}" onclick="votar('${r.id}',true,'${origen}')">${ICONS.up}${ok}${lOk}</button><button class="act${no>0?' on-no':''}" onclick="votar('${r.id}',false,'${origen}')">${ICONS.down}${no}${lNo}</button><button class="act${cm>0?' on-chat':''}" onclick="openComentarios('reporte','${r.id}')">${ICONS.chat}<span id="cn-${r.id}">${cm}</span></button>${fbtn}</div>`;
+  const mio = usuario && r.autor && r.autor===usuario.username;
+  const menu = mio ? `<button class="act act-mas" onclick="pedirBorrarReporte('${r.id}','${origen}')" aria-label="Opciones">${ICONS.mas}</button>` : '';
+  return `<div class="acts acts4"><button class="act${ok>0?' on-ok':''}" onclick="votar('${r.id}',true,'${origen}')">${ICONS.up}${ok}${lOk}</button><button class="act${no>0?' on-no':''}" onclick="votar('${r.id}',false,'${origen}')">${ICONS.down}${no}${lNo}</button><button class="act${cm>0?' on-chat':''}" onclick="openComentarios('reporte','${r.id}')">${ICONS.chat}<span id="cn-${r.id}">${cm}</span></button>${fbtn}${menu}</div>`;
 }
 /* Avisito flotante */
 let _toastT=null;
@@ -1659,11 +1681,32 @@ async function cargarFotos(){
       ${f.reporte_label?`<div class="frep">${ICONS.bolt} ${escapeHtml(f.reporte_label)}</div>`:''}
       ${f.descripcion?`<div class="fdesc">${escapeHtml(f.descripcion)}</div>`:''}
       <div class="fmeta">${hace(f.aprobada_at)}${ins}</div>
-      <div class="factions"><button class="fbtn ${localStorage.getItem('like_'+f.id)?'liked':''}" id="lkb-${f.id}" onclick="likeFoto('${f.id}')">${ICONS.heart} <span id="lk-${f.id}">${f.corazones||0}</span></button><button class="fbtn" onclick="openComentarios('foto','${f.id}')">${ICONS.chat} <span id="cn-${f.id}">${f.comentarios_n||0}</span></button></div></div></div>`;
+      <div class="factions"><button class="fbtn ${localStorage.getItem('like_'+f.id)?'liked':''}" id="lkb-${f.id}" onclick="likeFoto('${f.id}')">${ICONS.heart} <span id="lk-${f.id}">${f.corazones||0}</span></button><button class="fbtn ${(f.comentarios_n||0)>0?'has-cm':''}" onclick="openComentarios('foto','${f.id}')">${ICONS.chat} <span id="cn-${f.id}">${f.comentarios_n||0}</span></button></div></div></div>`;
   }).join('')+'</div>';
 }
 
 /* --- Subir foto (modal) --- */
+/* ===== Borrar el reporte propio ===== */
+function pedirBorrarReporte(rid, origen){
+  let ov=$('confirmBorrar');
+  if(!ov){ ov=document.createElement('div'); ov.id='confirmBorrar'; ov.className='cbov'; document.body.appendChild(ov); }
+  ov.innerHTML=`<div class="cbcard">
+    <div class="cbic">${ICONS.trash}</div>
+    <h3>¿Eliminar tu reporte?</h3>
+    <p>Se quitará para todos. Esta acción no se puede deshacer.</p>
+    <div class="cbrow"><button class="btn btn-ghost" onclick="cerrarConfirmBorrar()">Cancelar</button>
+      <button class="btn btn-bad" onclick="hacerBorrarReporte('${rid}','${origen}')">Eliminar</button></div></div>`;
+  ov.classList.add('open');
+}
+function cerrarConfirmBorrar(){ const ov=$('confirmBorrar'); if(ov) ov.classList.remove('open'); }
+async function hacerBorrarReporte(rid, origen){
+  cerrarConfirmBorrar();
+  const { error }=await db.rpc('borrar_mi_reporte',{ rid });
+  if(error){ toast('No se pudo eliminar'); return; }
+  toast('Reporte eliminado');
+  if(origen==='estatus') cargarEstatus(); else cargarInicio();
+}
+
 /* ===== Foto adjunta a un reporte (solo usuarios con permiso) ===== */
 let fotoRepBlob=null, fotoRepSolicitada=false;
 function bloqueFotoRep(){
