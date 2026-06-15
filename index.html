@@ -414,7 +414,7 @@
   body.dark .fx-gap .g{color:#f4a04a}
   .svcs{display:flex;gap:8px;padding:12px 0 2px;overflow-x:auto;scrollbar-width:none}
   .svcs::-webkit-scrollbar{display:none}
-  .svc{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;
+  .svc{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:100px;gap:6px;padding:8px 12px;border-radius:999px;
     font-size:12.5px;font-weight:700;background:var(--chip2);color:var(--ink2);cursor:pointer;border:none;font-family:inherit}
   .svc svg{width:15px;height:15px;stroke-width:2}
   .svc .gd{width:7px;height:7px;border-radius:50%}
@@ -734,7 +734,9 @@ const SERVICIOS = {
   gasolina: {titulo:'Gasolina',     ubLabel:'¿Cuál estación?',   lugarTipo:'estacion', ph:'Ej: E/S Venezuela…', ttl:'12 horas',
     sit:[['<i class="odot" style="background:#21965a"></i>','Fluyendo / sin cola','fluyendo'],['<i class="odot" style="background:#d8990a"></i>','Cola moderada','cola_media'],['<i class="odot" style="background:#d6452e"></i>','Cola pesada','cola_pesada'],['<i class="odot" style="background:#8a7a63"></i>','Cerrada / sin gasolina','cerrada']]},
   via:      {titulo:'Tráfico / vías',ubLabel:'¿En qué vía o zona?',lugarTipo:'zona',     ph:'Ej: Av. 23 de Enero…', ttl:'12 horas',
-    sit:[['<i class="odot" style="background:#d6452e"></i>','Accidente','accidente'],['<i class="odot" style="background:#d8990a"></i>','Trancón / cola fuerte','trancon'],['<i class="odot" style="background:#d6452e"></i>','Calle cerrada','cerrada_via'],['<i class="odot" style="background:#d8990a"></i>','Semáforo dañado','semaforo'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]}
+    sit:[['<i class="odot" style="background:#d6452e"></i>','Accidente','accidente'],['<i class="odot" style="background:#d8990a"></i>','Trancón / cola fuerte','trancon'],['<i class="odot" style="background:#d6452e"></i>','Calle cerrada','cerrada_via'],['<i class="odot" style="background:#d8990a"></i>','Semáforo dañado','semaforo'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]},
+  alerta:   {titulo:'Alertas generales', ubLabel:'¿En qué zona?',    lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'12 horas',
+    sit:[['<i class="odot" style="background:#d8990a"></i>','Lluvia / clima','clima'],['<i class="odot" style="background:#d6452e"></i>','Calle inundada','inundacion'],['<i class="odot" style="background:#d6452e"></i>','Robo','robo'],['<i class="odot" style="background:#d8990a"></i>','Protesta / cierre','protesta'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]}
 };
 
 /* ======================= De aquí abajo es la lógica ======================= */
@@ -750,7 +752,8 @@ const EST_INFO = {
   sin_luz:{dot:'d-red',badge:'b-red',label:'Sin luz'},   con_luz:{dot:'d-green',badge:'b-green',label:'Con luz'}, bajones:{dot:'d-amber',badge:'b-amber',label:'Bajones'},
   con_agua:{dot:'d-green',badge:'b-green',label:'Llegó'}, poca_agua:{dot:'d-amber',badge:'b-amber',label:'Poca presión'}, sin_agua:{dot:'d-red',badge:'b-red',label:'Sin agua'},
   fluyendo:{dot:'d-green',badge:'b-green',label:'Fluyendo'}, cola_media:{dot:'d-amber',badge:'b-amber',label:'Cola media'}, cola_pesada:{dot:'d-red',badge:'b-red',label:'Cola pesada'}, cerrada:{dot:'d-gray',badge:'b-gray',label:'Cerrada'},
-  accidente:{dot:'d-red',badge:'b-red',label:'Accidente'}, trancon:{dot:'d-amber',badge:'b-amber',label:'Trancón'}, cerrada_via:{dot:'d-red',badge:'b-red',label:'Calle cerrada'}, semaforo:{dot:'d-amber',badge:'b-amber',label:'Semáforo dañado'}
+  accidente:{dot:'d-red',badge:'b-red',label:'Accidente'}, trancon:{dot:'d-amber',badge:'b-amber',label:'Trancón'}, cerrada_via:{dot:'d-red',badge:'b-red',label:'Calle cerrada'}, semaforo:{dot:'d-amber',badge:'b-amber',label:'Semáforo dañado'},
+  clima:{dot:'d-amber',badge:'b-amber',label:'Lluvia / clima'}, inundacion:{dot:'d-red',badge:'b-red',label:'Calle inundada'}, robo:{dot:'d-red',badge:'b-red',label:'Robo'}, protesta:{dot:'d-amber',badge:'b-amber',label:'Protesta / cierre'}
 };
 
 /* ===== LA PLAZA: iconos dibujados (la interfaz ya no usa emojis) ===== */
@@ -776,9 +779,10 @@ const ICONS = {
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M8 10l4 4 4-4"/><path d="M12 2v12"/></svg>',
   chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
   mas:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
-  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>'
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/></svg>',
+  alert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
 };
-const ICONO_TIPO_SVG = {luz:ICONS.bolt, agua:ICONS.drop, gasolina:ICONS.pump, via:ICONS.traffic, oferta:ICONS.cart, carero:ICONS.cart};
+const ICONO_TIPO_SVG = {luz:ICONS.bolt, agua:ICONS.drop, gasolina:ICONS.pump, via:ICONS.traffic, oferta:ICONS.cart, carero:ICONS.cart, alerta:ICONS.alert};
 /* Severidad de un reporte: ok / warn / bad / mid (neutro) */
 function sevDe(r){
   if(r.estado==='otro') return 'warn';
@@ -1277,6 +1281,7 @@ function renderChooser(){
       <div class="choice" onclick="startServicio('via')"><div class="ce" style="background:#fae0dc;color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="20" rx="2.4"/><circle cx="12" cy="6.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="17.6" r="1.25" fill="currentColor" stroke="none"/></svg></div><div><h5>Tráfico / vías</h5><p>Accidente, trancón, calle cerrada…</p></div></div>
       <div class="choice" onclick="startOferta()"><div class="ce" style="background:#e4efdc;color:var(--llano)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.6"/><circle cx="19" cy="21" r="1.6"/><path d="M1.5 2.5h3l3.1 13.4a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22.5 7H6"/></svg></div><div><h5>Oferta o precio</h5><p>Comida, básicos, el bajón…</p></div></div>
       <div class="choice" onclick="startCarero()"><div class="ce" style="background:#fbe4e2;color:#c0392f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H4a2 2 0 0 0-2 2v5.6c0 .5.2 1 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l5.6-5.6a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg></div><div><h5>Carero / sobreprecio</h5><p>Algo que viste demasiado caro</p></div></div>
+      <div class="choice" onclick="startServicio('alerta')"><div class="ce" style="background:#fde9cf;color:#c77f12"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div><div><h5>Alertas generales</h5><p>Clima, robo, inundación…</p></div></div>
       <div class="choice" onclick="openSubirFoto()"><div class="ce" style="background:#fff0d6;color:var(--sun-deep)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7.8 6.2H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.2a2 2 0 0 0-2-2h-3.8L14.5 4z"/><circle cx="12" cy="13" r="3.6"/></svg></div><div><h5>Foto</h5><p>Muestra lo que está pasando</p></div></div>
     </div>
     <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" style="flex:1" onclick="closeReport()">Cerrar</button></div>`;
