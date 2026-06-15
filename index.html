@@ -950,10 +950,12 @@ function fxCuando(iso){
     if(h<24) return 'hace '+h+' h'; return 'hace '+Math.round(h/24)+' d';
   }catch(e){ return ''; }
 }
-function fxSel(t){
+function fxSel(t, ev){
+  if(ev && ev.stopPropagation) ev.stopPropagation();
   window.fxSel=t;
   var a=document.getElementById('fxSegBcv'), b=document.getElementById('fxSegBin');
-  if(a&&b){ a.classList.toggle('on',t==='bcv'); b.classList.toggle('on',t==='bin'); }
+  if(a){ a.className = (t==='bcv'?'on':''); }
+  if(b){ b.className = (t==='bin'?'on':''); }
   fxCalc();
 }
 function fxCalc(){
@@ -975,8 +977,8 @@ async function cargarDolar(){
     const vOfi=ofi.promedio||ofi.venta, vBin=bin.promedio||bin.venta;
     const brecha=((vBin-vOfi)/vOfi*100);
     window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv';
-    wrap.innerHTML=`<div class="fx" onclick="this.classList.toggle('open')">
-      <div class="fx-row">
+    wrap.innerHTML=`<div class="fx">
+      <div class="fx-row" style="cursor:pointer" onclick="this.closest('.fx').classList.toggle('open')">
         <div class="fx-cell"><div class="k"><span class="dotk" style="background:#3f8d57"></span>BCV oficial</div><div class="v">${fxFmt(vOfi)}</div></div>
         <div class="fx-sep"></div>
         <div class="fx-cell"><div class="k"><span class="dotk" style="background:#f2a13b"></span>Binance</div><div class="v">${fxFmt(vBin)}</div></div>
@@ -987,11 +989,11 @@ async function cargarDolar(){
         <div class="fx-line"><span>Binance (paralelo)</span><b>${fxFmt(vBin)}</b></div>
         <div class="fx-line"><span>Brecha entre ambos</span><b>+${brecha.toFixed(1)}%</b></div>
         <div class="fx-foot">BCV ${fxCuando(ofi.fechaActualizacion)} \u00b7 Binance ${fxCuando(bin.fechaActualizacion)}</div>
-        <div class="fx-calc" onclick="event.stopPropagation()">
+        <div class="fx-calc">
           <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
           <div class="fx-seg">
-            <button id="fxSegBcv" class="on" onclick="fxSel('bcv')">BCV</button>
-            <button id="fxSegBin" onclick="fxSel('bin')">Binance</button>
+            <button id="fxSegBcv" class="on" onclick="fxSel('bcv',event)">BCV</button>
+            <button id="fxSegBin" onclick="fxSel('bin',event)">Binance</button>
           </div>
           <div class="fx-inrow"><span class="fx-cur">$</span>
             <input id="fxMonto" type="number" inputmode="decimal" placeholder="0" oninput="fxCalc()"></div>
