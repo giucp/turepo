@@ -600,6 +600,7 @@
         <div class="fchip on" data-t="luz"      onclick="setEstatus('luz')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.1 12.5h6L9.9 22 19 11.5h-6L13 2z"/></svg> Luz</div>
         <div class="fchip"    data-t="gasolina" onclick="setEstatus('gasolina')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M3 21h14"/><path d="M15 9h2.5a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9.5L19 7"/></svg> Gasolina</div>
         <div class="fchip"    data-t="via"      onclick="setEstatus('via')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="20" rx="2.4"/><circle cx="12" cy="6.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="17.6" r="1.25" fill="currentColor" stroke="none"/></svg> Vías</div>
+        <div class="fchip" data-t="alerta" onclick="setEstatus('alerta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Alertas</div>
       </div>
       <div id="estatus-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
@@ -842,6 +843,7 @@ function pintarResumen(data){
       ['luz','Luz','bolt',"irEstatus('luz')",true],
       ['gasolina','Gasolina','pump',"irEstatus('gasolina')",true],
       ['via','Vías','traffic',"irEstatus('via')",true],
+      ['alerta','Alertas','alert',"irEstatus('alerta')",true],
       ['oferta','Precios','cart',"go('s-ofertas')",false],
       ['fotos','Fotos','camera',"go('s-fotos')",false]
     ];
@@ -1026,7 +1028,7 @@ async function cargarInicio(){
   const saludo = hr<12 ? 'Buenos días' : (hr<19 ? 'Buenas tardes' : 'Buenas noches');
   const _sm=$('saludoMini'); if(_sm) _sm.textContent = saludo;
 
-  const data = await leer(['luz','agua','gasolina','via','oferta']);
+  const data = await leer(['luz','agua','gasolina','via','oferta','alerta']);
   pintarTicker(data);
   pintarResumen(data);
 
@@ -1112,8 +1114,8 @@ async function cargarEstatus(){
   const data = await leer([t]);
 
   // Vías: solo se listan los problemas activos (si no hay, vía despejada)
-  if(t==='via'){
-    if(!data.length){ cont.innerHTML = `<div class="empty"><span class="big">${ICONS.check}</span>Vías despejadas.<br>Nadie ha reportado problemas ahora mismo.</div>`; return; }
+  if(t==='via'||t==='alerta'){
+    if(!data.length){ const msg = t==='alerta' ? 'Sin alertas ahora.<br>Nadie ha reportado nada por aquí.' : 'Vías despejadas.<br>Nadie ha reportado problemas ahora mismo.'; cont.innerHTML = `<div class="empty"><span class="big">${ICONS.check}</span>${msg}</div>`; return; }
     cont.innerHTML = data.map(r=>rowEstatus(r.zona, r)).join('');
     return;
   }
