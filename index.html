@@ -950,13 +950,28 @@ function fxCuando(iso){
     if(h<24) return 'hace '+h+' h'; return 'hace '+Math.round(h/24)+' d';
   }catch(e){ return ''; }
 }
-function fxSel(t, ev){
-  if(ev && ev.stopPropagation) ev.stopPropagation();
+function fxSel(t){
   window.fxSel=t;
   var a=document.getElementById('fxSegBcv'), b=document.getElementById('fxSegBin');
   if(a){ a.className = (t==='bcv'?'on':''); }
   if(b){ b.className = (t==='bin'?'on':''); }
   fxCalc();
+}
+function fxConectar(wrap){
+  try{
+    var fx=wrap.querySelector('.fx');
+    var row=wrap.querySelector('[data-fxrow]');
+    if(row && fx) row.addEventListener('click', function(){ fx.classList.toggle('open'); });
+    var bA=wrap.querySelector('#fxSegBcv'), bB=wrap.querySelector('#fxSegBin');
+    if(bA) bA.addEventListener('click', function(e){ e.stopPropagation(); fxSel('bcv'); });
+    if(bB) bB.addEventListener('click', function(e){ e.stopPropagation(); fxSel('bin'); });
+    var inp=wrap.querySelector('#fxMonto');
+    if(inp){
+      inp.addEventListener('input', fxCalc);
+      inp.addEventListener('keyup', fxCalc);   // refuerzo para algunos teclados móviles
+      inp.addEventListener('click', function(e){ e.stopPropagation(); });
+    }
+  }catch(_){}
 }
 function fxCalc(){
   var inp=document.getElementById('fxMonto'), res=document.getElementById('fxRes');
@@ -978,7 +993,7 @@ async function cargarDolar(){
     const brecha=((vBin-vOfi)/vOfi*100);
     window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv';
     wrap.innerHTML=`<div class="fx">
-      <div class="fx-row" style="cursor:pointer" onclick="this.closest('.fx').classList.toggle('open')">
+      <div class="fx-row" style="cursor:pointer" data-fxrow="1">
         <div class="fx-cell"><div class="k"><span class="dotk" style="background:#3f8d57"></span>BCV oficial</div><div class="v">${fxFmt(vOfi)}</div></div>
         <div class="fx-sep"></div>
         <div class="fx-cell"><div class="k"><span class="dotk" style="background:#f2a13b"></span>Binance</div><div class="v">${fxFmt(vBin)}</div></div>
@@ -992,16 +1007,17 @@ async function cargarDolar(){
         <div class="fx-calc">
           <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
           <div class="fx-seg">
-            <button id="fxSegBcv" class="on" onclick="fxSel('bcv',event)">BCV</button>
-            <button id="fxSegBin" onclick="fxSel('bin',event)">Binance</button>
+            <button id="fxSegBcv" class="on" type="button">BCV</button>
+            <button id="fxSegBin" type="button">Binance</button>
           </div>
           <div class="fx-inrow"><span class="fx-cur">$</span>
-            <input id="fxMonto" type="number" inputmode="decimal" placeholder="0" oninput="fxCalc()"></div>
+            <input id="fxMonto" type="number" inputmode="decimal" placeholder="0"></div>
           <div class="fx-res" id="fxRes">= Bs. 0,00</div>
         </div>
       </div></div>
     </div>
     <div class="fx-hint">\u25BE toca para ver m\u00e1s</div>`;
+    fxConectar(wrap);
   }catch(e){ wrap.innerHTML=''; }  // si falla la API, no mostramos nada (sin romper el inicio)
 }
 async function cargarInicio(){
