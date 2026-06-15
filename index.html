@@ -414,7 +414,7 @@
   body.dark .fx-gap .g{color:#f4a04a}
   .svcs{display:flex;gap:8px;padding:12px 0 2px;overflow-x:auto;scrollbar-width:none}
   .svcs::-webkit-scrollbar{display:none}
-  .svc{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:100px;gap:6px;padding:8px 12px;border-radius:999px;
+  .svc{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:112px;gap:6px;padding:8px 12px;border-radius:999px;
     font-size:12.5px;font-weight:700;background:var(--chip2);color:var(--ink2);cursor:pointer;border:none;font-family:inherit}
   .svc svg{width:15px;height:15px;stroke-width:2}
   .svc .gd{width:7px;height:7px;border-radius:50%}
@@ -959,7 +959,9 @@ function fxCuando(iso){
 function fxCalc(){
   var inp=document.getElementById('fxMonto'), res=document.getElementById('fxRes');
   if(!inp||!res||!window.fxTasa) return;
-  var m=parseFloat(String(inp.value).replace(',','.'))||0;
+  var raw=String(inp.value).replace(',','.').replace(/[^0-9.]/g,'');
+  var pts=raw.split('.'); if(pts.length>2) raw=pts[0]+'.'+pts.slice(1).join('');
+  var m=parseFloat(raw)||0;
   var tasa=window.fxTasa[window.fxSel||'bcv']||0;
   res.textContent='= '+fxFmt(m*tasa);
 }
@@ -1014,7 +1016,7 @@ async function cargarDolar(){
             <button id="fxSegBin" type="button" data-sel="bin">Binance</button>
           </div>
           <div class="fx-inrow"><span class="fx-cur">$</span>
-            <input id="fxMonto" type="number" inputmode="decimal" placeholder="0"></div>
+            <input id="fxMonto" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
           <div class="fx-res" id="fxRes">= Bs. 0,00</div>
         </div>
       </div></div>
