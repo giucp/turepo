@@ -709,9 +709,14 @@ function normalizar(t){
     .replace(/5/g,'s').replace(/7/g,'t').replace(/8/g,'b')
     .replace(/@/g,'a').replace(/\$/g,'s').replace(/[^a-z]/g,'');
 }
-// Palabras inocentes que contienen groserías por dentro (diputado→puta, conocer→cono…)
-const PALABRAS_SEGURAS = ['conoc','conoz','diputad','disput','reputac','comput','imput','amput'];
-function hayGroseria(t){ let n=normalizar(t); PALABRAS_SEGURAS.forEach(w=>{ n=n.split(w).join(''); }); return BLOQUEADAS.some(w=>n.includes(w)); }
+// Separa el texto en palabras y bloquea solo si una palabra COMPLETA coincide.
+// Conserva dígitos, @ y $ dentro de cada palabra para que normalizar() deshaga los trucos (m4dur0->maduro, c0ño->cono, $hit->shit).
+function hayGroseria(t){
+  return (t||'')
+    .split(/[^\p{L}\p{N}@$]+/u)
+    .map(normalizar)
+    .some(tok => BLOQUEADAS.includes(tok));
+}
 // Rango de emojis comunes (caras, símbolos, pictogramas, banderas)
 const RE_EMOJI = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
 // Se permiten letras (con acentos/ñ), números, espacios, . - y hasta 2 emojis.
