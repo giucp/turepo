@@ -950,35 +950,32 @@ function fxCuando(iso){
     if(h<24) return 'hace '+h+' h'; return 'hace '+Math.round(h/24)+' d';
   }catch(e){ return ''; }
 }
-function fxSel(t){
-  window.fxSel=t;
-  var a=document.getElementById('fxSegBcv'), b=document.getElementById('fxSegBin');
-  if(a){ a.className = (t==='bcv'?'on':''); }
-  if(b){ b.className = (t==='bin'?'on':''); }
-  fxCalc();
-}
-function fxConectar(wrap){
-  try{
-    var fx=wrap.querySelector('.fx');
-    var row=wrap.querySelector('[data-fxrow]');
-    if(row && fx) row.addEventListener('click', function(){ fx.classList.toggle('open'); });
-    var bA=wrap.querySelector('#fxSegBcv'), bB=wrap.querySelector('#fxSegBin');
-    if(bA) bA.addEventListener('click', function(e){ e.stopPropagation(); fxSel('bcv'); });
-    if(bB) bB.addEventListener('click', function(e){ e.stopPropagation(); fxSel('bin'); });
-    var inp=wrap.querySelector('#fxMonto');
-    if(inp){
-      inp.addEventListener('input', fxCalc);
-      inp.addEventListener('keyup', fxCalc);   // refuerzo para algunos teclados móviles
-      inp.addEventListener('click', function(e){ e.stopPropagation(); });
-    }
-  }catch(_){}
-}
 function fxCalc(){
   var inp=document.getElementById('fxMonto'), res=document.getElementById('fxRes');
   if(!inp||!res||!window.fxTasa) return;
   var m=parseFloat(String(inp.value).replace(',','.'))||0;
   var tasa=window.fxTasa[window.fxSel||'bcv']||0;
   res.textContent='= '+fxFmt(m*tasa);
+}
+function fxAplicarSel(sel){
+  window.fxSel=sel;
+  var btns=document.querySelectorAll('.fx-seg button');
+  for(var i=0;i<btns.length;i++){ btns[i].className=(btns[i].getAttribute('data-sel')===sel?'on':''); }
+  fxCalc();
+}
+// Delegación global (una sola vez): funciona aunque la barra se redibuje, en iOS y Android
+if(!window.__fxDeleg){
+  window.__fxDeleg=true;
+  document.addEventListener('click', function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var seg=t.closest('.fx-seg button');
+    if(seg){ e.stopPropagation(); fxAplicarSel(seg.getAttribute('data-sel')); return; }
+    var row=t.closest('[data-fxrow]');
+    if(row){ var fx=row.closest('.fx'); if(fx) fx.classList.toggle('open'); }
+  });
+  document.addEventListener('input', function(e){
+    if(e.target && e.target.id==='fxMonto') fxCalc();
+  });
 }
 async function cargarDolar(){
   const wrap=$('fxWrap'); if(!wrap) return;
@@ -1007,8 +1004,8 @@ async function cargarDolar(){
         <div class="fx-calc">
           <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
           <div class="fx-seg">
-            <button id="fxSegBcv" class="on" type="button">BCV</button>
-            <button id="fxSegBin" type="button">Binance</button>
+            <button id="fxSegBcv" class="on" type="button" data-sel="bcv">BCV</button>
+            <button id="fxSegBin" type="button" data-sel="bin">Binance</button>
           </div>
           <div class="fx-inrow"><span class="fx-cur">$</span>
             <input id="fxMonto" type="number" inputmode="decimal" placeholder="0"></div>
@@ -1017,7 +1014,6 @@ async function cargarDolar(){
       </div></div>
     </div>
     <div class="fx-hint">\u25BE toca para ver m\u00e1s</div>`;
-    fxConectar(wrap);
   }catch(e){ wrap.innerHTML=''; }  // si falla la API, no mostramos nada (sin romper el inicio)
 }
 async function cargarInicio(){
