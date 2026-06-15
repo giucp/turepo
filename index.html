@@ -378,6 +378,27 @@
   .hline b{color:var(--ink2)}
   .tickerlite{overflow:hidden;margin-top:11px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 0}
   .tickerlite .tk-item{color:var(--ink2);font-weight:600;font-size:12.5px}
+  /* ===== Barra dólar BCV + Binance ===== */
+  .fx{margin:12px 0 0;background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .fx-row{display:flex;align-items:stretch}
+  .fx-cell{flex:1;padding:11px 13px;min-width:0}
+  .fx-cell .k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);display:flex;align-items:center;gap:5px}
+  .fx-cell .k .dotk{width:6px;height:6px;border-radius:50%;flex:none}
+  .fx-cell .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:var(--ink);margin-top:3px;white-space:nowrap}
+  .fx-sep{width:1px;background:var(--line);flex:none}
+  .fx-gap{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 14px;background:var(--accS)}
+  .fx-gap .g{font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;color:var(--sun-deep)}
+  .fx-gap .gl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);margin-top:1px}
+  .fx-more{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .fx.open .fx-more{max-height:220px}
+  .fx-more-in{border-top:1px solid var(--line);padding:12px 13px;display:flex;flex-direction:column;gap:9px}
+  .fx-line{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink2);gap:10px}
+  .fx-line b{color:var(--ink);font-weight:700;white-space:nowrap}
+  .fx-foot{font-size:11px;color:var(--ink3);text-align:center;margin-top:1px}
+  .fx-up{color:var(--badC);font-weight:800}
+  .fx-down{color:var(--okC);font-weight:800}
+  .fx-hint{font-size:10px;color:var(--ink3);text-align:center;padding:6px 0 0}
+  body.dark .fx-gap .g{color:#f4a04a}
   .svcs{display:flex;gap:8px;padding:12px 0 2px;overflow-x:auto;scrollbar-width:none}
   .svcs::-webkit-scrollbar{display:none}
   .svc{flex:none;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;
@@ -551,6 +572,7 @@
         <div class="hline"><span id="hlineL">Cargando reportes…</span><span id="hlineR"></span></div>
       </div>
       <div class="tickerlite" id="ticker"><div class="ticker-track" id="ticker-track"><span class="tk-item">Cargando lo que pasa…</span></div></div>
+      <div id="fxWrap"></div>
       <div class="svcs" id="svcsRow"></div>
       <div class="sec-title">Lo más reciente</div>
       <div id="reciente-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
@@ -902,7 +924,49 @@ function pintarEstado(){
 }
 
 /* ---- INICIO ---- */
+function fxFmt(n){ try{ return 'Bs. '+Number(n).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2}); }catch(e){ return 'Bs. '+n; } }
+function fxVar(p){
+  if(p===null||p===undefined||isNaN(p)) return '';
+  const v=Number(p); if(v>0) return ' <span class="fx-up">\u25B2 '+v.toFixed(1)+'%</span>';
+  if(v<0) return ' <span class="fx-down">\u25BC '+Math.abs(v).toFixed(1)+'%</span>';
+  return ' <span style="color:var(--ink3);font-weight:800">0%</span>';
+}
+function fxCuando(iso){
+  try{ const d=new Date(iso), ahora=new Date(), m=Math.round((ahora-d)/60000);
+    if(m<60) return 'hace '+m+' min'; const h=Math.round(m/60);
+    if(h<24) return 'hace '+h+' h'; return 'hace '+Math.round(h/24)+' d';
+  }catch(e){ return ''; }
+}
+async function cargarDolar(){
+  const wrap=$('fxWrap'); if(!wrap) return;
+  try{
+    const r=await fetch('https://ve.dolarapi.com/v1/dolares',{cache:'no-store'});
+    if(!r.ok) throw 0;
+    const arr=await r.json();
+    const ofi=arr.find(x=>x.fuente==='oficial');
+    const bin=arr.find(x=>x.fuente==='bitcoin') || arr.find(x=>/binance|paralelo/i.test(x.nombre||''));
+    if(!ofi||!bin) throw 0;
+    const vOfi=ofi.promedio||ofi.venta, vBin=bin.promedio||bin.venta;
+    const brecha=((vBin-vOfi)/vOfi*100);
+    wrap.innerHTML=`<div class="fx" onclick="this.classList.toggle('open')">
+      <div class="fx-row">
+        <div class="fx-cell"><div class="k"><span class="dotk" style="background:#3f8d57"></span>BCV oficial</div><div class="v">${fxFmt(vOfi)}</div></div>
+        <div class="fx-sep"></div>
+        <div class="fx-cell"><div class="k"><span class="dotk" style="background:#f2a13b"></span>Binance</div><div class="v">${fxFmt(vBin)}</div></div>
+        <div class="fx-gap"><div class="g">+${brecha.toFixed(0)}%</div><div class="gl">brecha</div></div>
+      </div>
+      <div class="fx-more"><div class="fx-more-in">
+        <div class="fx-line"><span>D\u00f3lar BCV (oficial)</span><b>${fxFmt(vOfi)}</b></div>
+        <div class="fx-line"><span>Binance (paralelo)</span><b>${fxFmt(vBin)}</b></div>
+        <div class="fx-line"><span>Brecha entre ambos</span><b>+${brecha.toFixed(1)}%</b></div>
+        <div class="fx-foot">BCV ${fxCuando(ofi.fechaActualizacion)} \u00b7 Binance ${fxCuando(bin.fechaActualizacion)}</div>
+      </div></div>
+    </div>
+    <div class="fx-hint">\u25BE toca para ver m\u00e1s</div>`;
+  }catch(e){ wrap.innerHTML=''; }  // si falla la API, no mostramos nada (sin romper el inicio)
+}
 async function cargarInicio(){
+  cargarDolar();
   const hr=new Date().getHours();
   const saludo = hr<12 ? 'Buenos días' : (hr<19 ? 'Buenas tardes' : 'Buenas noches');
   const _sm=$('saludoMini'); if(_sm) _sm.textContent = saludo;
