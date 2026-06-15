@@ -398,6 +398,19 @@
   .fx-up{color:var(--badC);font-weight:800}
   .fx-down{color:var(--okC);font-weight:800}
   .fx-hint{font-size:10px;color:var(--ink3);text-align:center;padding:6px 0 0}
+  .fx-calc{border-top:1px dashed var(--line);margin-top:4px;padding-top:11px}
+  .fx-calc-h{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);margin-bottom:8px}
+  .fx-seg{display:flex;gap:7px;margin-bottom:9px}
+  .fx-seg button{flex:1;font-family:inherit;font-weight:800;font-size:12.5px;padding:8px 0;border-radius:10px;
+    border:1px solid var(--line);background:var(--chip2);color:var(--ink2);cursor:pointer;transition:.12s}
+  .fx-seg button.on{background:var(--sun);border-color:var(--sun);color:#1a140d}
+  .fx-inrow{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);
+    border-radius:11px;padding:9px 12px}
+  .fx-inrow .fx-cur{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;color:var(--ink3)}
+  .fx-inrow input{flex:1;min-width:0;border:none;background:none;outline:none;font-family:'Bricolage Grotesque';
+    font-weight:800;font-size:17px;color:var(--ink);width:100%}
+  .fx-res{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--sun-deep);text-align:right;margin-top:9px}
+  body.dark .fx-res{color:#f4a04a}
   body.dark .fx-gap .g{color:#f4a04a}
   .svcs{display:flex;gap:8px;padding:12px 0 2px;overflow-x:auto;scrollbar-width:none}
   .svcs::-webkit-scrollbar{display:none}
@@ -937,6 +950,19 @@ function fxCuando(iso){
     if(h<24) return 'hace '+h+' h'; return 'hace '+Math.round(h/24)+' d';
   }catch(e){ return ''; }
 }
+function fxSel(t){
+  window.fxSel=t;
+  var a=document.getElementById('fxSegBcv'), b=document.getElementById('fxSegBin');
+  if(a&&b){ a.classList.toggle('on',t==='bcv'); b.classList.toggle('on',t==='bin'); }
+  fxCalc();
+}
+function fxCalc(){
+  var inp=document.getElementById('fxMonto'), res=document.getElementById('fxRes');
+  if(!inp||!res||!window.fxTasa) return;
+  var m=parseFloat(String(inp.value).replace(',','.'))||0;
+  var tasa=window.fxTasa[window.fxSel||'bcv']||0;
+  res.textContent='= '+fxFmt(m*tasa);
+}
 async function cargarDolar(){
   const wrap=$('fxWrap'); if(!wrap) return;
   try{
@@ -948,6 +974,7 @@ async function cargarDolar(){
     if(!ofi||!bin) throw 0;
     const vOfi=ofi.promedio||ofi.venta, vBin=bin.promedio||bin.venta;
     const brecha=((vBin-vOfi)/vOfi*100);
+    window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv';
     wrap.innerHTML=`<div class="fx" onclick="this.classList.toggle('open')">
       <div class="fx-row">
         <div class="fx-cell"><div class="k"><span class="dotk" style="background:#3f8d57"></span>BCV oficial</div><div class="v">${fxFmt(vOfi)}</div></div>
@@ -960,6 +987,16 @@ async function cargarDolar(){
         <div class="fx-line"><span>Binance (paralelo)</span><b>${fxFmt(vBin)}</b></div>
         <div class="fx-line"><span>Brecha entre ambos</span><b>+${brecha.toFixed(1)}%</b></div>
         <div class="fx-foot">BCV ${fxCuando(ofi.fechaActualizacion)} \u00b7 Binance ${fxCuando(bin.fechaActualizacion)}</div>
+        <div class="fx-calc" onclick="event.stopPropagation()">
+          <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
+          <div class="fx-seg">
+            <button id="fxSegBcv" class="on" onclick="fxSel('bcv')">BCV</button>
+            <button id="fxSegBin" onclick="fxSel('bin')">Binance</button>
+          </div>
+          <div class="fx-inrow"><span class="fx-cur">$</span>
+            <input id="fxMonto" type="number" inputmode="decimal" placeholder="0" oninput="fxCalc()"></div>
+          <div class="fx-res" id="fxRes">= Bs. 0,00</div>
+        </div>
       </div></div>
     </div>
     <div class="fx-hint">\u25BE toca para ver m\u00e1s</div>`;
