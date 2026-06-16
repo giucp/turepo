@@ -819,10 +819,10 @@ function pintarResumen(data){
   const alertas=cont.bad, avisos=cont.warn, tot=cont.ok+cont.warn+cont.bad;
   let palabra, sev;
   if(!tot){ palabra='Sin novedades aún'; sev='ok'; }
-  else if(!alertas && !avisos){ palabra='Todo tranquilo'; sev='ok'; }
-  else if(!alertas){ palabra='Tranquila, con avisos'; sev='warn'; }
-  else if(alertas<=2){ palabra='Mayormente tranquila'; sev='ok'; }
-  else { palabra='Con varias alertas'; sev='bad'; }
+  else if(!alertas && !avisos){ palabra='Todo tranqui'; sev='ok'; }
+  else if(!alertas){ palabra='Tranqui, pero atento'; sev='warn'; }
+  else if(alertas<=2){ palabra='Ponte pilas'; sev='warn'; }
+  else { palabra='Día movido'; sev='bad'; }
   $('verdictWord').textContent=palabra;
   vd.className='ld ld-'+sev;
   const hb=$('hbar');
