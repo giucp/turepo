@@ -235,6 +235,11 @@
   .authtab{flex:1;text-align:center;padding:10px;border-radius:10px;border:none;background:none;
     font-weight:700;font-size:14px;color:#8a7a63;cursor:pointer}
   .authtab.on{background:var(--paper);color:var(--sun-deep);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  .authdiv{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--ink3);font-size:12px;font-weight:600}
+  .authdiv::before,.authdiv::after{content:'';flex:1;height:1px;background:var(--line)}
+  .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:13px;font-weight:700;font-size:14px;font-family:inherit;cursor:pointer}
+  .btn-google:active{transform:scale(.98);background:var(--chip2)}
+  .btn-google svg{width:18px;height:18px;flex:none}
   .perfilcard{background:linear-gradient(135deg,#2c2417,#4a3a23);color:#fff5e6;border-radius:20px;padding:20px;text-align:center}
   .perfilcard .pname{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px}
   .perfilcard .ppts{font-size:30px;font-weight:800;margin-top:8px;color:var(--sun)}
@@ -1555,7 +1560,7 @@ async function refrescarSesion(){
     let nombre = session.user.user_metadata?.username || 'ciudadano', puntos = 0;
     const { data } = await db.from('perfiles').select('username,puntos,posts_ilimitados,es_admin').eq('id',uid).maybeSingle();
     if(data){ nombre = data.username || nombre; puntos = data.puntos||0; }
-    usuario = { id:uid, username:nombre, puntos, ilimitado: !!(data && data.posts_ilimitados), admin: !!(data && data.es_admin) };
+    usuario = { id:uid, username:nombre, puntos, ilimitado: !!(data && data.posts_ilimitados), admin: !!(data && data.es_admin), sinNombre: !(data && data.username) };
   } else { usuario = null; }
   pintarBadge();
 }
@@ -1572,7 +1577,17 @@ async function premiar(){   // suma 10 puntos al usuario si tiene sesión
 function cargarYo(){
   const c=$('yo-cont');
   const lm=$('lemaYo'); if(lm) lm.style.display = usuario ? 'none' : '';
-  if(usuario){
+  if(usuario && usuario.sinNombre){
+    c.innerHTML=`
+      <div class="q" style="margin:2px 2px 12px">¡Bienvenido! Elige tu <b>nombre de usuario</b> para terminar tu cuenta. Así te verán en los reportes y el ranking.</div>
+      <div class="authcard">
+        <div class="authmsg" id="authMsg"></div>
+        <div class="authfield"><label>Nombre de usuario</label>
+          <input id="newUser" class="tinput" placeholder="Solo letras, números y _" maxlength="20"></div>
+        <button class="btn btn-prim" style="width:100%;margin-top:6px" onclick="guardarUsername()">Confirmar nombre</button>
+      </div>
+      <div class="legalnote" onclick="mostrarLegal()">ⓘ <u>Cómo funciona y nuestra responsabilidad</u></div>`;
+  } else if(usuario){
     const idx=nivelIdx(usuario.puntos), lv=NIVELES[idx], sig=NIVELES[idx+1];
     const ini=(usuario.username||'?').trim().charAt(0).toUpperCase();
     let pct=100, next='¡Eres el rango máximo!';
@@ -1623,6 +1638,8 @@ function cargarYo(){
           <input id="authPass" class="tinput" type="password" placeholder="Mínimo 6 caracteres"></div>
         <button class="btn btn-prim" style="width:100%;margin-top:6px" onclick="${authModo==='login'?'hacerLogin()':'hacerRegistro()'}">
           ${authModo==='login'?'Entrar':'Crear mi cuenta'}</button>
+        <div class="authdiv">o</div>
+        <button class="btn-google" onclick="loginGoogle()"><svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg> Continuar con Google</button>
       </div>
       <div class="prowlist" style="margin-top:12px">
         <div class="prow" onclick="instalarApp()">
@@ -1658,6 +1675,21 @@ async function hacerLogin(){
   await refrescarSesion(); cargarYo();
 }
 async function cerrarSesion(){ await db.auth.signOut(); await refrescarSesion(); cargarYo(); }
+async function loginGoogle(){
+  if(!db) return;
+  const { error } = await db.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.origin } });
+  if(error) authMsg('No se pudo iniciar con Google: '+error.message);
+}
+async function guardarUsername(){
+  const u=$('newUser').value.trim();
+  if(!/^[A-Za-z0-9_]{3,20}$/.test(u)){ authMsg('El nombre solo admite letras, números y _ (3 a 20 caracteres).'); return; }
+  if(hayGroseria(u)){ authMsg('Ese nombre no está permitido. Elige otro.'); return; }
+  const { data, error } = await db.rpc('elegir_username',{ p_username:u });
+  if(error){ authMsg('No se pudo guardar: '+error.message); return; }
+  if(data==='taken'){ authMsg('Ese nombre ya existe. Prueba otro.'); return; }
+  if(data!=='ok'){ authMsg('Revisa el nombre e inténtalo de nuevo.'); return; }
+  await refrescarSesion(); cargarYo();
+}
 
 /* ======================= RANKING ======================= */
 async function cargarRanking(){
@@ -2103,6 +2135,18 @@ async function likeFoto(id){
 pintarEstado();
 refrescarSesion();
 cargarInicio();
+if(db){
+  db.auth.onAuthStateChange(function(event){
+    if(event==='SIGNED_IN' || event==='SIGNED_OUT' || event==='INITIAL_SESSION'){
+      setTimeout(async function(){
+        await refrescarSesion();
+        const actual = document.querySelector('.screen.active');
+        if(usuario && usuario.sinNombre) go('s-yo');
+        else if(actual && actual.id==='s-yo') cargarYo();
+      }, 0);
+    }
+  });
+}
 </script>
 <script>
 /* ===== Instalación como app (PWA) ===== */
