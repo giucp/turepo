@@ -876,9 +876,7 @@ function toggleTema(){
 // Color/etiqueta de un reporte; si es 'otro', usa el texto que escribió el usuario
 function infoEstado(r){
   if(r.estado==='otro'){
-    const d=String(r.detalle||'').trim();
-    const corto=d.length>22 ? d.slice(0,22)+'…' : d;
-    return {dot:'d-amber',badge:'b-amber',label: d? escapeHtml(corto) : 'Otro'};
+    return {dot:'d-amber',badge:'b-amber',label:'Otra situación'};
   }
   return EST_INFO[r.estado]||{dot:'d-gray',badge:'b-gray',label:r.estado||'—'};
 }
@@ -1066,7 +1064,7 @@ function pintarTicker(data){
   data.forEach(r=>{
     if(r.tipo==='oferta') return;
     let et = ALERTA[r.estado];
-    if(!et && r.estado==='otro' && r.detalle) et = escapeHtml(String(r.detalle).slice(0,28));
+    if(!et && r.estado==='otro' && r.detalle) et = escapeHtml([...String(r.detalle)].slice(0,28).join(''));
     if(!et) return;
     const lugar = (r.zona||r.lugar||'').trim();
     const clave = et+'|'+lugar.toLowerCase();
@@ -1306,29 +1304,34 @@ let svcTipo, svcStep, svcSel;
 function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined,detalle:''}; renderServicio(); }
 function renderServicio(){
   const cfg = SERVICIOS[svcTipo];
-  const dots=[0,1].map(i=>`<div class="stepdot ${i<=svcStep?'on':''}"></div>`).join('');
+  const esOtra = svcSel.sit!==undefined && cfg.sit[svcSel.sit][2]==='otro';
+  const total = esOtra ? 3 : 2;
+  const ultimo = svcStep === total-1;
+  const dots=Array.from({length:total},(_,i)=>`<div class="stepdot ${i<=svcStep?'on':''}"></div>`).join('');
   let body;
   if(svcStep===0){
-    body=`<h3>${cfg.titulo}</h3><div class="q">${cfg.ubLabel} · paso 1 de 2</div>
+    body=`<h3>${cfg.titulo}</h3><div class="q">${cfg.ubLabel} · paso 1 de ${total}</div>
       <div class="field">
         <input id="ubInput" class="tinput" placeholder="${cfg.ph}" value="${(svcSel.ub||'').replace(/"/g,'&quot;')}" oninput="svcUb(this.value)" autocomplete="off">
         <div class="warn" id="ubWarn">Solo letras, números y hasta 2 emojis. Sin groserías.</div>
         <div class="suggs" id="ubSuggs"></div>
         <div class="sugg-hint">Escribe el nombre. Si ya existe, tócalo en las sugerencias.</div>
       </div>`;
+  } else if(svcStep===1){
+    body=`<h3>¿Cuál es la situación?</h3><div class="q">Toca lo que pasa · paso 2 de ${total}</div>
+      <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>`;
   } else {
-    const esOtroSit = svcSel.sit!==undefined && cfg.sit[svcSel.sit][2]==='otro';
-    body=`<h3>¿Cuál es la situación?</h3><div class="q">Toca lo que pasa · paso 2 de 2</div>
-      <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>
-      ${esOtroSit?`<div class="field" style="margin-top:4px">
-        <input id="sitInput" class="tinput" maxlength="40" placeholder="Cuéntalo corto. Ej: Poste caído…" value="${(svcSel.detalle||'').replace(/"/g,'&quot;')}" oninput="svcDetalle(this.value)" autocomplete="off">
-        <div class="warn" id="sitWarn">Revisa el texto: corto y sin groserías.</div></div>`:''}`;
+    body=`<h3>Breve descripción</h3><div class="q">Cuéntalo corto · paso 3 de 3</div>
+      <div class="field">
+        <input id="sitInput" class="tinput" maxlength="40" placeholder="Cuéntalo corto. Ej: Palo de agua próx 🌧️" value="${(svcSel.detalle||'').replace(/"/g,'&quot;')}" oninput="svcDetalle(this.value)" autocomplete="off">
+        <div class="warn" id="sitWarn">Revisa el texto: corto y sin groserías.</div>
+      </div>`;
   }
-  const last = svcStep<1?`<button class="btn btn-prim" onclick="svcNext()">Siguiente</button>`:`<button class="btn btn-prim" onclick="svcSend()">Enviar reporte</button>`;
-  const foto = svcStep===1 ? bloqueFotoRep() : '';
+  const last = ultimo?`<button class="btn btn-prim" onclick="svcSend()">Enviar reporte</button>`:`<button class="btn btn-prim" onclick="svcNext()">Siguiente</button>`;
+  const foto = ultimo ? bloqueFotoRep() : '';
   $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}${foto}
     <div class="actions"><button class="btn btn-ghost" onclick="${svcStep>0?'svcBack()':'renderChooser()'}">←</button>${last}</div>`;
-  if(svcStep===1 && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
+  if(ultimo && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
   if(svcStep===0) pintarSuggsUb('');
 }
 async function pintarSuggsUb(texto){
@@ -1352,9 +1355,11 @@ function svcDetalle(v){
 }
 function svcBack(){ if(svcStep>0){svcStep--; renderServicio();} }
 function svcNext(){
-  const u=(svcSel.ub||'').trim();
-  if(u.length<2){ $('ubWarn').textContent='Escribe dónde (mínimo 2 letras).'; $('ubWarn').classList.add('show'); return; }
-  if(textoNoPermitido(u)){ $('ubInput').classList.add('bad'); $('ubWarn').classList.add('show'); return; }
+  if(svcStep===0){
+    const u=(svcSel.ub||'').trim();
+    if(u.length<2){ $('ubWarn').textContent='Escribe dónde (mínimo 2 letras).'; $('ubWarn').classList.add('show'); return; }
+    if(textoNoPermitido(u)){ $('ubInput').classList.add('bad'); $('ubWarn').classList.add('show'); return; }
+  }
   svcStep++; renderServicio();
 }
 async function svcSend(){
