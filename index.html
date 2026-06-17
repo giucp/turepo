@@ -1008,7 +1008,21 @@ async function cargarDolar(){
     const ofi=arr.find(x=>x.fuente==='oficial');
     const bin=arr.find(x=>x.fuente==='bitcoin') || arr.find(x=>/binance|paralelo/i.test(x.nombre||''));
     if(!ofi||!bin) throw 0;
-    const vOfi=ofi.promedio||ofi.venta, vBin=bin.promedio||bin.venta;
+    const vBin=bin.promedio||bin.venta;
+
+    // BCV oficial: preferimos nuestra tabla tasa_bcv (la actualiza un GitHub Action cada 6h).
+    // Si falla o viene vacia, caemos al 'oficial' de dolarapi como antes (nunca sin dato).
+    let vOfi=ofi.promedio||ofi.venta;                 // respaldo por defecto
+    let bcvCuando=fxCuando(ofi.fechaActualizacion);   // timestamp del respaldo
+    try{
+      if(db){
+        const { data:tb }=await db.from('tasa_bcv').select('valor,actualizado').eq('id',1).maybeSingle();
+        if(tb && Number(tb.valor)>0){
+          vOfi=Number(tb.valor);
+          bcvCuando=fxCuando(tb.actualizado);         // timestamp real y honesto de la tabla
+        }
+      }
+    }catch(_){ /* si tasa_bcv falla, usamos el respaldo de dolarapi */ }
     const brecha=((vBin-vOfi)/vOfi*100);
     window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv';
     wrap.innerHTML=`<div class="fx">
@@ -1022,7 +1036,7 @@ async function cargarDolar(){
         <div class="fx-line"><span>D\u00f3lar BCV (oficial)</span><b>${fxFmt(vOfi)}</b></div>
         <div class="fx-line"><span>Binance (paralelo)</span><b>${fxFmt(vBin)}</b></div>
         <div class="fx-line"><span>Brecha entre ambos</span><b>+${brecha.toFixed(1)}%</b></div>
-        <div class="fx-foot">BCV ${fxCuando(ofi.fechaActualizacion)} \u00b7 Binance ${fxCuando(bin.fechaActualizacion)}</div>
+        <div class="fx-foot">BCV ${bcvCuando} \u00b7 Binance ${fxCuando(bin.fechaActualizacion)}</div>
         <div class="fx-calc">
           <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
           <div class="fx-seg">
