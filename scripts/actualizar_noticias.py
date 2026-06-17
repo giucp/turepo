@@ -9,7 +9,6 @@ import feedparser
 FEEDS = [
     {"fuente": "El Nacional", "url": "https://www.elnacional.com/feed/", "categoria": "nacional"},
     {"fuente": "El Diario",   "url": "https://eldiario.com/feed/",       "categoria": "nacional"},
-    {"fuente": "Tal Cual",    "url": "https://talcualdigital.com/feed/", "categoria": "nacional"},
     {"fuente": "Runrun.es",   "url": "https://runrun.es/feed/",          "categoria": "nacional"},
 ]
 
