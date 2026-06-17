@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -10,17 +11,57 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 BCV_URL = "https://www.bcv.org.ve/"
 
+# Headers de un Chrome real: el BCV devuelve 500 a clientes que no parecen navegador
+NAVEGADOR_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;q=0.9,"
+        "image/avif,image/webp,image/apng,*/*;q=0.8"
+    ),
+    "Accept-Language": "es-VE,es;q=0.9,en;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+}
+
+# El BCV es inestable: a veces la 1ra falla con 500 pero la 2da responde
+MAX_INTENTOS = 4
+ESPERA_BASE = 5   # segundos; la espera crece 5, 10, 15... (backoff progresivo)
+
+
+def descargar_html():
+    sesion = requests.Session()
+    sesion.headers.update(NAVEGADOR_HEADERS)
+    ultimo_error = None
+    for intento in range(1, MAX_INTENTOS + 1):
+        try:
+            r = sesion.get(
+                BCV_URL,
+                verify=False,               # <-- clave: ignora el cert UnknownIssuer
+                timeout=30,
+            )
+            r.raise_for_status()
+            return r.text
+        except requests.RequestException as e:
+            ultimo_error = e
+            print(f"Intento {intento}/{MAX_INTENTOS} falló: {e}", file=sys.stderr)
+            if intento < MAX_INTENTOS:
+                time.sleep(ESPERA_BASE * intento)   # 5s, 10s, 15s...
+    raise RuntimeError(f"BCV no respondió tras {MAX_INTENTOS} intentos: {ultimo_error}")
+
 
 def obtener_tasa_dolar():
-    r = requests.get(
-        BCV_URL,
-        verify=False,                       # <-- clave: ignora el cert UnknownIssuer
-        timeout=30,
-        headers={"User-Agent": "Mozilla/5.0 (turepo-bcv-bot)"},
-    )
-    r.raise_for_status()
-
-    soup = BeautifulSoup(r.text, "html.parser")
+    html = descargar_html()
+    soup = BeautifulSoup(html, "html.parser")
     div = soup.find(id="dolar")
     if div is None:
         raise RuntimeError("No se encontró id='dolar' en el HTML del BCV")
