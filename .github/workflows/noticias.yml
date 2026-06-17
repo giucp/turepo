@@ -1,0 +1,27 @@
+name: Actualizar noticias
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"     # cada 2 horas (UTC)
+  workflow_dispatch:           # correr a mano
+
+jobs:
+  actualizar-noticias:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install requests feedparser
+
+      - name: Leer RSS y subir a Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/actualizar_noticias.py
