@@ -1,0 +1,27 @@
+name: Actualizar tasa BCV
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"     # cada 6 horas (en UTC): 00, 06, 12, 18
+  workflow_dispatch:           # botón para correrlo a mano cuando quieras
+
+jobs:
+  actualizar-bcv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install requests beautifulsoup4
+
+      - name: Leer BCV y subir a Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/actualizar_bcv.py
