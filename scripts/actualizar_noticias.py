@@ -7,9 +7,10 @@ import feedparser
 
 # Lista de feeds (fuente, url, categoria por defecto). Ajustable luego.
 FEEDS = [
-    {"fuente": "El Nacional",      "url": "https://www.elnacional.com/feed/",     "categoria": "nacional"},
-    {"fuente": "El Diario",        "url": "https://eldiario.com/feed/",           "categoria": "nacional"},
-    {"fuente": "Últimas Noticias", "url": "https://ultimasnoticias.com.ve/feed/", "categoria": "nacional"},
+    {"fuente": "El Nacional", "url": "https://www.elnacional.com/feed/", "categoria": "nacional"},
+    {"fuente": "El Diario",   "url": "https://eldiario.com/feed/",       "categoria": "nacional"},
+    {"fuente": "Tal Cual",    "url": "https://talcualdigital.com/feed/", "categoria": "nacional"},
+    {"fuente": "Runrun.es",   "url": "https://runrun.es/feed/",          "categoria": "nacional"},
 ]
 
 MAX_POR_FEED = 20            # solo las últimas N por feed (no llenar infinito)
