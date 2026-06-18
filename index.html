@@ -645,7 +645,7 @@
 
     <section class="screen" id="s-noticias">
       <button class="backbtn" onclick="go('s-inicio')">← Volver</button>
-      <div class="sec-title" style="margin-top:6px">Noticias de Venezuela</div>
+      <div class="sec-title" style="margin-top:6px">Venezuela y el mundo</div>
       <div class="q" style="font-size:13px;color:#8a7a63;margin:-4px 4px 12px">Titulares de medios nacionales. Toca una para leer la nota completa en su fuente.</div>
       <div id="noticias-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
@@ -856,11 +856,11 @@ function pintarResumen(data){
   });
   const alertas=cont.bad, avisos=cont.warn, tot=cont.ok+cont.warn+cont.bad;
   let palabra, sev;
-  if(!tot){ palabra='Sin novedades aún'; sev='ok'; }
-  else if(!alertas && !avisos){ palabra='Todo tranqui'; sev='ok'; }
-  else if(!alertas){ palabra='Tranqui, pero atento'; sev='warn'; }
-  else if(alertas<=2){ palabra='Ponte pilas'; sev='warn'; }
-  else { palabra='Día movido'; sev='bad'; }
+  if(!tot){ palabra='Sin reportes aún'; sev='ok'; }
+  else if(!alertas && !avisos){ palabra='Todo en orden'; sev='ok'; }
+  else if(!alertas){ palabra='Con algunos avisos'; sev='warn'; }
+  else if(alertas<=2){ palabra='Hay alertas activas'; sev='warn'; }
+  else { palabra='Jornada complicada'; sev='bad'; }
   $('verdictWord').textContent=palabra;
   vd.className='ld ld-'+sev;
   const hb=$('hbar');
@@ -1042,7 +1042,8 @@ async function cargarDolar(){
     const ofi=arr.find(x=>x.fuente==='oficial');
     const bin=arr.find(x=>x.fuente==='bitcoin') || arr.find(x=>/binance|paralelo/i.test(x.nombre||''));
     if(!ofi||!bin) throw 0;
-    const vBin=bin.promedio||bin.venta;
+    let vBin=bin.promedio||bin.venta;                 // respaldo Binance (dolarapi)
+    let binCuando=fxCuando(bin.fechaActualizacion);
 
     // BCV oficial: preferimos nuestra tabla tasa_bcv (la actualiza un GitHub Action cada 6h).
     // Si falla o viene vacia, caemos al 'oficial' de dolarapi como antes (nunca sin dato).
@@ -1055,8 +1056,14 @@ async function cargarDolar(){
           vOfi=Number(tb.valor);
           bcvCuando=fxCuando(tb.actualizado);         // timestamp real y honesto de la tabla
         }
+        // Binance: nuestra tabla tasa_binance (cron-job.org cada 30min), SOLO si es fresca (<1h)
+        const { data:tbi }=await db.from('tasa_binance').select('valor,actualizado').eq('id',1).maybeSingle();
+        if(tbi && Number(tbi.valor)>0 && (Date.now()-new Date(tbi.actualizado).getTime() < 3600000)){
+          vBin=Number(tbi.valor);
+          binCuando=fxCuando(tbi.actualizado);
+        }
       }
-    }catch(_){ /* si tasa_bcv falla, usamos el respaldo de dolarapi */ }
+    }catch(_){ /* si las tablas fallan, usamos los respaldos de dolarapi */ }
     const brecha=((vBin-vOfi)/vOfi*100);
     window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv';
     wrap.innerHTML=`<div class="fx">
@@ -1070,7 +1077,7 @@ async function cargarDolar(){
         <div class="fx-line"><span>D\u00f3lar BCV (oficial)</span><b>${fxFmt(vOfi)}</b></div>
         <div class="fx-line"><span>Binance (paralelo)</span><b>${fxFmt(vBin)}</b></div>
         <div class="fx-line"><span>Brecha entre ambos</span><b>+${brecha.toFixed(1)}%</b></div>
-        <div class="fx-foot">BCV ${bcvCuando} \u00b7 Binance ${fxCuando(bin.fechaActualizacion)}</div>
+        <div class="fx-foot">BCV ${bcvCuando} \u00b7 Binance ${binCuando}</div>
         <div class="fx-calc">
           <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
           <div class="fx-seg">
