@@ -130,10 +130,31 @@
   .fchip{white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;
     font-size:12.5px;font-weight:600;color:#6b5d49;cursor:pointer}
   .fchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .noticia{display:block;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:13px 14px;margin-bottom:9px}
-  .noticia:active{transform:scale(.99)}
-  .noticia .ntit{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;line-height:1.32;color:var(--ink)}
-  .noticia .nmeta{margin-top:6px;font-size:12px;color:var(--gray)}
+  /* ===== Noticias: hero destacada + tarjetas con categoria en color ===== */
+  .cat{font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 9px;border-radius:6px;text-transform:uppercase;white-space:nowrap}
+  .cat.nac{background:rgba(224,123,26,.14);color:#b5630f}
+  .cat.intl{background:rgba(47,111,208,.13);color:#2f6fd0}
+  .cat.eco{background:rgba(187,90,48,.13);color:#bb5a30}
+  .cat.dep{background:rgba(47,128,72,.14);color:#2f8048}
+  .cat.suc{background:rgba(192,57,43,.13);color:#c0392b}
+  .nhero{display:block;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:18px}
+  .nhero-top{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+  .nhero-recent{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase;margin-left:auto}
+  .nhero-title{font-family:'Bricolage Grotesque';font-size:19px;font-weight:800;line-height:1.25;color:var(--ink);margin-bottom:11px}
+  .nhero-src{font-size:12.5px;color:var(--ink2);font-weight:600}
+  .nhero-time{color:var(--ink3);font-weight:400}
+  .ncard{display:block;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
+  .ncard:active{transform:scale(.99)}
+  .ncard-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .ncard-time{font-size:11.5px;color:var(--ink3);margin-left:auto}
+  .ncard-title{font-family:'Bricolage Grotesque';font-size:15px;font-weight:700;line-height:1.3;color:var(--ink);margin-bottom:9px}
+  .ncard-src{font-size:12px;color:var(--ink2);font-weight:600}
+  body.dark .nhero{background:linear-gradient(160deg,#241c14,#1a1714);border-color:#3a2f22}
+  body.dark .cat.nac{background:rgba(242,161,59,.16);color:var(--sun)}
+  body.dark .cat.intl{background:rgba(90,140,210,.18);color:#7fa8e0}
+  body.dark .cat.eco{background:rgba(200,120,90,.16);color:#e0926c}
+  body.dark .cat.dep{background:rgba(90,190,120,.16);color:#6cc88a}
+  body.dark .cat.suc{background:rgba(210,90,90,.16);color:#e08080}
   .loading,.empty{text-align:center;color:#8a7a63;font-size:13.5px;padding:30px 16px;line-height:1.5}
   .empty .big{font-size:30px;display:block;margin-bottom:8px}
   .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--sun-deep);border-radius:50%;
@@ -1080,6 +1101,14 @@ async function cargarInicio(){
   cont.innerHTML = data.slice(0,6).map(r=>postReporte(r,'inicio')).join('');
 }
 /* ---- NOTICIAS ---- */
+const NOTI_CAT = {
+  nacional:      {cls:'nac',  txt:'Nacional'},
+  internacional: {cls:'intl', txt:'Internacional'},
+  economia:      {cls:'eco',  txt:'Economía'},
+  deportes:      {cls:'dep',  txt:'Deportes'},
+  sucesos:       {cls:'suc',  txt:'Sucesos'},
+};
+function noticiaCat(c){ return NOTI_CAT[(c||'').toLowerCase()] || {cls:'nac', txt:'Nacional'}; }
 async function cargarNoticias(){
   const cont=$('noticias-list'); if(!cont) return;
   cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando…</div>';
@@ -1091,15 +1120,23 @@ async function cargarNoticias(){
       .limit(60);
     if(error) throw error;
     if(!data||!data.length){ cont.innerHTML=vacio('Todavía no hay noticias. Vuelve pronto.'); return; }
-    cont.innerHTML=data.map(postNoticia).join('');
+    cont.innerHTML = postNoticiaHero(data[0]) + data.slice(1).map(postNoticia).join('');
   }catch(e){ cont.innerHTML=vacio('No pudimos cargar las noticias ahora. Intenta más tarde.'); }
 }
+function postNoticiaHero(n){
+  const cat=noticiaCat(n.categoria), cuando=n.publicado?fxCuando(n.publicado):'';
+  return `<a class="nhero" href="${escapeHtml(n.enlace||'')}" target="_blank" rel="noopener noreferrer">
+    <div class="nhero-top"><span class="cat ${cat.cls}">${cat.txt}</span><span class="nhero-recent">Lo más reciente</span></div>
+    <div class="nhero-title">${escapeHtml(n.titulo||'')}</div>
+    <div class="nhero-src">${escapeHtml(n.fuente||'')}${cuando?` <span class="nhero-time">· ${cuando}</span>`:''}</div>
+  </a>`;
+}
 function postNoticia(n){
-  const cuando = n.publicado ? fxCuando(n.publicado) : '';
-  const meta = [escapeHtml(n.fuente||''), cuando].filter(Boolean).join(' · ');
-  return `<a class="noticia" href="${escapeHtml(n.enlace||'')}" target="_blank" rel="noopener noreferrer">
-    <div class="ntit">${escapeHtml(n.titulo||'')}</div>
-    <div class="nmeta">${meta}</div>
+  const cat=noticiaCat(n.categoria), cuando=n.publicado?fxCuando(n.publicado):'';
+  return `<a class="ncard" href="${escapeHtml(n.enlace||'')}" target="_blank" rel="noopener noreferrer">
+    <div class="ncard-top"><span class="cat ${cat.cls}">${cat.txt}</span><span class="ncard-time">${cuando}</span></div>
+    <div class="ncard-title">${escapeHtml(n.titulo||'')}</div>
+    <div class="ncard-src">${escapeHtml(n.fuente||'')}</div>
   </a>`;
 }
 /* Genera titulares vivos agrupando los reportes activos del estado */
