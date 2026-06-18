@@ -1109,6 +1109,33 @@ const NOTI_CAT = {
   sucesos:       {cls:'suc',  txt:'Sucesos'},
 };
 function noticiaCat(c){ return NOTI_CAT[(c||'').toLowerCase()] || {cls:'nac', txt:'Nacional'}; }
+// Tokens significativos del titular (minuscula, sin acentos ni puntuacion, palabras >=4)
+function notiTokens(t){
+  return (t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>=4);
+}
+function notiSimil(a,b){
+  if(!a.length||!b.length) return 0;
+  const B=new Set(b); let inter=0;
+  for(const w of new Set(a)) if(B.has(w)) inter++;
+  return inter/(new Set(a).size + B.size - inter);   // Jaccard de tokens
+}
+// Agrupa titulares parecidos entre medios (misma historia, distinta URL): conserva
+// el mas reciente de cada grupo y anota las otras fuentes. Umbral 0.6 de similitud.
+function agruparNoticias(items){
+  const grupos=[];
+  for(const it of items){
+    const tk=notiTokens(it.titulo); let g=null;
+    for(const gr of grupos){ if(notiSimil(tk, gr.tokens)>=0.6){ g=gr; break; } }
+    if(g){ if(it.fuente && it.fuente!==g.n.fuente) g.otras.add(it.fuente); }
+    else grupos.push({n:it, tokens:tk, otras:new Set()});
+  }
+  return grupos;
+}
+function notiOtras(otras){
+  const a=[...otras]; if(!a.length) return '';
+  return a.length===1 ? ` · también ${escapeHtml(a[0])}` : ` · +${a.length} medios`;
+}
 async function cargarNoticias(){
   const cont=$('noticias-list'); if(!cont) return;
   cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando…</div>';
@@ -1120,23 +1147,24 @@ async function cargarNoticias(){
       .limit(60);
     if(error) throw error;
     if(!data||!data.length){ cont.innerHTML=vacio('Todavía no hay noticias. Vuelve pronto.'); return; }
-    cont.innerHTML = postNoticiaHero(data[0]) + data.slice(1).map(postNoticia).join('');
+    const grupos=agruparNoticias(data);
+    cont.innerHTML = postNoticiaHero(grupos[0]) + grupos.slice(1).map(postNoticia).join('');
   }catch(e){ cont.innerHTML=vacio('No pudimos cargar las noticias ahora. Intenta más tarde.'); }
 }
-function postNoticiaHero(n){
-  const cat=noticiaCat(n.categoria), cuando=n.publicado?fxCuando(n.publicado):'';
+function postNoticiaHero(g){
+  const n=g.n, cat=noticiaCat(n.categoria), cuando=n.publicado?fxCuando(n.publicado):'';
   return `<a class="nhero" href="${escapeHtml(n.enlace||'')}" target="_blank" rel="noopener noreferrer">
     <div class="nhero-top"><span class="cat ${cat.cls}">${cat.txt}</span><span class="nhero-recent">Lo más reciente</span></div>
     <div class="nhero-title">${escapeHtml(n.titulo||'')}</div>
-    <div class="nhero-src">${escapeHtml(n.fuente||'')}${cuando?` <span class="nhero-time">· ${cuando}</span>`:''}</div>
+    <div class="nhero-src">${escapeHtml(n.fuente||'')}${notiOtras(g.otras)}${cuando?` <span class="nhero-time">· ${cuando}</span>`:''}</div>
   </a>`;
 }
-function postNoticia(n){
-  const cat=noticiaCat(n.categoria), cuando=n.publicado?fxCuando(n.publicado):'';
+function postNoticia(g){
+  const n=g.n, cat=noticiaCat(n.categoria), cuando=n.publicado?fxCuando(n.publicado):'';
   return `<a class="ncard" href="${escapeHtml(n.enlace||'')}" target="_blank" rel="noopener noreferrer">
     <div class="ncard-top"><span class="cat ${cat.cls}">${cat.txt}</span><span class="ncard-time">${cuando}</span></div>
     <div class="ncard-title">${escapeHtml(n.titulo||'')}</div>
-    <div class="ncard-src">${escapeHtml(n.fuente||'')}</div>
+    <div class="ncard-src">${escapeHtml(n.fuente||'')}${notiOtras(g.otras)}</div>
   </a>`;
 }
 /* Genera titulares vivos agrupando los reportes activos del estado */
