@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import datetime
 import calendar
 import requests
@@ -25,7 +26,9 @@ FEEDS = [
 
 MAX_POR_FEED = 8             # max 8 por feed: equilibra la mezcla (El Nacional ~100 vs El Diario ~12)
 DIAS_RETENCION = 30          # limpieza: borra lo guardado hace más de N días
-TIMEOUT = 25
+TIMEOUT = 40                 # los feeds de El Nacional (~100 items) son pesados/lentos
+MAX_INTENTOS = 3             # reintentos por feed ante timeout/errores transitorios
+ESPERA = 4                   # backoff progresivo entre intentos: 4s, 8s
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
 
@@ -40,12 +43,25 @@ def fecha_iso(entry):
     return None
 
 
+def descargar(url):
+    """GET con reintentos: recupera timeouts/errores transitorios (feeds pesados)."""
+    ultimo = None
+    for intento in range(1, MAX_INTENTOS + 1):
+        try:
+            r = requests.get(url, timeout=TIMEOUT, headers={"User-Agent": UA})
+            r.raise_for_status()
+            return r.content
+        except requests.RequestException as e:
+            ultimo = e
+            if intento < MAX_INTENTOS:
+                time.sleep(ESPERA * intento)
+    raise ultimo
+
+
 def leer_feed(feed):
     """Devuelve lista de registros. Si el feed se cae, devuelve [] sin romper."""
     try:
-        r = requests.get(feed["url"], timeout=TIMEOUT, headers={"User-Agent": UA})
-        r.raise_for_status()
-        parsed = feedparser.parse(r.content)
+        parsed = feedparser.parse(descargar(feed["url"]))
         registros = []
         for e in parsed.entries[:MAX_POR_FEED]:
             titulo = (e.get("title") or "").strip()
