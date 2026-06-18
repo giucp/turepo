@@ -5,14 +5,25 @@ import calendar
 import requests
 import feedparser
 
-# Lista de feeds (fuente, url, categoria por defecto). Ajustable luego.
+# Feeds por categoria: cada uno trae su categoria fija (se guarda en 'categoria').
 FEEDS = [
-    {"fuente": "El Nacional", "url": "https://www.elnacional.com/feed/", "categoria": "nacional"},
-    {"fuente": "El Diario",   "url": "https://eldiario.com/feed/",       "categoria": "nacional"},
-    {"fuente": "Runrun.es",   "url": "https://runrun.es/feed/",          "categoria": "nacional"},
+    # El Nacional (~100 items/feed; el tope de MAX_POR_FEED evita que domine)
+    {"fuente": "El Nacional", "url": "https://www.elnacional.com/venezuela/feed/", "categoria": "nacional"},
+    {"fuente": "El Nacional", "url": "https://www.elnacional.com/mundo/feed/",     "categoria": "internacional"},
+    {"fuente": "El Nacional", "url": "https://www.elnacional.com/economia/feed/",  "categoria": "economia"},
+    {"fuente": "El Nacional", "url": "https://www.elnacional.com/deportes/feed/",  "categoria": "deportes"},
+    # El Diario (categorias completas, via /categoria/<slug>/feed/)
+    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/venezuela/feed/", "categoria": "nacional"},
+    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/mundo/feed/",     "categoria": "internacional"},
+    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/economia/feed/",  "categoria": "economia"},
+    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/deportes/feed/",  "categoria": "deportes"},
+    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/sucesos/feed/",   "categoria": "sucesos"},
+    # Runrun.es (solo Nacional e Internacional disponibles)
+    {"fuente": "Runrun.es", "url": "https://runrun.es/nacional/feed/",      "categoria": "nacional"},
+    {"fuente": "Runrun.es", "url": "https://runrun.es/internacional/feed/", "categoria": "internacional"},
 ]
 
-MAX_POR_FEED = 20            # solo las últimas N por feed (no llenar infinito)
+MAX_POR_FEED = 8             # max 8 por feed: equilibra la mezcla (El Nacional ~100 vs El Diario ~12)
 DIAS_RETENCION = 30          # limpieza: borra lo guardado hace más de N días
 TIMEOUT = 25
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -66,8 +77,9 @@ def upsert(registros):
         "apikey": key,
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
-        # ignora duplicados por enlace: no toca filas ya guardadas (conserva 'creado')
-        "Prefer": "resolution=ignore-duplicates,return=minimal",
+        # merge por enlace: sin filas duplicadas y re-categoriza las ya guardadas.
+        # 'creado' se preserva porque no va en el payload (solo se setea al insertar).
+        "Prefer": "resolution=merge-duplicates,return=minimal",
     }
     resp = requests.post(endpoint, json=registros, headers=headers, timeout=TIMEOUT)
     resp.raise_for_status()
@@ -101,6 +113,17 @@ if __name__ == "__main__":
         print("ERROR: ningun feed devolvio noticias", file=sys.stderr)
         sys.exit(1)                         # solo falla si TODOS cayeron
 
-    n = upsert(todos)
-    print(f"OK · {n} noticias enviadas (duplicados ignorados por enlace)")
+    # Dedup por enlace dentro del lote: un mismo articulo puede aparecer en dos
+    # feeds (WordPress permite varias categorias). Conserva la 1ra aparicion y
+    # evita el error de upsert "cannot affect row a second time".
+    vistos = set()
+    unicos = []
+    for r in todos:
+        if r["enlace"] in vistos:
+            continue
+        vistos.add(r["enlace"])
+        unicos.append(r)
+
+    n = upsert(unicos)
+    print(f"OK · {n} noticias enviadas de {len(todos)} leidas (merge por enlace)")
     limpiar_viejas()
