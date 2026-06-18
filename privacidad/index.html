@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidad · Tu Repo</title>
+<meta name="description" content="Política de Privacidad de Tu Repo: qué información recopilamos, cómo la usamos y tus derechos.">
+<meta name="theme-color" content="#e07b1a">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<script>
+  /* Respeta el tema elegido en la app (mismo dominio); si no hay, usa el del sistema */
+  (function(){
+    try{
+      var t = localStorage.getItem('temaTuRepo');
+      var oscuro = t === 'dark' || (t === null && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      if(oscuro) document.documentElement.classList.add('dark');
+    }catch(e){}
+  })();
+</script>
+<style>
+  :root{
+    --bg:#f4ede0; --paper:#fffaf2; --ink:#221a12; --ink2:#5d5444; --ink3:#8a7a63;
+    --sun:#f2a13b; --sun-deep:#e07b1a; --line:#e6dac6;
+  }
+  html.dark{
+    --bg:#15110c; --paper:#1d1812; --ink:#f4ecdf; --ink2:#beb19b; --ink3:#857a64;
+    --line:#2a2318;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(600px 360px at 90% -8%, #ffd9a0 0%, transparent 60%), var(--bg);
+    color:var(--ink); line-height:1.62; padding:0 0 56px; -webkit-text-size-adjust:100%;
+    min-height:100vh;
+  }
+  html.dark body{ background:radial-gradient(600px 360px at 90% -8%, rgba(224,123,26,.16) 0%, transparent 60%), var(--bg); }
+
+  /* Cabecera */
+  .top{
+    display:flex; align-items:center; gap:11px;
+    max-width:720px; margin:0 auto; padding:16px 20px 10px;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink); }
+  .logo{
+    width:38px; height:38px; border-radius:12px; overflow:hidden; flex:none;
+    box-shadow:0 4px 10px rgba(224,123,26,.4); background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+  }
+  .logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .brand b{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:18px; letter-spacing:-.01em; }
+  .volver{
+    margin-left:auto; font-size:13px; font-weight:700; color:var(--sun-deep);
+    text-decoration:none; padding:7px 13px; border:1px solid var(--line); border-radius:999px;
+    white-space:nowrap; transition:.15s;
+  }
+  .volver:active{ transform:scale(.97); }
+
+  /* Tarjeta de contenido */
+  .card{
+    max-width:720px; margin:8px auto 0; background:var(--paper);
+    border:1px solid var(--line); border-radius:20px; padding:26px 22px;
+  }
+  h1{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:25px; line-height:1.15; letter-spacing:-.02em; }
+  .upd{ color:var(--ink3); font-size:13px; font-weight:600; margin-top:6px; margin-bottom:18px; }
+  .intro{ color:var(--ink2); margin-bottom:6px; }
+  h2{
+    font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px; color:var(--sun-deep);
+    margin-top:26px; margin-bottom:8px; letter-spacing:-.01em;
+  }
+  p{ margin-bottom:11px; }
+  .sub{ font-weight:700; color:var(--ink); margin-top:10px; margin-bottom:6px; }
+  ul{ margin:0 0 11px 0; padding-left:20px; }
+  li{ margin-bottom:7px; }
+  a{ color:var(--sun-deep); font-weight:600; }
+  hr{ border:none; border-top:1px solid var(--line); margin:24px 0; }
+
+  /* Botón final */
+  .foot{ text-align:center; margin-top:26px; }
+  .btn{
+    display:inline-block; background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+    color:#fff; text-decoration:none; font-weight:800; font-size:14.5px;
+    padding:12px 26px; border-radius:999px; box-shadow:0 4px 14px rgba(224,123,26,.35);
+  }
+  .btn:active{ transform:scale(.98); }
+
+  @media (max-width:520px){
+    .card{ border-radius:0; border-left:none; border-right:none; padding:22px 17px; }
+    h1{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <a class="brand" href="/">
+      <span class="logo"><img src="/icon-192.png" alt="Tu Repo"></span>
+      <b>Tu Repo</b>
+    </a>
+    <a class="volver" href="/">← Volver a la app</a>
+  </header>
+
+  <main class="card">
+    <h1>Política de Privacidad de Tu Repo</h1>
+    <p class="upd">Última actualización: 18 de junio de 2026</p>
+
+    <p class="intro">Esta Política de Privacidad describe cómo Tu Repo (“la aplicación”, “nosotros”) recopila, usa y protege la información de las personas que usan la aplicación (“tú”, “el usuario”). Al usar Tu Repo, aceptas las prácticas descritas aquí.</p>
+
+    <h2>1. Uso sin registro</h2>
+    <p>Tu Repo se puede usar de forma anónima. Puedes consultar reportes y crear reportes sin registrarte ni proporcionar datos personales. Los reportes anónimos no se asocian a ninguna identidad.</p>
+
+    <h2>2. Información que recopilamos</h2>
+    <p>Solo recopilamos la información necesaria para que la aplicación funcione:</p>
+
+    <p class="sub">a) Si creas una cuenta (opcional):</p>
+    <ul>
+      <li><b>Registro con correo:</b> guardamos un nombre de usuario elegido por ti y una clave (almacenada de forma cifrada). No usamos tu correo para enviarte publicidad.</li>
+      <li><b>Registro con Google (opcional):</b> si decides iniciar sesión con tu cuenta de Google, recibimos de Google tu dirección de correo electrónico y un identificador básico de tu cuenta, únicamente para crear y reconocer tu cuenta en Tu Repo. No accedemos a tus contactos, archivos, ni a ninguna otra información de tu cuenta de Google. Eliges un nombre de usuario la primera vez; ese es el nombre que verá la comunidad.</li>
+    </ul>
+
+    <p class="sub">b) Contenido que tú generas:</p>
+    <ul>
+      <li>Los reportes que creas (tipo, zona, descripción, y opcionalmente una foto), junto con la fecha y el estado o región seleccionada.</li>
+      <li>Los votos y comentarios que haces sobre reportes.</li>
+    </ul>
+
+    <p class="sub">c) Información técnica básica:</p>
+    <ul>
+      <li>Datos mínimos de funcionamiento que maneja nuestro proveedor de infraestructura (por ejemplo, registros de conexión). No construimos perfiles publicitarios ni vendemos esta información.</li>
+    </ul>
+
+    <p>No recopilamos tu ubicación GPS. La “ciudad” o región se selecciona manualmente por el usuario; no rastreamos tu posición física.</p>
+
+    <h2>3. Cómo usamos la información</h2>
+    <p>Usamos la información únicamente para:</p>
+    <ul>
+      <li>Mostrar los reportes de la comunidad en tiempo real.</li>
+      <li>Mantener tu cuenta, tus Puntos Ciudadanos y tu posición en el ranking (si tienes cuenta).</li>
+      <li>Moderar contenido y mantener la calidad de los reportes.</li>
+      <li>Hacer funcionar y mejorar la aplicación.</li>
+    </ul>
+    <p>No vendemos ni alquilamos tus datos personales a terceros. No usamos tus datos para publicidad.</p>
+
+    <h2>4. Contenido público</h2>
+    <p>Ten en cuenta que los reportes, comentarios, fotos y el nombre de usuario asociado son visibles públicamente para otros usuarios de la aplicación, ya que ese es el propósito de Tu Repo: compartir información comunitaria. No publiques información personal sensible en los reportes.</p>
+
+    <h2>5. Fotos</h2>
+    <p>Si adjuntas una foto a un reporte, esta se almacena en nuestros servidores y se muestra públicamente junto al reporte. Las fotos se eliminan automáticamente después de un tiempo limitado.</p>
+
+    <h2>6. Almacenamiento y proveedores</h2>
+    <p>Tu Repo utiliza servicios de terceros para funcionar, como proveedores de base de datos, almacenamiento e infraestructura (por ejemplo, Supabase y Vercel), y servicios de inicio de sesión (Google, si eliges esa opción). Estos proveedores procesan datos según sus propias políticas de privacidad y medidas de seguridad.</p>
+
+    <h2>7. Tus derechos</h2>
+    <p>Puedes:</p>
+    <ul>
+      <li>Usar la app sin cuenta.</li>
+      <li>Eliminar tus propios reportes (si tienes cuenta y eres el autor).</li>
+      <li>Solicitar la eliminación de tu cuenta y los datos asociados escribiéndonos al correo de contacto más abajo.</li>
+    </ul>
+
+    <h2>8. Menores de edad</h2>
+    <p>Tu Repo no está dirigido a recopilar información de menores de edad. Es una herramienta de información comunitaria de uso general.</p>
+
+    <h2>9. Cambios a esta política</h2>
+    <p>Podemos actualizar esta política ocasionalmente. La fecha de “última actualización” indicará la versión vigente.</p>
+
+    <h2>10. Contacto</h2>
+    <p>Si tienes preguntas sobre esta política o quieres ejercer tus derechos, escríbenos a: <a href="mailto:turepocom@gmail.com">turepocom@gmail.com</a></p>
+
+    <hr>
+    <div class="foot">
+      <a class="btn" href="/">Volver a Tu Repo</a>
+    </div>
+  </main>
+
+</body>
+</html>
