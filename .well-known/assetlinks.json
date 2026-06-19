@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.turepo.app",
+      "sha256_cert_fingerprints": [
+        "5E:CC:A9:60:3A:61:EC:1F:75:61:CC:AA:A8:F3:01:EA:D5:1F:A3:94:92:F1:EC:E5:34:85:78:4F:DF:C2:62:DA"
+      ]
+    }
+  }
+]
