@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eliminar tu cuenta · Tu Repo</title>
+<meta name="description" content="Cómo eliminar tu cuenta de Tu Repo y los datos asociados.">
+<meta name="theme-color" content="#e07b1a">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<script>
+  /* Respeta el tema elegido en la app (mismo dominio); si no hay, usa el del sistema */
+  (function(){
+    try{
+      var t = localStorage.getItem('temaTuRepo');
+      var oscuro = t === 'dark' || (t === null && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      if(oscuro) document.documentElement.classList.add('dark');
+    }catch(e){}
+  })();
+</script>
+<style>
+  :root{
+    --bg:#f4ede0; --paper:#fffaf2; --ink:#221a12; --ink2:#5d5444; --ink3:#8a7a63;
+    --sun:#f2a13b; --sun-deep:#e07b1a; --line:#e6dac6;
+  }
+  html.dark{
+    --bg:#15110c; --paper:#1d1812; --ink:#f4ecdf; --ink2:#beb19b; --ink3:#857a64;
+    --line:#2a2318;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(600px 360px at 90% -8%, #ffd9a0 0%, transparent 60%), var(--bg);
+    color:var(--ink); line-height:1.62; padding:0 0 56px; -webkit-text-size-adjust:100%;
+    min-height:100vh;
+  }
+  html.dark body{ background:radial-gradient(600px 360px at 90% -8%, rgba(224,123,26,.16) 0%, transparent 60%), var(--bg); }
+
+  .top{ display:flex; align-items:center; gap:11px; max-width:720px; margin:0 auto; padding:16px 20px 10px; }
+  .brand{ display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink); }
+  .logo{ width:38px; height:38px; border-radius:12px; overflow:hidden; flex:none; box-shadow:0 4px 10px rgba(224,123,26,.4); background:linear-gradient(140deg,var(--sun),var(--sun-deep)); }
+  .logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .brand b{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:18px; letter-spacing:-.01em; }
+  .volver{ margin-left:auto; font-size:13px; font-weight:700; color:var(--sun-deep); text-decoration:none; padding:7px 13px; border:1px solid var(--line); border-radius:999px; white-space:nowrap; transition:.15s; }
+  .volver:active{ transform:scale(.97); }
+
+  .card{ max-width:720px; margin:8px auto 0; background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:26px 22px; }
+  h1{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:25px; line-height:1.15; letter-spacing:-.02em; }
+  .intro{ color:var(--ink2); margin-top:10px; margin-bottom:6px; }
+  h2{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px; color:var(--sun-deep); margin-top:26px; margin-bottom:8px; letter-spacing:-.01em; }
+  p{ margin-bottom:11px; }
+  ul{ margin:0 0 11px 0; padding-left:20px; }
+  li{ margin-bottom:7px; }
+  a{ color:var(--sun-deep); font-weight:600; }
+  .mailbox{ display:block; margin:14px 0; padding:14px 16px; background:rgba(224,123,26,.10); border:1px solid var(--line); border-radius:14px; font-weight:700; font-size:15px; text-align:center; color:var(--sun-deep); text-decoration:none; }
+  hr{ border:none; border-top:1px solid var(--line); margin:24px 0; }
+  .foot{ text-align:center; margin-top:26px; }
+  .btn{ display:inline-block; background:linear-gradient(140deg,var(--sun),var(--sun-deep)); color:#fff; text-decoration:none; font-weight:800; font-size:14.5px; padding:12px 26px; border-radius:999px; box-shadow:0 4px 14px rgba(224,123,26,.35); }
+  .btn:active{ transform:scale(.98); }
+
+  @media (max-width:520px){
+    .card{ border-radius:0; border-left:none; border-right:none; padding:22px 17px; }
+    h1{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <a class="brand" href="/">
+      <span class="logo"><img src="/icon-192.png" alt="Tu Repo"></span>
+      <b>Tu Repo</b>
+    </a>
+    <a class="volver" href="/">← Volver a la app</a>
+  </header>
+
+  <main class="card">
+    <h1>Eliminar tu cuenta y tus datos</h1>
+    <p class="intro">Aquí te explicamos cómo eliminar tu cuenta de Tu Repo y los datos asociados. Recuerda que puedes usar la app de forma anónima, sin cuenta.</p>
+
+    <h2>1. Borra tu propio contenido (desde la app)</h2>
+    <p>Si tienes cuenta y eres el autor, puedes eliminar tus propios reportes directamente dentro de la aplicación, en cualquier momento.</p>
+
+    <h2>2. Solicitar la eliminación de tu cuenta</h2>
+    <p>Para eliminar por completo tu cuenta y los datos asociados, escríbenos indicando tu <b>nombre de usuario</b> y el asunto <b>“Eliminar cuenta”</b>:</p>
+    <a class="mailbox" href="mailto:turepocom@gmail.com?subject=Eliminar%20cuenta">turepocom@gmail.com</a>
+    <p>Procesamos tu solicitud en un plazo máximo de <b>30 días</b>.</p>
+
+    <h2>3. Qué datos se eliminan</h2>
+    <ul>
+      <li>Tu <b>cuenta</b>, tu <b>nombre de usuario</b>, tu <b>perfil</b> y tus <b>Puntos Ciudadanos</b>.</li>
+      <li>Tus <b>votos</b> y <b>comentarios</b>.</li>
+      <li>Tus <b>reportes</b>: puedes borrarlos tú mismo desde la app; los que queden se desvinculan de tu identidad (pueden conservarse de forma anónima como información comunitaria).</li>
+      <li>Las <b>fotos</b> que hayas subido se eliminan automáticamente después de un tiempo limitado.</li>
+    </ul>
+
+    <h2>4. Contacto</h2>
+    <p>Si tienes dudas sobre la eliminación de tu cuenta o tus datos, escríbenos a <a href="mailto:turepocom@gmail.com">turepocom@gmail.com</a>. Consulta también nuestra <a href="/privacidad">Política de Privacidad</a>.</p>
+
+    <hr>
+    <div class="foot">
+      <a class="btn" href="/">Volver a Tu Repo</a>
+    </div>
+  </main>
+
+</body>
+</html>
