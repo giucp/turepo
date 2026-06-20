@@ -362,6 +362,19 @@
   .lb-actions .fbtn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:#fff;font-size:15px;font-weight:700;padding:4px}
   .lb-actions .fbtn svg{width:22px;height:22px}
   .lb-actions .fbtn.liked{color:#ff6b6b}
+  /* ===== Selector de punto en el mapa (mira de centro) ===== */
+  .pickmap{position:fixed;inset:0;z-index:900;display:none;flex-direction:column;background:var(--bg)}
+  .pickmap.open{display:flex}
+  .pk-map{position:absolute;inset:0;z-index:1}
+  .pk-bar{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:12px;right:12px;z-index:10;display:flex;gap:8px}
+  .pk-search{flex:1;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;box-shadow:0 4px 14px rgba(60,40,15,.18)}
+  .pk-x{width:46px;border:1px solid var(--line);background:var(--paper);border-radius:12px;color:var(--ink2);font-size:17px;cursor:pointer;flex:none}
+  .pk-cross{position:absolute;left:50%;top:50%;z-index:5;transform:translate(-50%,-100%);pointer-events:none;filter:drop-shadow(0 5px 6px rgba(0,0,0,.4))}
+  .pk-cross svg{width:38px;height:44px;display:block}
+  .pk-foot{position:absolute;left:0;right:0;bottom:0;z-index:10;padding:16px 14px calc(env(safe-area-inset-bottom) + 16px);background:linear-gradient(to top,var(--bg) 62%,transparent);display:flex;flex-direction:column;gap:10px}
+  .pk-hint{text-align:center;font-size:12.5px;color:var(--ink3);font-weight:600}
+  .pk-foot .btn{width:100%}
+  .leaflet-container{font-family:'DM Sans',sans-serif;background:var(--bg)}
   .lightbox img{display:block;max-width:calc(100vw - 40px);max-height:calc(100vh - 90px);object-fit:contain;border-radius:14px;
     box-shadow:0 10px 40px rgba(0,0,0,.5)}
   .lb-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:42px;height:42px;
@@ -1980,6 +1993,86 @@ function abrirFoto(src, foto){
 }
 function cerrarFoto(){ const lb=$('lightbox'); if(lb) lb.classList.remove('open'); }
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarFoto(); });
+
+/* ===== MAPA · componente para elegir punto (sin GPS) ===== */
+const ESTADO_COORD = {
+  'Amazonas':[5.663,-67.625],'Anzoátegui':[10.133,-64.683],'Apure':[7.889,-67.472],
+  'Aragua':[10.247,-67.596],'Barinas':[8.623,-70.208],'Bolívar':[8.122,-63.549],
+  'Carabobo':[10.162,-68.008],'Cojedes':[9.663,-68.587],'Delta Amacuro':[9.061,-62.046],
+  'Distrito Capital':[10.491,-66.902],'Falcón':[11.402,-69.673],'Guárico':[9.911,-67.353],
+  'La Guaira':[10.601,-66.931],'Lara':[10.065,-69.323],'Mérida':[8.590,-71.144],
+  'Miranda':[10.340,-67.041],'Monagas':[9.749,-63.184],'Nueva Esparta':[10.961,-63.852],
+  'Portuguesa':[9.042,-69.748],'Sucre':[10.456,-64.179],'Táchira':[7.767,-72.225],
+  'Trujillo':[9.368,-70.436],'Yaracuy':[10.339,-68.741],'Zulia':[10.642,-71.638]
+};
+let _leafletP=null;
+function cargarLeaflet(){
+  if(window.L) return Promise.resolve();
+  if(_leafletP) return _leafletP;
+  _leafletP=new Promise((res,rej)=>{
+    const css=document.createElement('link'); css.rel='stylesheet';
+    css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'; document.head.appendChild(css);
+    const js=document.createElement('script');
+    js.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';
+    js.onload=()=>res(); js.onerror=rej; document.head.appendChild(js);
+  });
+  return _leafletP;
+}
+function mapTiles(){
+  const dark=document.body.classList.contains('dark');
+  return L.tileLayer(dark
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    {maxZoom:19, attribution:'© OpenStreetMap © CARTO'});
+}
+async function geoBuscar(q){
+  try{
+    const u=`https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=es&countrycodes=ve&q=${encodeURIComponent(q+', '+estadoActual+', Venezuela')}`;
+    const r=await fetch(u); const j=await r.json();
+    return (j&&j[0]) ? {lat:parseFloat(j[0].lat), lng:parseFloat(j[0].lon)} : null;
+  }catch(e){ return null; }
+}
+async function geoZona(lat,lng){
+  try{
+    const u=`https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&accept-language=es&lat=${lat}&lon=${lng}`;
+    const r=await fetch(u); const a=(await r.json()).address||{};
+    return a.neighbourhood||a.suburb||a.quarter||a.residential||a.village||a.town||a.city_district||a.road||a.city||'';
+  }catch(e){ return ''; }
+}
+function pickPunto(){
+  return new Promise(async (resolve)=>{
+    await cargarLeaflet();
+    let ov=$('pickmap');
+    if(!ov){ ov=document.createElement('div'); ov.id='pickmap'; ov.className='pickmap'; document.body.appendChild(ov); }
+    ov.innerHTML=`
+      <div class="pk-bar"><input id="pkSearch" class="pk-search" placeholder="Buscar dirección o lugar…" autocomplete="off">
+        <button class="pk-x" id="pkCancel" aria-label="Cancelar">✕</button></div>
+      <div id="pkMap" class="pk-map"></div>
+      <div class="pk-cross"><svg viewBox="0 0 24 24" fill="#e07b1a" stroke="#ffffff" stroke-width="1.5"><path d="M12 22s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="11" r="2.6" fill="#ffffff" stroke="none"/></svg></div>
+      <div class="pk-foot"><div class="pk-hint">Mueve el mapa para centrar el punto exacto</div>
+        <button class="btn btn-prim" id="pkOk">Confirmar ubicación</button></div>`;
+    ov.classList.add('open');
+    const c=ESTADO_COORD[estadoActual]||[8.62,-70.20];
+    const map=L.map('pkMap',{zoomControl:false,attributionControl:true}).setView(c,14);
+    mapTiles().addTo(map);
+    setTimeout(()=>map.invalidateSize(),120);
+    const search=$('pkSearch');
+    search.addEventListener('keydown', async e=>{
+      if(e.key!=='Enter') return; e.preventDefault();
+      const q=search.value.trim(); if(!q) return;
+      const p=await geoBuscar(q);
+      if(p) map.flyTo([p.lat,p.lng],16); else toast('No encontré ese lugar');
+    });
+    function cleanup(){ try{ map.remove(); }catch(_){} ov.classList.remove('open'); ov.innerHTML=''; }
+    $('pkCancel').onclick=()=>{ cleanup(); resolve(null); };
+    $('pkOk').onclick=async ()=>{
+      const cc=map.getCenter();
+      const ok=$('pkOk'); ok.textContent='Ubicando…'; ok.disabled=true;
+      const zona=await geoZona(cc.lat,cc.lng);
+      cleanup(); resolve({lat:+cc.lat.toFixed(6), lng:+cc.lng.toFixed(6), zona});
+    };
+  });
+}
 
 async function cargarFotos(){
   pintarFotoFiltros();
