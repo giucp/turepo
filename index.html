@@ -1037,6 +1037,7 @@ function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $(id).classList.add('active');
   document.querySelectorAll('.nbtn').forEach(b=>b.classList.toggle('on', b.dataset.s===id));
+  const fab=document.querySelector('.fab'); if(fab) fab.style.display=(id==='s-mapa')?'none':'';
   document.querySelector('.screens').scrollTop=0;
   if(id==='s-inicio')  cargarInicio();
   if(id==='s-estatus') setEstatus(estatusTipo);
