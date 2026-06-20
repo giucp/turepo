@@ -375,6 +375,28 @@
   .pk-hint{text-align:center;font-size:12.5px;color:var(--ink3);font-weight:600}
   .pk-foot .btn{width:100%}
   .leaflet-container{font-family:'DM Sans',sans-serif;background:var(--bg)}
+  /* ===== Pantalla Mapa ===== */
+  .screens{position:relative}
+  #s-mapa{position:absolute;inset:0;padding:0}
+  #mapaMap{position:absolute;inset:0;z-index:1}
+  .mapa-verdict{position:absolute;top:12px;left:12px;right:12px;z-index:500;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:11px 14px;box-shadow:0 6px 20px rgba(60,40,15,.16);display:flex;align-items:center;gap:9px;font-family:'Bricolage Grotesque';font-weight:800;font-size:15.5px;color:var(--ink)}
+  .mapa-verdict .mapa-count{margin-left:auto;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--ink3)}
+  .mapa-filtros{position:absolute;left:0;right:0;bottom:16px;z-index:500;display:flex;gap:8px;overflow-x:auto;padding:0 12px;scrollbar-width:none}
+  .mapa-filtros::-webkit-scrollbar{display:none}
+  .mapa-filtros .fchip{flex:none;background:var(--paper);box-shadow:0 2px 10px rgba(31,24,19,.14)}
+  .mapa-filtros .fchip.off{opacity:.45}
+  .mapa-fab{position:absolute;right:14px;bottom:62px;z-index:520;height:48px;padding:0 16px;border-radius:16px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));color:#fff;border:none;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;box-shadow:0 10px 24px -8px rgba(224,123,26,.65);cursor:pointer}
+  .mapa-fab svg{width:19px;height:19px}
+  .mpin{position:relative;width:38px;height:46px}
+  .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff;border:2.5px solid var(--paper);box-shadow:0 4px 11px rgba(31,24,19,.4)}
+  .mpin .tile svg{width:18px;height:18px;stroke-width:2.1}
+  .mpin .tip{position:absolute;left:13px;top:30px;width:12px;height:12px;transform:rotate(45deg);border-radius:0 0 3px 0}
+  .mpin.s-ok .tile,.mpin.s-ok .tip{background:var(--okC)}
+  .mpin.s-warn .tile,.mpin.s-warn .tip{background:var(--warnC)}
+  .mpin.s-bad .tile,.mpin.s-bad .tip{background:var(--badC)}
+  .mpin.s-mid .tile,.mpin.s-mid .tip{background:var(--ink3)}
+  .mpin.s-acc .tile,.mpin.s-acc .tip{background:var(--sun-deep)}
+  #s-mapa .leaflet-bottom{margin-bottom:64px}
   .lightbox img{display:block;max-width:calc(100vw - 40px);max-height:calc(100vh - 90px);object-fit:contain;border-radius:14px;
     box-shadow:0 10px 40px rgba(0,0,0,.5)}
   .lb-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:42px;height:42px;
@@ -653,6 +675,7 @@
         <div class="fchip"    data-t="via"      onclick="setEstatus('via')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="20" rx="2.4"/><circle cx="12" cy="6.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="17.6" r="1.25" fill="currentColor" stroke="none"/></svg> Vías</div>
         <div class="fchip" data-t="alerta" onclick="setEstatus('alerta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Alertas</div>
       </div>
+      <button class="btn btn-ghost" style="width:100%;margin:2px 0 10px" onclick="go('s-ofertas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;vertical-align:-3px;margin-right:6px"><circle cx="9" cy="21" r="1.6"/><circle cx="19" cy="21" r="1.6"/><path d="M1.5 2.5h3l3.1 13.4a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22.5 7H6"/></svg>Ver precios y ofertas</button>
       <div id="estatus-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
 
@@ -662,6 +685,13 @@
       <div class="sec-title" id="ofertas-titulo" style="margin-top:12px">Caza-ofertas del día</div>
       <div class="filters"><div class="fchip on" onclick="setOrden('ranking',this)">Ranking de precios</div><div class="fchip" onclick="setOrden('reciente',this)">Más reciente</div></div>
       <div id="ofertas-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
+    </section>
+
+    <section class="screen" id="s-mapa">
+      <div id="mapaMap"></div>
+      <div class="mapa-verdict"><span class="ld ld-ok" id="mapaDot"></span><span id="mapaWord">Leyendo el mapa…</span><span class="mapa-count" id="mapaCount"></span></div>
+      <button class="mapa-fab" onclick="mapaReportarAqui()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Reportar aquí</button>
+      <div class="mapa-filtros" id="mapaFiltros"></div>
     </section>
 
     <section class="screen" id="s-noticias">
@@ -711,7 +741,7 @@
   <nav class="nav">
     <button class="nbtn on" data-s="s-inicio" onclick="go('s-inicio')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Inicio</span></button>
     <button class="nbtn" data-s="s-estatus" onclick="go('s-estatus')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Estatus</span></button>
-    <button class="nbtn" data-s="s-ofertas" onclick="go('s-ofertas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.6"/><circle cx="19" cy="21" r="1.6"/><path d="M1.5 2.5h3l3.1 13.4a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22.5 7H6"/></svg><span>Ofertas</span></button>
+    <button class="nbtn" data-s="s-mapa" onclick="go('s-mapa')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3z"/><path d="M9 3v15M15 6v15"/></svg><span>Mapa</span></button>
     <button class="nbtn" data-s="s-noticias" onclick="go('s-noticias')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v15H6a2 2 0 0 1-2-2V5z"/><path d="M17 9h3v9a2 2 0 0 1-2 2"/><path d="M7 9h7M7 12.5h7M7 16h5"/></svg><span>Noticias</span></button>
     <button class="nbtn" data-s="s-yo" onclick="go('s-yo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Yo</span></button>
   </nav>
@@ -1006,6 +1036,7 @@ function go(id){
     const tit=$('ofertas-titulo'); if(tit) tit.textContent='Caza-ofertas del día';
     cargarOfertas(); }
   if(id==='s-noticias') cargarNoticias();
+  if(id==='s-mapa')     cargarMapa();
   if(id==='s-yo')      cargarYo();
   if(id==='s-ranking') cargarRanking();
   if(id==='s-fotos')   cargarFotos();
@@ -1458,7 +1489,7 @@ function renderChooser(){
 }
   /* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
 let svcTipo, svcStep, svcSel;
-function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined,detalle:'',lat:null,lng:null}; renderServicio(); }
+function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:(_puntoMapa&&_puntoMapa.zona)||'',sit:undefined,detalle:'',lat:_puntoMapa?_puntoMapa.lat:null,lng:_puntoMapa?_puntoMapa.lng:null}; _puntoMapa=null; renderServicio(); }
 function renderServicio(){
   const cfg = SERVICIOS[svcTipo];
   const esOtra = svcSel.sit!==undefined && cfg.sit[svcSel.sit][2]==='otro';
@@ -2077,6 +2108,78 @@ function pickPunto(){
       cleanup(); resolve({lat:+cc.lat.toFixed(6), lng:+cc.lng.toFixed(6), zona});
     };
   });
+}
+
+/* ===== Pantalla Mapa ===== */
+let _mapa=null, _mapaCapa=null, _mapaRep=[], _mapaFiltro=new Set(), _puntoMapa=null;
+function mapaSev(r){
+  if(r.tipo==='oferta'||r.tipo==='carero') return 'acc';
+  const s=sevDe(r); return (s==='bad'||s==='warn'||s==='ok') ? s : 'mid';
+}
+function mapaPinIcon(r){
+  const ic = ICONO_TIPO_SVG[r.tipo]||ICONS.bolt;
+  return L.divIcon({className:'',iconSize:[38,46],iconAnchor:[19,42],popupAnchor:[0,-42],
+    html:`<div class="mpin s-${mapaSev(r)}"><div class="tile">${ic}</div><div class="tip"></div></div>`});
+}
+async function cargarMapa(){
+  await cargarLeaflet();
+  const centro = ESTADO_COORD[estadoActual]||[8.62,-70.20];
+  if(!_mapa){
+    _mapa=L.map('mapaMap',{zoomControl:false,attributionControl:true}).setView(centro,13);
+    mapTiles().addTo(_mapa);
+    _mapaCapa=L.layerGroup().addTo(_mapa);
+  } else { _mapa.setView(centro,13); }
+  setTimeout(()=>{ try{ _mapa.invalidateSize(); }catch(_){} },150);
+  try{
+    const { data }=await db.from('reportes_activos').select('*').eq('region',estadoActual).not('lat','is',null);
+    _mapaRep=data||[];
+  }catch(e){ _mapaRep=[]; }
+  pintarMapa(); pintarMapaVerdict(); pintarMapaFiltros();
+}
+function pintarMapa(){
+  if(!_mapaCapa) return;
+  _mapaCapa.clearLayers();
+  _mapaRep.forEach(r=>{
+    if(_mapaFiltro.has(r.tipo) || r.lat==null || r.lng==null) return;
+    if(r.estado==='robo'){ L.circle([r.lat,r.lng],{radius:180,color:'#d6452e',weight:1,fillColor:'#d6452e',fillOpacity:.12,opacity:.4}).addTo(_mapaCapa); }
+    const m=L.marker([r.lat,r.lng],{icon:mapaPinIcon(r)});
+    m.on('click',()=>abrirFichaMapa(r));
+    _mapaCapa.addLayer(m);
+  });
+}
+function pintarMapaVerdict(){
+  const data=_mapaRep.filter(r=>r.tipo!=='oferta'&&r.tipo!=='carero');
+  let ok=0,wa=0,bad=0;
+  data.forEach(r=>{ const s=sevDe(r); if(s==='ok')ok++; else if(s==='warn')wa++; else if(s==='bad')bad++; });
+  const tot=ok+wa+bad; let word,sev;
+  if(!tot){ word='Sin reportes en el mapa'; sev='ok'; }
+  else if(!bad&&!wa){ word='Todo en orden'; sev='ok'; }
+  else if(!bad){ word='Con algunos avisos'; sev='warn'; }
+  else if(bad<=2){ word='Hay alertas activas'; sev='warn'; }
+  else { word='Jornada complicada'; sev='bad'; }
+  const d=$('mapaDot'); if(d) d.className='ld ld-'+sev;
+  const w=$('mapaWord'); if(w) w.textContent=word;
+  const c=$('mapaCount'); if(c) c.textContent=_mapaRep.length?`${_mapaRep.length} en el mapa`:'';
+}
+function pintarMapaFiltros(){
+  const cont=$('mapaFiltros'); if(!cont) return;
+  const defs=[['luz','Luz','bolt'],['gasolina','Gasolina','pump'],['via','Vías','traffic'],['alerta','Alertas','alert'],['oferta','Precios','cart']];
+  cont.innerHTML=defs.map(d=>{
+    const n=_mapaRep.filter(r=>r.tipo===d[0]).length;
+    return `<button class="fchip ${_mapaFiltro.has(d[0])?'off':''}" onclick="mapaToggleFiltro('${d[0]}')">${ICONS[d[2]]} ${d[1]} <span style="color:var(--ink3)">${n}</span></button>`;
+  }).join('');
+}
+function mapaToggleFiltro(t){ _mapaFiltro.has(t)?_mapaFiltro.delete(t):_mapaFiltro.add(t); pintarMapa(); pintarMapaFiltros(); }
+function abrirFichaMapa(r){
+  $('sheet').innerHTML=`<div class="grip"></div>`+postReporte(r,'inicio')+
+    `<div class="actions" style="margin-top:14px"><button class="btn btn-prim" onclick="closeReport()">Cerrar</button></div>`;
+  $('modal').classList.add('open');
+}
+async function mapaReportarAqui(){
+  const p=await pickPunto();
+  if(!p) return;
+  _puntoMapa=p;
+  openReport();
 }
 
 async function cargarFotos(){
