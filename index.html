@@ -2062,7 +2062,7 @@ function openSubirFoto(){ fotoBlob=null; fotoCatSel=''; fotoDesc=''; $('modal').
 function renderSubirFoto(){
   $('sheet').innerHTML=`<div class="grip"></div>
     <h3>Subir una foto</h3>
-    <div class="q">Una imagen de lo que pasa en ${estadoActual}. La revisamos antes de publicarla.</div>
+    <div class="q">Una imagen de lo que pasa en ${estadoActual}. Se publica en la galería tras un filtro rápido.</div>
     <div class="field"><label>Tu foto</label>
       <div class="crow" style="margin-top:0">
         <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('fotoCam').click()">${ICONS.camera} Tomar foto</button>
@@ -2081,7 +2081,7 @@ function renderSubirFoto(){
     </div>
     <div class="actions" style="margin-top:8px">
       <button class="btn btn-ghost" onclick="closeReport()">Cerrar</button>
-      <button class="btn btn-prim" id="fotoSendBtn" onclick="enviarFoto()" ${fotoBlob?'':'disabled'}>Enviar a revisión</button>
+      <button class="btn btn-prim" id="fotoSendBtn" onclick="enviarFoto()" ${fotoBlob?'':'disabled'}>Enviar foto</button>
     </div>`;
   if(fotoBlob){ const p=$('fotoPreview'); if(p){ p.src=URL.createObjectURL(fotoBlob); p.classList.add('show'); } }
 }
@@ -2138,7 +2138,7 @@ async function enviarFoto(){
     if(insErr){ await db.storage.from('fotos').remove([path]).catch(()=>{}); throw insErr; }
     marcarCooldown('foto');
     $('sheet').innerHTML=`<div class="grip"></div><div class="done"><div class="check">✓</div>
-      <h3>¡Foto enviada!</h3><p>Gracias por avisarle a ${estadoActual}. Tu foto está en revisión y aparecerá en la galería en cuanto sea aprobada.</p></div>
+      <h3>¡Foto enviada!</h3><p>Gracias por avisarle a ${estadoActual}. Aparecerá en la galería en unos minutos.</p></div>
       <div class="actions" style="margin-top:20px"><button class="btn btn-prim" onclick="closeReport()">Entendido</button></div>`;
   }catch(e){ renderAviso((e&&e.message)||'No se pudo subir la foto. Intenta de nuevo.'); }
 }
