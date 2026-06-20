@@ -357,6 +357,8 @@
   .lightbox{position:fixed;inset:0;background:rgba(20,15,8,.92);z-index:200;display:none;
     align-items:center;justify-content:center;padding:20px;animation:fade .2s ease}
   .lightbox.open{display:flex}
+  .lb-actions{position:absolute;left:0;right:0;bottom:24px;display:flex;justify-content:center;gap:12px;z-index:1}
+  .lb-actions .fbtn{background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.3)}
   .lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;
     box-shadow:0 10px 40px rgba(0,0,0,.5)}
   .lb-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:42px;height:42px;
@@ -1937,7 +1939,12 @@ let fotoBlob = null, fotoCatSel = '', fotoDesc = '';
 
 function escapeHtml(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function urlFoto(p){ try{ return db.storage.from('fotos').getPublicUrl(p).data.publicUrl; }catch(e){ return ''; } }
-function abrirFotoRep(p){ if(p) abrirFoto(urlFoto(p)); }
+async function abrirFotoRep(p){
+  if(!p) return;
+  let foto=null;
+  try{ if(db){ const { data }=await db.from('fotos').select('id,corazones,comentarios_n').eq('storage_path',p).eq('estado','aprobada').maybeSingle(); foto=data; } }catch(_){}
+  abrirFoto(urlFoto(p), foto);
+}
 
 function pintarFotoFiltros(){
   const cont=$('foto-filtros'); if(!cont) return;
@@ -1947,16 +1954,25 @@ function pintarFotoFiltros(){
   }).join('');
 }
 function setFotoFiltro(c){ fotoCatFiltro = (c==='todas') ? null : c; cargarFotos(); }
-function abrirFoto(src){
+function abrirFoto(src, foto){
   let lb=$('lightbox');
   if(!lb){
     lb=document.createElement('div'); lb.id='lightbox'; lb.className='lightbox';
     lb.onclick=cerrarFoto;
     lb.innerHTML=`<button class="lb-close" onclick="cerrarFoto()" aria-label="Cerrar">✕</button>`+
-      `<img id="lb-img" alt="foto ampliada" onclick="event.stopPropagation()">`;
+      `<img id="lb-img" alt="foto ampliada" onclick="event.stopPropagation()">`+
+      `<div id="lb-actions" class="lb-actions" onclick="event.stopPropagation()"></div>`;
     document.body.appendChild(lb);
   }
   $('lb-img').src=src;
+  const act=$('lb-actions');
+  if(act){
+    if(foto && foto.id){
+      act.innerHTML=`<button class="fbtn ${localStorage.getItem('like_'+foto.id)?'liked':''}" id="lkb-${foto.id}" onclick="likeFoto('${foto.id}')">${ICONS.heart} <span id="lk-${foto.id}">${foto.corazones||0}</span></button>`+
+        `<button class="fbtn ${(foto.comentarios_n||0)>0?'has-cm':''}" onclick="cerrarFoto();openComentarios('foto','${foto.id}')">${ICONS.chat} <span id="cn-${foto.id}">${foto.comentarios_n||0}</span></button>`;
+      act.style.display='flex';
+    } else { act.innerHTML=''; act.style.display='none'; }
+  }
   lb.classList.add('open');
 }
 function cerrarFoto(){ const lb=$('lightbox'); if(lb) lb.classList.remove('open'); }
