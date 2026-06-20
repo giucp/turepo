@@ -355,11 +355,14 @@
   .mbtn.ok{background:#def0e3;color:#2c7a3e} .mbtn.no{background:#fbe3e1;color:#b5322a}
   /* === Lightbox de fotos === */
   .lightbox{position:fixed;inset:0;background:rgba(20,15,8,.92);z-index:200;display:none;
-    flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;animation:fade .2s ease}
+    align-items:center;justify-content:center;padding:20px;animation:fade .2s ease}
   .lightbox.open{display:flex}
-  .lb-actions{display:flex;justify-content:center;gap:12px;flex:none}
-  .lb-actions .fbtn{background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.3)}
-  .lightbox img{max-width:100%;max-height:calc(100% - 64px);object-fit:contain;border-radius:14px;
+  .lb-figure{position:relative;display:inline-flex}
+  .lb-actions{position:absolute;right:12px;bottom:12px;display:flex;gap:8px;z-index:1}
+  .lb-actions .fbtn{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .lb-actions .fbtn svg{width:18px;height:18px}
+  .lb-actions .fbtn.liked{color:#ff6b6b}
+  .lightbox img{display:block;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);object-fit:contain;border-radius:14px;
     box-shadow:0 10px 40px rgba(0,0,0,.5)}
   .lb-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:42px;height:42px;
     border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#fff;font-size:20px;font-weight:700;
@@ -1960,8 +1963,8 @@ function abrirFoto(src, foto){
     lb=document.createElement('div'); lb.id='lightbox'; lb.className='lightbox';
     lb.onclick=cerrarFoto;
     lb.innerHTML=`<button class="lb-close" onclick="cerrarFoto()" aria-label="Cerrar">✕</button>`+
-      `<img id="lb-img" alt="foto ampliada" onclick="event.stopPropagation()">`+
-      `<div id="lb-actions" class="lb-actions" onclick="event.stopPropagation()"></div>`;
+      `<div class="lb-figure" onclick="event.stopPropagation()"><img id="lb-img" alt="foto ampliada">`+
+      `<div id="lb-actions" class="lb-actions"></div></div>`;
     document.body.appendChild(lb);
   }
   $('lb-img').src=src;
