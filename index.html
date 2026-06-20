@@ -1473,8 +1473,7 @@ function renderServicio(){
         <div class="warn" id="ubWarn">Solo letras, números y hasta 2 emojis. Sin groserías.</div>
         <div class="suggs" id="ubSuggs"></div>
         <div class="sugg-hint">Escribe el nombre. Si ya existe, tócalo en las sugerencias.</div>
-      </div>
-      <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="svcMapaPick()">${svcSel.lat!=null?'📍 Ubicación marcada en el mapa ✓':'📍 Marcar en el mapa (opcional)'}</button>`;
+      </div>`;
   } else if(svcStep===1){
     body=`<h3>¿Cuál es la situación?</h3><div class="q">Toca lo que pasa · paso 2 de ${total}</div>
       <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>`;
@@ -1505,13 +1504,6 @@ function svcUb(v){
 }
 function svcUsarSugg(s){ svcSel.ub=s; const el=$('ubInput'); if(el){el.value=s; svcUb(s);} }
 function svcPick(k,i){ svcSel[k]=i; renderServicio(); }
-async function svcMapaPick(){
-  const p=await pickPunto();
-  if(!p) return;
-  svcSel.lat=p.lat; svcSel.lng=p.lng;
-  if(p.zona) svcSel.ub=p.zona;     // autocompleta la zona con el sector del punto
-  renderServicio();
-}
 function svcDetalle(v){
   svcSel.detalle=v;
   const bad=textoNoPermitido(v);
