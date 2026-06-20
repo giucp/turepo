@@ -27,13 +27,14 @@ PROMPT = (
     "ofertas, comercios, etc.\n\n"
     "Evalúa la imagen y responde SOLO un JSON válido (sin texto extra) con la forma:\n"
     '{"veredicto":"aprobar|rechazar|dudoso","razon":"motivo breve"}\n\n'
-    "Reglas:\n"
-    "- rechazar: contenido sexual o desnudez, violencia gráfica o gore, símbolos de odio, "
-    "o spam/publicidad sin relación con la comunidad.\n"
-    "- aprobar: foto real de una situación cotidiana o comunitaria, un lugar, una cola, un "
-    "comercio, precios, calles, etc. (aunque sea de baja calidad).\n"
-    "- dudoso: si no puedes determinarlo con confianza.\n"
-    'Ante la duda usa "dudoso": un humano la revisará.'
+    "Reglas (sé CONSERVADOR con 'rechazar', porque rechazar BORRA la foto):\n"
+    "- rechazar: SOLO si hay contenido claramente prohibido: sexual o desnudez, violencia "
+    "gráfica o gore, símbolos de odio, o spam/publicidad evidente.\n"
+    "- aprobar: foto real de una situación cotidiana o comunitaria (un lugar, una cola, un "
+    "comercio, precios, calles, etc.), aunque sea de baja calidad.\n"
+    "- dudoso: para TODO lo demás — capturas de pantalla, imágenes fuera de tema, o si no "
+    "estás seguro. Un humano lo revisará.\n"
+    'Ante cualquier duda usa "dudoso", NUNCA "rechazar".'
 )
 
 
