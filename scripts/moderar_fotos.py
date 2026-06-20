@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import json
 import time
 import base64
@@ -8,14 +9,15 @@ import requests
 
 SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
 SERVICE_KEY  = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-GEMINI_KEY   = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+GROQ_KEY     = os.environ["GROQ_API_KEY"]
+# Modelo de visión de Groq (configurable por si cambia el nombre)
+GROQ_MODEL   = os.environ.get("GROQ_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
 # Por seguridad arranca en SIMULACRO. Para moderar de verdad: DRY_RUN=false
 DRY_RUN = os.environ.get("DRY_RUN", "true").strip().lower() != "false"
 
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 TIMEOUT = 45
-MAX_FOTOS = 25            # por corrida (respeta la capa gratis de Gemini)
+MAX_FOTOS = 25            # por corrida
 
 SB = {"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}", "Content-Type": "application/json"}
 
@@ -33,13 +35,6 @@ PROMPT = (
     "- dudoso: si no puedes determinarlo con confianza.\n"
     'Ante la duda usa "dudoso": un humano la revisará.'
 )
-
-SAFETY = [
-    {"category": c, "threshold": "BLOCK_NONE"} for c in (
-        "HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH",
-        "HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_DANGEROUS_CONTENT",
-    )
-]
 
 
 def pendientes():
@@ -61,42 +56,44 @@ def bajar_imagen(storage_path):
     return ct, base64.b64encode(r.content).decode("ascii")
 
 
-def gemini_call(body):
-    """POST a Gemini con reintentos ante 429/503; en error muestra el cuerpo real."""
-    esperas = [8, 20, 40]   # backoff entre reintentos
+def groq_call(messages):
+    """POST a Groq (API estilo OpenAI) con reintentos ante 429/503."""
+    body = {"model": GROQ_MODEL, "messages": messages, "temperature": 0, "max_tokens": 200}
+    headers = {"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"}
+    esperas = [8, 20, 40]
     ultimo = None
     for intento in range(len(esperas) + 1):
-        r = requests.post(GEMINI_URL, params={"key": GEMINI_KEY}, json=body, timeout=TIMEOUT)
+        r = requests.post(GROQ_URL, headers=headers, json=body, timeout=TIMEOUT)
         if r.status_code in (429, 503):
             ultimo = r
             if intento < len(esperas):
-                print(f"    {r.status_code} de Gemini, reintento en {esperas[intento]}s...", file=sys.stderr)
+                print(f"    {r.status_code} de Groq, reintento en {esperas[intento]}s...", file=sys.stderr)
                 time.sleep(esperas[intento])
                 continue
         if not r.ok:
-            raise RuntimeError(f"Gemini HTTP {r.status_code}: {r.text[:400]}")
+            raise RuntimeError(f"Groq HTTP {r.status_code}: {r.text[:400]}")
         return r.json()
-    raise RuntimeError(f"Gemini HTTP {ultimo.status_code} tras reintentos: {ultimo.text[:400]}")
+    raise RuntimeError(f"Groq HTTP {ultimo.status_code} tras reintentos: {ultimo.text[:400]}")
 
 
-def moderar(ct, b64):
-    body = {
-        "contents": [{"parts": [
-            {"text": PROMPT},
-            {"inline_data": {"mime_type": ct, "data": b64}},
-        ]}],
-        "safetySettings": SAFETY,
-        "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
-    }
-    cands = gemini_call(body).get("candidates") or []
-    if not cands:
-        return "dudoso", "Gemini no devolvió veredicto (posible bloqueo)"
-    txt = cands[0]["content"]["parts"][0]["text"]
-    data = json.loads(txt)
+def parse_veredicto(txt):
+    # extrae el primer objeto JSON aunque venga con texto o ```fences``` alrededor
+    m = re.search(r"\{.*\}", txt, re.S)
+    data = json.loads(m.group(0)) if m else {}
     v = (data.get("veredicto") or "").strip().lower()
     if v not in ("aprobar", "rechazar", "dudoso"):
         v = "dudoso"
     return v, (data.get("razon") or "").strip()
+
+
+def moderar(ct, b64):
+    messages = [{"role": "user", "content": [
+        {"type": "text", "text": PROMPT},
+        {"type": "image_url", "image_url": {"url": f"data:{ct};base64,{b64}"}},
+    ]}]
+    j = groq_call(messages)
+    txt = j["choices"][0]["message"]["content"]
+    return parse_veredicto(txt)
 
 
 def aprobar(fid):
@@ -121,7 +118,7 @@ def rechazar(fid, storage_path):
 
 if __name__ == "__main__":
     modo = "SIMULACRO (no cambia nada)" if DRY_RUN else "EN VIVO"
-    print(f"Moderación de fotos · modo {modo} · modelo {GEMINI_MODEL}")
+    print(f"Moderación de fotos · modo {modo} · modelo {GROQ_MODEL}")
     try:
         fotos = pendientes()
     except Exception as e:
