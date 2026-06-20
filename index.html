@@ -398,14 +398,16 @@
   .mapa-fab{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:520;height:48px;padding:0 18px;border-radius:999px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));color:#fff;border:none;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;box-shadow:0 8px 22px -6px rgba(224,123,26,.55);cursor:pointer}
   .mapa-fab svg{width:19px;height:19px}
   .mpin{position:relative;width:38px;height:46px}
-  .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff;border:2.5px solid var(--paper);box-shadow:0 4px 11px rgba(31,24,19,.4)}
-  .mpin .tile svg{width:18px;height:18px;stroke-width:2.1}
-  .mpin .tip{position:absolute;left:13px;top:30px;width:12px;height:12px;transform:rotate(45deg);border-radius:0 0 3px 0}
-  .mpin.s-ok .tile,.mpin.s-ok .tip{background:var(--okC)}
-  .mpin.s-warn .tile,.mpin.s-warn .tip{background:var(--warnC)}
-  .mpin.s-bad .tile,.mpin.s-bad .tip{background:var(--badC)}
-  .mpin.s-mid .tile,.mpin.s-mid .tip{background:var(--ink3)}
-  .mpin.s-acc .tile,.mpin.s-acc .tip{background:var(--sun-deep)}
+  .mpin .halo{position:absolute;left:5px;top:3px;width:28px;height:28px;border-radius:50%;opacity:.5;animation:mpinPulse 1.9s cubic-bezier(.2,.55,.3,1) infinite}
+  .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;border:2.5px solid var(--paper);box-shadow:0 5px 12px rgba(31,24,19,.45);background-image:linear-gradient(150deg,rgba(255,255,255,.30),rgba(255,255,255,0) 58%)}
+  .mpin .tile svg{width:18px;height:18px;stroke-width:2.2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
+  .mpin .tip{position:absolute;left:13px;top:30px;width:12px;height:12px;transform:rotate(45deg);border-radius:0 0 3px 0;box-shadow:3px 3px 5px rgba(31,24,19,.28)}
+  .mpin.s-ok .tile,.mpin.s-ok .tip,.mpin.s-ok .halo{background-color:var(--okC)}
+  .mpin.s-warn .tile,.mpin.s-warn .tip,.mpin.s-warn .halo{background-color:var(--warnC)}
+  .mpin.s-bad .tile,.mpin.s-bad .tip,.mpin.s-bad .halo{background-color:var(--badC)}
+  .mpin.s-mid .tile,.mpin.s-mid .tip,.mpin.s-mid .halo{background-color:var(--ink3)}
+  .mpin.s-acc .tile,.mpin.s-acc .tip,.mpin.s-acc .halo{background-color:var(--sun-deep)}
+  @keyframes mpinPulse{0%{transform:scale(.7);opacity:.5}70%{opacity:0}100%{transform:scale(2.4);opacity:0}}
   #s-mapa .leaflet-bottom{margin-bottom:calc(env(safe-area-inset-bottom) + 68px)}
   #s-mapa .leaflet-control-attribution{background:rgba(255,250,242,.8);color:var(--ink3);font-size:9.5px;border-radius:7px;padding:1px 6px;backdrop-filter:blur(4px)}
   body.dark #s-mapa .leaflet-control-attribution{background:rgba(20,16,11,.8)}
@@ -688,6 +690,7 @@
         <div class="fchip"    data-t="gasolina" onclick="setEstatus('gasolina')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M3 21h14"/><path d="M15 9h2.5a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9.5L19 7"/></svg> Gasolina</div>
         <div class="fchip"    data-t="via"      onclick="setEstatus('via')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="20" rx="2.4"/><circle cx="12" cy="6.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="17.6" r="1.25" fill="currentColor" stroke="none"/></svg> Vías</div>
         <div class="fchip" data-t="alerta" onclick="setEstatus('alerta')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Alertas</div>
+        <div class="fchip" onclick="go('s-fotos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7.8 6.2H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.2a2 2 0 0 0-2-2h-3.8L14.5 4z"/><circle cx="12" cy="13" r="3.6"/></svg> Fotos</div>
       </div>
       <button class="btn btn-ghost" style="width:100%;margin:2px 0 10px" onclick="go('s-ofertas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;vertical-align:-3px;margin-right:6px"><circle cx="9" cy="21" r="1.6"/><circle cx="19" cy="21" r="1.6"/><path d="M1.5 2.5h3l3.1 13.4a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22.5 7H6"/></svg>Ver precios y ofertas</button>
       <div id="estatus-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
@@ -2179,7 +2182,7 @@ function mapaSev(r){
 function mapaPinIcon(r){
   const ic = ICONO_TIPO_SVG[r.tipo]||ICONS.bolt;
   return L.divIcon({className:'',iconSize:[38,46],iconAnchor:[19,42],popupAnchor:[0,-42],
-    html:`<div class="mpin s-${mapaSev(r)}"><div class="tile">${ic}</div><div class="tip"></div></div>`});
+    html:`<div class="mpin s-${mapaSev(r)}"><div class="halo"></div><div class="tile">${ic}</div><div class="tip"></div></div>`});
 }
 async function cargarMapa(){
   await cargarLeaflet();
