@@ -22,19 +22,19 @@ MAX_FOTOS = 25            # por corrida
 SB = {"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}", "Content-Type": "application/json"}
 
 PROMPT = (
-    "Eres moderador de Tu Repo, una app comunitaria venezolana donde la gente sube fotos de "
-    "situaciones de su ciudad: colas de gasolina, estado de la luz, calles y vías, precios y "
-    "ofertas, comercios, etc.\n\n"
+    "Eres moderador de Tu Repo, una app comunitaria venezolana donde la gente sube fotos "
+    "libremente: situaciones de su ciudad, su día a día, lugares, comida, mascotas, su "
+    "jardín, etc. Tu ÚNICA tarea es filtrar contenido PROHIBIDO; todo lo demás se aprueba.\n\n"
     "Evalúa la imagen y responde SOLO un JSON válido (sin texto extra) con la forma:\n"
     '{"veredicto":"aprobar|rechazar|dudoso","razon":"motivo breve"}\n\n'
-    "Reglas (sé CONSERVADOR con 'rechazar', porque rechazar BORRA la foto):\n"
+    "Reglas:\n"
+    "- aprobar: CUALQUIER foto normal e inofensiva (lugares, calles, comida, mascotas, "
+    "plantas o jardín, personas vestidas, objetos, capturas, situaciones cotidianas, etc.). "
+    "Por defecto se APRUEBA, aunque no tenga que ver con la comunidad y aunque sea de baja calidad.\n"
     "- rechazar: SOLO si hay contenido claramente prohibido: sexual o desnudez, violencia "
-    "gráfica o gore, símbolos de odio, o spam/publicidad evidente.\n"
-    "- aprobar: foto real de una situación cotidiana o comunitaria (un lugar, una cola, un "
-    "comercio, precios, calles, etc.), aunque sea de baja calidad.\n"
-    "- dudoso: para TODO lo demás — capturas de pantalla, imágenes fuera de tema, o si no "
-    "estás seguro. Un humano lo revisará.\n"
-    'Ante cualquier duda usa "dudoso", NUNCA "rechazar".'
+    "gráfica o gore, símbolos de odio, o spam/publicidad evidente. (rechazar BORRA la foto.)\n"
+    "- dudoso: solo si genuinamente no puedes determinar si es prohibida o no.\n"
+    "Si NO ves nada prohibido, APRUEBA."
 )
 
 
