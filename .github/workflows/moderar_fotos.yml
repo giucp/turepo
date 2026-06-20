@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Simulacro (true = solo registra, no aprueba/rechaza)"
+        description: "Simulacro (marca esta casilla = solo registra, no aprueba/rechaza)"
         type: boolean
-        default: true
+        default: false
   schedule:
     - cron: "*/5 * * * *"     # cada 5 min (respaldo; el disparo real es cron-job.org)
 
