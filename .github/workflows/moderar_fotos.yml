@@ -9,8 +9,8 @@ on:
         description: "Simulacro (true = solo registra, no aprueba/rechaza)"
         type: boolean
         default: true
-  # schedule:
-  #   - cron: "*/5 * * * *"     # cada 5 min (respaldo; el disparo real será cron-job.org)
+  schedule:
+    - cron: "*/5 * * * *"     # cada 5 min (respaldo; el disparo real es cron-job.org)
 
 jobs:
   moderar:
@@ -32,6 +32,6 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          # Vacío en runs automáticos => el script usa simulacro por defecto (seguro).
-          DRY_RUN: ${{ github.event.inputs.dry_run }}
+          # Runs automáticos (cron-job.org/schedule) => EN VIVO. Manual con dry_run=true => simulacro.
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: python scripts/moderar_fotos.py
