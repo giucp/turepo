@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 import base64
 import datetime
 import requests
@@ -60,6 +61,24 @@ def bajar_imagen(storage_path):
     return ct, base64.b64encode(r.content).decode("ascii")
 
 
+def gemini_call(body):
+    """POST a Gemini con reintentos ante 429/503; en error muestra el cuerpo real."""
+    esperas = [8, 20, 40]   # backoff entre reintentos
+    ultimo = None
+    for intento in range(len(esperas) + 1):
+        r = requests.post(GEMINI_URL, params={"key": GEMINI_KEY}, json=body, timeout=TIMEOUT)
+        if r.status_code in (429, 503):
+            ultimo = r
+            if intento < len(esperas):
+                print(f"    {r.status_code} de Gemini, reintento en {esperas[intento]}s...", file=sys.stderr)
+                time.sleep(esperas[intento])
+                continue
+        if not r.ok:
+            raise RuntimeError(f"Gemini HTTP {r.status_code}: {r.text[:400]}")
+        return r.json()
+    raise RuntimeError(f"Gemini HTTP {ultimo.status_code} tras reintentos: {ultimo.text[:400]}")
+
+
 def moderar(ct, b64):
     body = {
         "contents": [{"parts": [
@@ -69,9 +88,7 @@ def moderar(ct, b64):
         "safetySettings": SAFETY,
         "generationConfig": {"temperature": 0, "responseMimeType": "application/json"},
     }
-    r = requests.post(GEMINI_URL, params={"key": GEMINI_KEY}, json=body, timeout=TIMEOUT)
-    r.raise_for_status()
-    cands = r.json().get("candidates") or []
+    cands = gemini_call(body).get("candidates") or []
     if not cands:
         return "dudoso", "Gemini no devolvió veredicto (posible bloqueo)"
     txt = cands[0]["content"]["parts"][0]["text"]
