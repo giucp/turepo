@@ -367,7 +367,15 @@
   .pickmap.open{display:flex}
   .pk-map{position:absolute;inset:0;z-index:1}
   .pk-bar{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:12px;right:12px;z-index:10;display:flex;gap:8px}
-  .pk-search{flex:1;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;box-shadow:0 4px 14px rgba(60,40,15,.18)}
+  .pk-searchwrap{flex:1;position:relative}
+  .pk-search{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:12px 14px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;box-shadow:0 4px 14px rgba(60,40,15,.18)}
+  .pk-sugs{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(60,40,15,.22);overflow:hidden;display:none}
+  .pk-sugs.open{display:block}
+  .pk-sug{padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--line)}
+  .pk-sug:last-child{border-bottom:none}
+  .pk-sug:active{background:var(--bg)}
+  .pk-sug .tit{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pk-sug .sub{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
   .pk-x{width:46px;border:1px solid var(--line);background:var(--paper);border-radius:12px;color:var(--ink2);font-size:17px;cursor:pointer;flex:none}
   .pk-cross{position:absolute;left:50%;top:50%;z-index:5;transform:translate(-50%,-100%);pointer-events:none;filter:drop-shadow(0 5px 6px rgba(0,0,0,.4))}
   .pk-cross svg{width:38px;height:44px;display:block}
@@ -2078,6 +2086,18 @@ async function geoBuscar(q){
     return (j&&j[0]) ? {lat:parseFloat(j[0].lat), lng:parseFloat(j[0].lon)} : null;
   }catch(e){ return null; }
 }
+async function geoSugerencias(q){
+  try{
+    const c=ESTADO_COORD[estadoActual]||[8.62,-70.20];
+    const vb=`${c[1]-0.8},${c[0]+0.8},${c[1]+0.8},${c[0]-0.8}`; // x1,y1,x2,y2 (lon,lat) sesgo al estado
+    const u=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&accept-language=es&countrycodes=ve&viewbox=${vb}&q=${encodeURIComponent(q+', '+estadoActual+', Venezuela')}`;
+    const r=await fetch(u); const j=await r.json();
+    return (j||[]).map(o=>{
+      const parts=(o.display_name||'').split(', ');
+      return { nombre:parts[0]||o.display_name||'', sub:parts.slice(1,3).join(', '), lat:parseFloat(o.lat), lng:parseFloat(o.lon) };
+    }).filter(o=>!isNaN(o.lat)&&!isNaN(o.lng));
+  }catch(e){ return []; }
+}
 async function geoZona(lat,lng){
   try{
     const u=`https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&accept-language=es&lat=${lat}&lon=${lng}`;
@@ -2091,7 +2111,8 @@ function pickPunto(){
     let ov=$('pickmap');
     if(!ov){ ov=document.createElement('div'); ov.id='pickmap'; ov.className='pickmap'; document.body.appendChild(ov); }
     ov.innerHTML=`
-      <div class="pk-bar"><input id="pkSearch" class="pk-search" placeholder="Buscar dirección o lugar…" autocomplete="off">
+      <div class="pk-bar"><div class="pk-searchwrap"><input id="pkSearch" class="pk-search" placeholder="Buscar dirección o lugar…" autocomplete="off">
+          <div id="pkSugs" class="pk-sugs"></div></div>
         <button class="pk-x" id="pkCancel" aria-label="Cancelar">✕</button></div>
       <div id="pkMap" class="pk-map"></div>
       <div class="pk-cross"><svg viewBox="0 0 24 24" fill="#e07b1a" stroke="#ffffff" stroke-width="1.5"><path d="M12 22s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="11" r="2.6" fill="#ffffff" stroke="none"/></svg></div>
@@ -2102,13 +2123,42 @@ function pickPunto(){
     const map=L.map('pkMap',{zoomControl:false,attributionControl:true}).setView(c,14);
     mapTiles().addTo(map);
     setTimeout(()=>map.invalidateSize(),120);
-    const search=$('pkSearch');
+    const search=$('pkSearch'), sugs=$('pkSugs');
+    let _sugList=[], _debTimer=null, _reqId=0;
+    function pintarSugs(items){
+      sugs.innerHTML='';
+      if(!items.length){ sugs.classList.remove('open'); return; }
+      items.forEach((it,i)=>{
+        const d=document.createElement('div'); d.className='pk-sug'; d.dataset.i=i;
+        const t=document.createElement('div'); t.className='tit'; t.textContent=it.nombre;
+        d.appendChild(t);
+        if(it.sub){ const s=document.createElement('div'); s.className='sub'; s.textContent=it.sub; d.appendChild(s); }
+        sugs.appendChild(d);
+      });
+      sugs.classList.add('open');
+    }
+    function elegirSug(it){ if(!it) return; search.value=it.nombre; _sugList=[]; sugs.classList.remove('open'); map.flyTo([it.lat,it.lng],16); }
+    search.addEventListener('input', ()=>{
+      const q=search.value.trim();
+      clearTimeout(_debTimer);
+      if(q.length<3){ sugs.classList.remove('open'); return; }
+      _debTimer=setTimeout(async ()=>{
+        const my=++_reqId;
+        const items=await geoSugerencias(q);
+        if(my!==_reqId) return; // descarta respuestas viejas
+        _sugList=items; pintarSugs(items);
+      },400);
+    });
+    sugs.addEventListener('click', e=>{ const el=e.target.closest('.pk-sug'); if(el) elegirSug(_sugList[+el.dataset.i]); });
     search.addEventListener('keydown', async e=>{
       if(e.key!=='Enter') return; e.preventDefault();
+      clearTimeout(_debTimer);
+      if(_sugList.length){ elegirSug(_sugList[0]); return; }
       const q=search.value.trim(); if(!q) return;
       const p=await geoBuscar(q);
       if(p) map.flyTo([p.lat,p.lng],16); else toast('No encontré ese lugar');
     });
+    map.on('movestart click', ()=>sugs.classList.remove('open'));
     function cleanup(){ try{ map.remove(); }catch(_){} ov.classList.remove('open'); ov.innerHTML=''; }
     $('pkCancel').onclick=()=>{ cleanup(); resolve(null); };
     $('pkOk').onclick=async ()=>{
