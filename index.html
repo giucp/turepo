@@ -846,7 +846,7 @@ function sevDe(r){
   return 'mid';
 }
 /* Veredicto + barra de salud + chips de servicios (con datos reales) */
-function pintarResumen(data){
+function pintarResumen(data, hayFotos){
   const vd=$('verdictDot'); if(!vd) return;
   const cont={ok:0,warn:0,bad:0};
   const porTipo={};
@@ -891,19 +891,25 @@ function pintarResumen(data){
   /* chips */
   const sr=$('svcsRow');
   if(sr){
+    const hayOfertas = data.some(r=>r.tipo==='oferta');
     const defs=[
-      ['luz','Luz','bolt',"irEstatus('luz')",true],
-      ['gasolina','Gasolina','pump',"irEstatus('gasolina')",true],
-      ['via','Vías','traffic',"irEstatus('via')",true],
-      ['alerta','Alertas','alert',"irEstatus('alerta')",true],
-      ['oferta','Precios','cart',"go('s-ofertas')",false],
-      ['fotos','Fotos','camera',"go('s-fotos')",false]
+      ['luz','Luz','bolt',"irEstatus('luz')",'svc'],
+      ['gasolina','Gasolina','pump',"irEstatus('gasolina')",'svc'],
+      ['via','Vías','traffic',"irEstatus('via')",'svc'],
+      ['alerta','Alertas','alert',"irEstatus('alerta')",'svc'],
+      ['oferta','Precios','cart',"go('s-ofertas')", hayOfertas?'on':'off'],
+      ['fotos','Fotos','camera',"go('s-fotos')", hayFotos?'on':'off']
     ];
     sr.innerHTML=defs.map(d=>{
-      const [t,lab,icn,click,conLuz]=d;
-      const st=porTipo[t];
-      const cls=conLuz? (st&&st.bad?'alert':(st&&st.warn?'warn':'calm')) : '';
-      const dot=conLuz? '<span class="gd"></span>' : '';
+      const [t,lab,icn,click,modo]=d;
+      let cls='', dot='';
+      if(modo==='svc'){                       // luz/gasolina/vías/alerta: tiñe segun reportes
+        const st=porTipo[t];
+        cls = st&&st.bad?'alert':(st&&st.warn?'warn':'calm');
+        dot = '<span class="gd"></span>';
+      } else if(modo==='on'){                 // oferta/fotos: punto verde "activo" si hay contenido
+        cls='calm'; dot='<span class="gd"></span>';
+      }                                       // modo 'off': sin punto ni tinte
       return `<button class="svc ${cls}" onclick="${click}">${dot}${ICONS[icn]}${lab}</button>`;
     }).join('');
   }
@@ -1102,9 +1108,12 @@ async function cargarInicio(){
   const saludo = hr<12 ? 'Buenos días' : (hr<19 ? 'Buenas tardes' : 'Buenas noches');
   const _sm=$('saludoMini'); if(_sm) _sm.textContent = saludo;
 
-  const data = await leer(['luz','agua','gasolina','via','oferta','alerta']);
+  const [data, hayFotos] = await Promise.all([
+    leer(['luz','agua','gasolina','via','oferta','alerta']),
+    (async()=>{ try{ if(db){ const { count }=await db.from('fotos_activas').select('*',{count:'exact',head:true}).eq('region',estadoActual); return (count||0)>0; } }catch(_){} return false; })()
+  ]);
   pintarTicker(data);
-  pintarResumen(data);
+  pintarResumen(data, hayFotos);
 
   const cont = $('reciente-list');
   if(!data.length){ cont.innerHTML = vacio('Todavía no hay reportes. ¡Sé el primero en avisar!'); return; }
