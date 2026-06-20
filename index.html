@@ -1458,7 +1458,7 @@ function renderChooser(){
 }
   /* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
 let svcTipo, svcStep, svcSel;
-function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined,detalle:''}; renderServicio(); }
+function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:'',sit:undefined,detalle:'',lat:null,lng:null}; renderServicio(); }
 function renderServicio(){
   const cfg = SERVICIOS[svcTipo];
   const esOtra = svcSel.sit!==undefined && cfg.sit[svcSel.sit][2]==='otro';
@@ -1473,7 +1473,8 @@ function renderServicio(){
         <div class="warn" id="ubWarn">Solo letras, números y hasta 2 emojis. Sin groserías.</div>
         <div class="suggs" id="ubSuggs"></div>
         <div class="sugg-hint">Escribe el nombre. Si ya existe, tócalo en las sugerencias.</div>
-      </div>`;
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="svcMapaPick()">${svcSel.lat!=null?'📍 Ubicación marcada en el mapa ✓':'📍 Marcar en el mapa (opcional)'}</button>`;
   } else if(svcStep===1){
     body=`<h3>¿Cuál es la situación?</h3><div class="q">Toca lo que pasa · paso 2 de ${total}</div>
       <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>`;
@@ -1504,6 +1505,13 @@ function svcUb(v){
 }
 function svcUsarSugg(s){ svcSel.ub=s; const el=$('ubInput'); if(el){el.value=s; svcUb(s);} }
 function svcPick(k,i){ svcSel[k]=i; renderServicio(); }
+async function svcMapaPick(){
+  const p=await pickPunto();
+  if(!p) return;
+  svcSel.lat=p.lat; svcSel.lng=p.lng;
+  if(p.zona) svcSel.ub=p.zona;     // autocompleta la zona con el sector del punto
+  renderServicio();
+}
 function svcDetalle(v){
   svcSel.detalle=v;
   const bad=textoNoPermitido(v);
@@ -1532,8 +1540,13 @@ async function svcSend(){
     if(textoNoPermitido(detalle)){ const w=$('sitWarn'); if(w) w.classList.add('show'); const inp=$('sitInput'); if(inp) inp.classList.add('bad'); return; }
   }
   enviando();
+  // Ubicación: si marcó punto en el mapa úsalo; si no, intenta geolocalizar la zona escrita (mejor esfuerzo)
+  let lat=svcSel.lat, lng=svcSel.lng;
+  if(lat==null){
+    try{ const p=await Promise.race([geoBuscar(zona), new Promise(res=>setTimeout(()=>res(null),4000))]); if(p){ lat=p.lat; lng=p.lng; } }catch(_){}
+  }
   const extra = usuario ? { autor: usuario.username, autor_nivel: nivelIdx(usuario.puntos) } : {};
-  const { data:ins, error } = await db.from('reportes').insert({ tipo:svcTipo, zona, estado, detalle, region:estadoActual, ...extra }).select('id').single();
+  const { data:ins, error } = await db.from('reportes').insert({ tipo:svcTipo, zona, estado, detalle, region:estadoActual, lat, lng, ...extra }).select('id').single();
   if(error){ renderAviso(error.message || JSON.stringify(error)); return; }
   if(ins && fotoRepBlob && usuario && usuario.ilimitado){
     const etq = `${cfg.sit[svcSel.sit][1]} en ${zona}`;
