@@ -1982,12 +1982,14 @@ async function cargarFotos(){
   cont.innerHTML='<div class="fotogrid">'+fotos.map(f=>{
     const cat=FOTO_CAT_LABEL[f.categoria];
     const ins=f.autor?insignia(f.autor_nivel):'';
+    const mia=!!(usuario && f.autor && f.autor===usuario.username);
+    const delBtn=mia?`<button class="fbtn" style="margin-left:auto;color:var(--red)" onclick="pedirBorrarFoto('${f.id}','${(f.storage_path||'').replace(/'/g,"\\'")}')" aria-label="Eliminar mi foto">${ICONS.trash}</button>`:'';
     return `<div class="foto"><img class="ph" loading="lazy" src="${urlFoto(f.storage_path)}" onclick="abrirFoto(this.src)" style="cursor:zoom-in" alt="foto de la comunidad">
       <div class="fbody"><div class="ftags">${cat?`<span class="ftag">${cat}</span>`:''}</div>
       ${f.reporte_label?`<div class="frep">${ICONS.bolt} ${escapeHtml(f.reporte_label)}</div>`:''}
       ${f.descripcion?`<div class="fdesc">${escapeHtml(f.descripcion)}</div>`:''}
       <div class="fmeta">${hace(f.aprobada_at)}${ins}</div>
-      <div class="factions"><button class="fbtn ${localStorage.getItem('like_'+f.id)?'liked':''}" id="lkb-${f.id}" onclick="likeFoto('${f.id}')">${ICONS.heart} <span id="lk-${f.id}">${f.corazones||0}</span></button><button class="fbtn ${(f.comentarios_n||0)>0?'has-cm':''}" onclick="openComentarios('foto','${f.id}')">${ICONS.chat} <span id="cn-${f.id}">${f.comentarios_n||0}</span></button></div></div></div>`;
+      <div class="factions"><button class="fbtn ${localStorage.getItem('like_'+f.id)?'liked':''}" id="lkb-${f.id}" onclick="likeFoto('${f.id}')">${ICONS.heart} <span id="lk-${f.id}">${f.corazones||0}</span></button><button class="fbtn ${(f.comentarios_n||0)>0?'has-cm':''}" onclick="openComentarios('foto','${f.id}')">${ICONS.chat} <span id="cn-${f.id}">${f.comentarios_n||0}</span></button>${delBtn}</div></div></div>`;
   }).join('')+'</div>';
 }
 
@@ -2007,10 +2009,31 @@ function pedirBorrarReporte(rid, origen){
 function cerrarConfirmBorrar(){ const ov=$('confirmBorrar'); if(ov) ov.classList.remove('open'); }
 async function hacerBorrarReporte(rid, origen){
   cerrarConfirmBorrar();
-  const { error }=await db.rpc('borrar_mi_reporte',{ rid });
+  const { data, error }=await db.rpc('borrar_mi_reporte',{ rid });
   if(error){ toast('No se pudo eliminar'); return; }
+  if(Array.isArray(data) && data.length){ await db.storage.from('fotos').remove(data).catch(()=>{}); }
   toast('Reporte eliminado');
   if(origen==='estatus') cargarEstatus(); else cargarInicio();
+}
+/* ===== Borrar mi foto de la galería (autor) ===== */
+function pedirBorrarFoto(id, path){
+  let ov=$('confirmBorrar');
+  if(!ov){ ov=document.createElement('div'); ov.id='confirmBorrar'; ov.className='cbov'; document.body.appendChild(ov); }
+  ov.innerHTML=`<div class="cbcard">
+    <div class="cbic">${ICONS.trash}</div>
+    <h3>¿Eliminar tu foto?</h3>
+    <p>Se quitará de la galería para todos. Esta acción no se puede deshacer.</p>
+    <div class="cbrow"><button class="btn btn-ghost" onclick="cerrarConfirmBorrar()">Cancelar</button>
+      <button class="btn btn-bad" onclick="hacerBorrarMiFoto('${id}','${(path||'').replace(/'/g,"\\'")}')">Eliminar</button></div></div>`;
+  ov.classList.add('open');
+}
+async function hacerBorrarMiFoto(id, path){
+  cerrarConfirmBorrar();
+  const { data, error }=await db.rpc('borrar_mi_foto',{ foto_id:id });
+  if(error || !data){ toast('No se pudo eliminar'); return; }
+  await db.storage.from('fotos').remove([data]).catch(()=>{});
+  toast('Foto eliminada');
+  cargarFotos();
 }
 
 /* ===== Foto adjunta a un reporte (solo usuarios con permiso) ===== */
