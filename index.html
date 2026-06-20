@@ -379,13 +379,15 @@
   .screens{position:relative}
   #s-mapa{position:absolute;inset:0;padding:0}
   #mapaMap{position:absolute;inset:0;z-index:1}
-  .mapa-verdict{position:absolute;top:12px;left:12px;right:12px;z-index:500;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:11px 14px;box-shadow:0 6px 20px rgba(60,40,15,.16);display:flex;align-items:center;gap:9px;font-family:'Bricolage Grotesque';font-weight:800;font-size:15.5px;color:var(--ink)}
+  .mapa-top{position:absolute;top:12px;left:12px;right:12px;z-index:500;display:flex;flex-direction:column;gap:9px;pointer-events:none}
+  .mapa-top>*{pointer-events:auto}
+  .mapa-verdict{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:11px 14px;box-shadow:0 6px 20px rgba(60,40,15,.16);display:flex;align-items:center;gap:9px;font-family:'Bricolage Grotesque';font-weight:800;font-size:15.5px;color:var(--ink)}
   .mapa-verdict .mapa-count{margin-left:auto;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--ink3)}
-  .mapa-filtros{position:absolute;left:0;right:0;bottom:16px;z-index:500;display:flex;gap:8px;overflow-x:auto;padding:0 12px;scrollbar-width:none}
+  .mapa-filtros{display:flex;gap:8px;overflow-x:auto;margin:0 -12px;padding:1px 12px;scrollbar-width:none}
   .mapa-filtros::-webkit-scrollbar{display:none}
   .mapa-filtros .fchip{flex:none;background:var(--paper);box-shadow:0 2px 10px rgba(31,24,19,.14)}
   .mapa-filtros .fchip.off{opacity:.45}
-  .mapa-fab{position:absolute;right:14px;bottom:62px;z-index:520;height:48px;padding:0 16px;border-radius:16px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));color:#fff;border:none;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;box-shadow:0 10px 24px -8px rgba(224,123,26,.65);cursor:pointer}
+  .mapa-fab{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:520;height:48px;padding:0 18px;border-radius:999px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));color:#fff;border:none;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;box-shadow:0 8px 22px -6px rgba(224,123,26,.55);cursor:pointer}
   .mapa-fab svg{width:19px;height:19px}
   .mpin{position:relative;width:38px;height:46px}
   .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff;border:2.5px solid var(--paper);box-shadow:0 4px 11px rgba(31,24,19,.4)}
@@ -396,7 +398,10 @@
   .mpin.s-bad .tile,.mpin.s-bad .tip{background:var(--badC)}
   .mpin.s-mid .tile,.mpin.s-mid .tip{background:var(--ink3)}
   .mpin.s-acc .tile,.mpin.s-acc .tip{background:var(--sun-deep)}
-  #s-mapa .leaflet-bottom{margin-bottom:64px}
+  #s-mapa .leaflet-bottom{margin-bottom:calc(env(safe-area-inset-bottom) + 68px)}
+  #s-mapa .leaflet-control-attribution{background:rgba(255,250,242,.8);color:var(--ink3);font-size:9.5px;border-radius:7px;padding:1px 6px;backdrop-filter:blur(4px)}
+  body.dark #s-mapa .leaflet-control-attribution{background:rgba(20,16,11,.8)}
+  body.dark #s-mapa .leaflet-control-attribution a{color:var(--sun)}
   .lightbox img{display:block;max-width:calc(100vw - 40px);max-height:calc(100vh - 90px);object-fit:contain;border-radius:14px;
     box-shadow:0 10px 40px rgba(0,0,0,.5)}
   .lb-close{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;width:42px;height:42px;
@@ -595,6 +600,7 @@
   body.dark .toast{color:#1a140c}
   body.dark .ccard,body.dark .fbtn,body.dark .opt,body.dark .key,body.dark .sugg,
   body.dark .tinput,body.dark .fchip,body.dark .vbtn{background:#221b12;border-color:#362c1c;color:var(--ink)}
+  body.dark .btn-ghost{background:#262017;color:var(--ink2)}
   body.dark .b-green{background:rgba(62,199,122,.18);color:#7fdca3}
   body.dark .b-amber{background:rgba(238,189,69,.18);color:#eec06a}
   body.dark .b-red{background:rgba(240,100,76,.2);color:#f4937f}
@@ -689,9 +695,11 @@
 
     <section class="screen" id="s-mapa">
       <div id="mapaMap"></div>
-      <div class="mapa-verdict"><span class="ld ld-ok" id="mapaDot"></span><span id="mapaWord">Leyendo el mapa…</span><span class="mapa-count" id="mapaCount"></span></div>
+      <div class="mapa-top">
+        <div class="mapa-verdict"><span class="ld ld-ok" id="mapaDot"></span><span id="mapaWord">Leyendo el mapa…</span><span class="mapa-count" id="mapaCount"></span></div>
+        <div class="mapa-filtros" id="mapaFiltros"></div>
+      </div>
       <button class="mapa-fab" onclick="mapaReportarAqui()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Reportar aquí</button>
-      <div class="mapa-filtros" id="mapaFiltros"></div>
     </section>
 
     <section class="screen" id="s-noticias">
@@ -967,6 +975,7 @@ if(localStorage.getItem('temaTuRepo')==='dark') document.body.classList.add('dar
 function toggleTema(){
   const oscuro=document.body.classList.toggle('dark');
   localStorage.setItem('temaTuRepo', oscuro? 'dark':'claro');
+  if(_mapa && _mapaTiles){ _mapa.removeLayer(_mapaTiles); _mapaTiles=mapTiles().addTo(_mapa); _mapaTiles.bringToBack(); }
 }
 // Color/etiqueta de un reporte; si es 'otro', usa el texto que escribió el usuario
 function infoEstado(r){
@@ -2111,7 +2120,7 @@ function pickPunto(){
 }
 
 /* ===== Pantalla Mapa ===== */
-let _mapa=null, _mapaCapa=null, _mapaRep=[], _mapaFiltro=new Set(), _puntoMapa=null;
+let _mapa=null, _mapaCapa=null, _mapaTiles=null, _mapaRep=[], _mapaFiltro=new Set(), _puntoMapa=null;
 function mapaSev(r){
   if(r.tipo==='oferta'||r.tipo==='carero') return 'acc';
   const s=sevDe(r); return (s==='bad'||s==='warn'||s==='ok') ? s : 'mid';
@@ -2125,8 +2134,9 @@ async function cargarMapa(){
   await cargarLeaflet();
   const centro = ESTADO_COORD[estadoActual]||[8.62,-70.20];
   if(!_mapa){
-    _mapa=L.map('mapaMap',{zoomControl:false,attributionControl:true}).setView(centro,13);
-    mapTiles().addTo(_mapa);
+    _mapa=L.map('mapaMap',{zoomControl:false,attributionControl:false}).setView(centro,13);
+    L.control.attribution({position:'bottomleft'}).addTo(_mapa);
+    _mapaTiles=mapTiles().addTo(_mapa);
     _mapaCapa=L.layerGroup().addTo(_mapa);
   } else { _mapa.setView(centro,13); }
   setTimeout(()=>{ try{ _mapa.invalidateSize(); }catch(_){} },150);
