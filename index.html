@@ -2197,17 +2197,25 @@ async function cargarMapa(){
   await cargarLeaflet();
   const centro = ESTADO_COORD[estadoActual]||[8.62,-70.20];
   if(!_mapa){
-    _mapa=L.map('mapaMap',{zoomControl:false,attributionControl:false}).setView(centro,13);
+    _mapa=L.map('mapaMap',{zoomControl:false,attributionControl:false}).setView(centro,11);
     L.control.attribution({position:'bottomleft'}).addTo(_mapa);
     _mapaTiles=mapTiles().addTo(_mapa);
     _mapaCapa=L.layerGroup().addTo(_mapa);
-  } else { _mapa.setView(centro,13); }
-  setTimeout(()=>{ try{ _mapa.invalidateSize(); }catch(_){} },150);
+  } else { _mapa.setView(centro,11); }
   try{
     const { data }=await db.from('reportes_activos').select('*').eq('region',estadoActual).not('lat','is',null);
     _mapaRep=data||[];
   }catch(e){ _mapaRep=[]; }
   pintarMapa(); pintarMapaVerdict(); pintarMapaFiltros();
+  setTimeout(()=>{ try{ _mapa.invalidateSize(); encuadrarMapa(); }catch(_){} },150);
+}
+// Abre el mapa encuadrando los reportes activos (o vista amplia del estado si no hay)
+function encuadrarMapa(){
+  if(!_mapa) return;
+  const pts=_mapaRep.filter(r=>!_mapaFiltro.has(r.tipo) && r.lat!=null && r.lng!=null).map(r=>[r.lat,r.lng]);
+  if(pts.length>=2){ _mapa.fitBounds(L.latLngBounds(pts), {padding:[55,55], maxZoom:13, animate:false}); }
+  else if(pts.length===1){ _mapa.setView(pts[0], 13, {animate:false}); }
+  else { _mapa.setView(ESTADO_COORD[estadoActual]||[8.62,-70.20], 11, {animate:false}); }
 }
 function pintarMapa(){
   if(!_mapaCapa) return;
