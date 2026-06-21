@@ -866,6 +866,31 @@ let db = null;
 if(tieneLlaves){ db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
 else { $('setupWarn').classList.add('show'); }
 
+/* ===== Observabilidad: registra errores en Supabase (best-effort, no rompe la UX) ===== */
+let _errCount = 0; const _errSeen = new Set();
+async function logError(contexto, err, extra){
+  try{
+    if(!db || _errCount >= 12) return;                 // tope por sesión: no inundar
+    const crudo = err && (err.message || err.reason) ? (err.message || err.reason) : err;
+    const msg = String(crudo == null ? 'error' : crudo).slice(0,300);
+    const clave = contexto + '|' + msg;
+    if(_errSeen.has(clave)) return;                     // no repetir el mismo error
+    _errSeen.add(clave); _errCount++;
+    const detalle = String((err && err.stack) || extra || '').slice(0,1500) || null;
+    const pantalla = (document.querySelector('.screen.active')||{}).id || '';
+    await db.from('error_log').insert({
+      contexto: String(contexto||'').slice(0,120),
+      mensaje: msg,
+      detalle: detalle,
+      url: (location.pathname + (pantalla ? ' #'+pantalla : '')).slice(0,200),
+      user_agent: (navigator.userAgent||'').slice(0,300),
+      username: (typeof usuario!=='undefined' && usuario && usuario.username) ? usuario.username : null
+    });
+  }catch(_){ /* el logger nunca debe romper nada */ }
+}
+window.addEventListener('error', e=>{ logError('window.onerror', e.error || e.message, (e.filename||'')+':'+(e.lineno||'')); });
+window.addEventListener('unhandledrejection', e=>{ logError('unhandledrejection', e.reason); });
+
 const EMOJI = Object.fromEntries(PRODUCTOS.map(p=>[p[1],p[0]]));
 // Mapa de cada estado a su color y etiqueta (cubre luz, agua, gasolina y vías)
 const EST_INFO = {

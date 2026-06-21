@@ -119,6 +119,18 @@ create table if not exists public.rate_limit (
   at     timestamptz not null default now()
 );
 
+-- Observabilidad: errores del cliente en producción (insert público, lectura solo admin/service_role)
+create table if not exists public.error_log (
+  id         uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  contexto   text,
+  mensaje    text,
+  detalle    text,
+  url        text,
+  user_agent text,
+  username   text
+);
+
 -- ============================================================================
 -- 2) ÍNDICES (además de los PK/UNIQUE implícitos)
 -- ============================================================================
@@ -128,6 +140,7 @@ create index if not exists comentarios_ref          on public.comentarios using 
 create index if not exists idx_lugares_tipo         on public.lugares using btree (tipo, menciones desc);
 create index if not exists noticias_publicado_idx   on public.noticias using btree (publicado desc);
 create index if not exists rate_limit_lookup        on public.rate_limit using btree (ident, accion, at);
+create index if not exists error_log_fecha          on public.error_log using btree (created_at desc);
 
 -- ============================================================================
 -- 3) FUNCIONES (RPC) — todas SECURITY DEFINER con search_path fijo
@@ -463,6 +476,11 @@ alter table public.noticias     enable row level security;
 alter table public.tasa_bcv     enable row level security;
 alter table public.tasa_binance enable row level security;
 alter table public.rate_limit   enable row level security;  -- sin políticas: solo SECURITY DEFINER
+alter table public.error_log    enable row level security;
+
+-- error_log: el cliente puede INSERTAR errores; nadie los LEE salvo admin/service_role
+drop policy if exists error_log_insert on public.error_log;
+create policy error_log_insert on public.error_log for insert to anon, authenticated with check (true);
 
 -- perfiles: lectura pública; SIN update directo (los cambios van por RPC SECURITY DEFINER)
 drop policy if exists perfil_leer on public.perfiles;

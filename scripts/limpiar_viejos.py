@@ -18,7 +18,8 @@ SUPABASE_URL = os.environ["SUPABASE_URL"].rstrip("/")
 SERVICE_KEY  = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 # Por seguridad arranca en SIMULACRO. Para borrar de verdad: DRY_RUN=false
 DRY_RUN = os.environ.get("DRY_RUN", "true").strip().lower() != "false"
-RETENTION_DAYS = float(os.environ.get("RETENTION_DAYS", "2"))  # > 12h (ventana activa)
+RETENTION_DAYS = float(os.environ.get("RETENTION_DAYS", "2"))      # > 12h (ventana activa)
+ERROR_LOG_DAYS = float(os.environ.get("ERROR_LOG_DAYS", "14"))     # logs de error: se guardan más
 
 TIMEOUT = 45
 MAX_FOTOS = 1000   # fotos por corrida (requieren borrar el archivo del Storage)
@@ -28,8 +29,8 @@ SB      = {"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}", "Con
 SB_AUTH = {"apikey": SERVICE_KEY, "Authorization": f"Bearer {SERVICE_KEY}"}
 
 
-def cutoff_iso():
-    dt = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=RETENTION_DAYS)
+def cutoff_iso(dias=RETENTION_DAYS):
+    dt = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=dias)
     return dt.isoformat()
 
 
@@ -88,14 +89,16 @@ if __name__ == "__main__":
     cutoff = cutoff_iso()
     print(f"Limpieza de datos viejos · modo {modo} · retención {RETENTION_DAYS} días (antes de {cutoff})")
 
+    cutoff_err = cutoff_iso(ERROR_LOG_DAYS)
     try:
         n_rep = contar("reportes", cutoff)
         n_com = contar("comentarios", cutoff)
         n_fot = contar("fotos", cutoff)
+        n_err = contar("error_log", cutoff_err)
     except Exception as e:
         print(f"ERROR contando: {e}", file=sys.stderr)
         sys.exit(1)
-    print(f"Por borrar -> reportes:{n_rep}  comentarios:{n_com}  fotos:{n_fot}")
+    print(f"Por borrar -> reportes:{n_rep}  comentarios:{n_com}  fotos:{n_fot}  error_log(>{ERROR_LOG_DAYS}d):{n_err}")
 
     if DRY_RUN:
         print("Simulacro: no se borró nada.")
@@ -122,5 +125,14 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"ERROR borrando comentarios: {e}", file=sys.stderr)
 
+    # 3) Logs de error viejos (retención más larga)
+    try:
+        r = requests.delete(f"{SUPABASE_URL}/rest/v1/error_log",
+                            headers={**SB, "Prefer": "return=minimal"},
+                            params={"created_at": f"lt.{cutoff_err}"}, timeout=TIMEOUT)
+        r.raise_for_status()
+    except Exception as e:
+        print(f"ERROR borrando error_log: {e}", file=sys.stderr)
+
     sufijo = " (quedan más para la próxima corrida)" if fotos_borradas >= MAX_FOTOS else ""
-    print(f"OK - fotos borradas:{fotos_borradas}{sufijo}  reportes/comentarios viejos: borrados")
+    print(f"OK - fotos borradas:{fotos_borradas}{sufijo}  reportes/comentarios/error_log viejos: borrados")
