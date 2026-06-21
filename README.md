@@ -103,3 +103,16 @@ invertir: rompería la verificación del TWA de Android).
 
 Es UTF-8 con CRLF. Al tocar el JS embebido, validar extrayendo los `<script>` sin `src` y
 corriendo `node --check` en cada bloque antes de dar por hecho el cambio.
+
+## Tests
+
+`tests/logic.test.js` prueba la lógica crítica (niveles por puntos, formato del dólar, filtro
+de groserías, severidad de reportes) cargando el `<script>` real de `index.html` en un sandbox.
+No tiene dependencias:
+
+```bash
+node tests/logic.test.js
+```
+
+Sale con código distinto de 0 si algo falla. Correrlo tras editar lógica para no romper nada
+en silencio.
