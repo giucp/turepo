@@ -401,12 +401,12 @@
   .mpin .halo{position:absolute;left:5px;top:3px;width:28px;height:28px;border-radius:50%;opacity:.5;animation:mpinPulse 1.9s cubic-bezier(.2,.55,.3,1) infinite}
   .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;border:2.5px solid var(--paper);box-shadow:0 5px 12px rgba(31,24,19,.45);background-image:linear-gradient(150deg,rgba(255,255,255,.30),rgba(255,255,255,0) 58%)}
   .mpin .tile svg{width:18px;height:18px;stroke-width:2.2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
-  .mpin .tip{position:absolute;left:13px;top:30px;width:12px;height:12px;transform:rotate(45deg);border-radius:0 0 3px 0;box-shadow:3px 3px 5px rgba(31,24,19,.28)}
-  .mpin.s-ok .tile,.mpin.s-ok .tip,.mpin.s-ok .halo{background-color:var(--okC)}
-  .mpin.s-warn .tile,.mpin.s-warn .tip,.mpin.s-warn .halo{background-color:var(--warnC)}
-  .mpin.s-bad .tile,.mpin.s-bad .tip,.mpin.s-bad .halo{background-color:var(--badC)}
-  .mpin.s-mid .tile,.mpin.s-mid .tip,.mpin.s-mid .halo{background-color:var(--ink3)}
-  .mpin.s-acc .tile,.mpin.s-acc .tip,.mpin.s-acc .halo{background-color:var(--sun-deep)}
+  .mpin .tip{position:absolute;left:50%;top:31px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:11px solid var(--ink3);filter:drop-shadow(0 2px 1.5px rgba(31,24,19,.3))}
+  .mpin.s-ok .tile,.mpin.s-ok .halo{background-color:var(--okC)}      .mpin.s-ok .tip{border-top-color:var(--okC)}
+  .mpin.s-warn .tile,.mpin.s-warn .halo{background-color:var(--warnC)} .mpin.s-warn .tip{border-top-color:var(--warnC)}
+  .mpin.s-bad .tile,.mpin.s-bad .halo{background-color:var(--badC)}    .mpin.s-bad .tip{border-top-color:var(--badC)}
+  .mpin.s-mid .tile,.mpin.s-mid .halo{background-color:var(--ink3)}    .mpin.s-mid .tip{border-top-color:var(--ink3)}
+  .mpin.s-acc .tile,.mpin.s-acc .halo{background-color:var(--sun-deep)} .mpin.s-acc .tip{border-top-color:var(--sun-deep)}
   @keyframes mpinPulse{0%{transform:scale(.7);opacity:.5}70%{opacity:0}100%{transform:scale(2.4);opacity:0}}
   #s-mapa .leaflet-bottom{margin-bottom:calc(env(safe-area-inset-bottom) + 68px)}
   #s-mapa .leaflet-control-attribution{background:rgba(255,250,242,.8);color:var(--ink3);font-size:9.5px;border-radius:7px;padding:1px 6px;backdrop-filter:blur(4px)}
