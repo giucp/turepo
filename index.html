@@ -768,7 +768,7 @@
   <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 
 <!-- Cliente de Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2"></script>
 <script>
 /* ========================================================================
    ===== CONFIG · PEGA AQUÍ TUS DOS LLAVES DE SUPABASE =====
@@ -1021,7 +1021,7 @@ function hace(iso){
 async function leer(tipos){
   if(!db) return [];
   const { data, error } = await db.from('reportes_activos').select('*')
-    .in('tipo', tipos).eq('region', estadoActual).order('created_at',{ascending:false});
+    .in('tipo', tipos).eq('region', estadoActual).order('created_at',{ascending:false}).limit(500);
   if(error){ console.error(error); return []; }
   return data||[];
 }
@@ -2207,7 +2207,7 @@ async function cargarMapa(){
     _mapaCapa=L.layerGroup().addTo(_mapa);
   } else { _mapa.setView(centro,11); }
   try{
-    const { data }=await db.from('reportes_activos').select('*').eq('region',estadoActual).not('lat','is',null);
+    const { data }=await db.from('reportes_activos').select('*').eq('region',estadoActual).not('lat','is',null).limit(500);
     _mapaRep=data||[];
   }catch(e){ _mapaRep=[]; }
   pintarMapa(); pintarMapaVerdict(); pintarMapaFiltros();
@@ -2278,7 +2278,7 @@ async function cargarFotos(){
   const cont=$('fotos-list');
   if(!db){ cont.innerHTML=vacio('Galería no disponible.'); return; }
   cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando…</div>';
-  let q=db.from('fotos_activas').select('*').eq('region',estadoActual).order('aprobada_at',{ascending:false});
+  let q=db.from('fotos_activas').select('*').eq('region',estadoActual).order('aprobada_at',{ascending:false}).limit(100);
   if(fotoCatFiltro) q=q.eq('categoria',fotoCatFiltro);
   const { data, error }=await q;
   if(error){ cont.innerHTML=vacio('No se pudieron cargar las fotos.'); return; }
