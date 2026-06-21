@@ -1066,10 +1066,22 @@ async function sugerencias(tipo, texto){
   }
   return lista;
 }
-async function registrarLugar(tipo, nombre){
+async function registrarLugar(tipo, nombre, lat, lng){
   if(!db || !nombre) return;
-  try{ await db.rpc('registrar_lugar', { p_region:estadoActual, p_tipo:tipo, p_nombre:nombre.trim(), p_clave:clave(nombre) }); }
+  const params={ p_region:estadoActual, p_tipo:tipo, p_nombre:nombre.trim(), p_clave:clave(nombre) };
+  if(lat!=null && lng!=null){ params.p_lat=lat; params.p_lng=lng; }   // recuerda la ubicación si la hay
+  try{ await db.rpc('registrar_lugar', params); }
   catch(e){ console.error('lugar', e); }
+}
+// Ubicación recordada de un lugar (si la comunidad ya lo marcó antes)
+async function lugarCoords(tipo, nombre){
+  if(!db || !nombre) return null;
+  try{
+    const { data } = await db.from('lugares').select('lat,lng')
+      .eq('region',estadoActual).eq('tipo',tipo).eq('clave',clave(nombre))
+      .not('lat','is',null).limit(1).maybeSingle();
+    return (data && data.lat!=null) ? {lat:data.lat, lng:data.lng} : null;
+  }catch(e){ return null; }
 }
 
 /* ---- Navegación + recarga de datos ---- */
@@ -1615,7 +1627,11 @@ async function svcSend(){
   enviando();
   // Ubicación: si marcó punto en el mapa úsalo; si no, intenta geolocalizar la zona escrita (mejor esfuerzo)
   let lat=svcSel.lat, lng=svcSel.lng;
-  if(lat==null){
+  if(lat==null){                                  // 1º: ¿la comunidad ya marcó este lugar?
+    const loc=await lugarCoords(cfg.lugarTipo, zona);
+    if(loc){ lat=loc.lat; lng=loc.lng; }
+  }
+  if(lat==null){                                  // 2º: geocodificar el texto (mejor esfuerzo)
     try{ const p=await Promise.race([geoBuscar(zona), new Promise(res=>setTimeout(()=>res(null),4000))]); if(p){ lat=p.lat; lng=p.lng; } }catch(_){}
   }
   const extra = usuario ? { autor: usuario.username, autor_nivel: nivelIdx(usuario.puntos) } : {};
@@ -1625,7 +1641,7 @@ async function svcSend(){
     const etq = `${cfg.sit[svcSel.sit][1]} en ${zona}`;
     await publicarFotoReporte(ins.id, etq);
   }
-  await registrarLugar(cfg.lugarTipo, zona);
+  await registrarLugar(cfg.lugarTipo, zona, lat, lng);   // recuerda el lugar con su ubicación
   marcarCooldown(svcTipo);
   estatusTipo=svcTipo;
   await premiar();
@@ -2117,7 +2133,7 @@ function mapTiles(){
   const dark=document.body.classList.contains('dark');
   return L.tileLayer(dark
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
     {maxZoom:19, attribution:'© OpenStreetMap © CARTO'});
 }
 async function geoBuscar(q){

@@ -86,6 +86,8 @@ create table if not exists public.lugares (
   menciones  integer not null default 1,
   created_at timestamptz not null default now(),
   region     text,
+  lat        double precision,   -- ubicación recordada (si la comunidad la marcó)
+  lng        double precision,
   constraint lugares_region_tipo_clave_key unique (region, tipo, clave)
 );
 
@@ -243,16 +245,19 @@ begin
   update perfiles set referido_premiado = true where id = auth.uid();
 end; $$;
 
--- Registra/incrementa un lugar mencionado
-create or replace function public.registrar_lugar(p_region text, p_tipo text, p_nombre text, p_clave text)
+-- Registra/incrementa un lugar mencionado (y recuerda su ubicación si viene)
+create or replace function public.registrar_lugar(p_region text, p_tipo text, p_nombre text, p_clave text,
+  p_lat double precision default null, p_lng double precision default null)
 returns integer language plpgsql security definer set search_path to 'public'
 as $$
 declare total int;
 begin
-  insert into lugares (region, tipo, nombre, clave)
-  values (p_region, p_tipo, p_nombre, p_clave)
+  insert into lugares (region, tipo, nombre, clave, lat, lng)
+  values (p_region, p_tipo, p_nombre, p_clave, p_lat, p_lng)
   on conflict (region, tipo, clave)
-  do update set menciones = lugares.menciones + 1
+  do update set menciones = lugares.menciones + 1,
+                lat = coalesce(excluded.lat, lugares.lat),
+                lng = coalesce(excluded.lng, lugares.lng)
   returning menciones into total;
   return total;
 end; $$;
