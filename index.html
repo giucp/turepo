@@ -2117,7 +2117,7 @@ function mapTiles(){
   const dark=document.body.classList.contains('dark');
   return L.tileLayer(dark
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     {maxZoom:19, attribution:'© OpenStreetMap © CARTO'});
 }
 async function geoBuscar(q){
