@@ -17,7 +17,7 @@
 <meta name="twitter:title" content="Tu Repo · Conectados nos ayudamos">
 <meta name="twitter:description" content="Lo que pasa en tu ciudad en tiempo real: luz, gasolina, vías y precios. Reportado por su gente.">
 <meta name="twitter:image" content="https://turepo.com/og.jpg">
-<meta name="theme-color" content="#e07b1a">
+<meta name="theme-color" content="#f4ede0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -983,9 +983,13 @@ function pintarResumen(data, hayFotos){
 }
 /* ===== Tema claro/oscuro: lo elige cada quien y se recuerda en el dispositivo ===== */
 if(localStorage.getItem('temaTuRepo')==='dark') document.body.classList.add('dark');
+// El color de la barra de estado sigue el tema (oscuro/claro) en vez de un naranja fijo
+function pintarThemeColor(){ const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', document.body.classList.contains('dark')?'#15110c':'#f4ede0'); }
+pintarThemeColor();
 function toggleTema(){
   const oscuro=document.body.classList.toggle('dark');
   localStorage.setItem('temaTuRepo', oscuro? 'dark':'claro');
+  pintarThemeColor();
   if(_mapa && _mapaTiles){ _mapa.removeLayer(_mapaTiles); _mapaTiles=mapTiles().addTo(_mapa); _mapaTiles.bringToBack(); }
 }
 // Color/etiqueta de un reporte; si es 'otro', usa el texto que escribió el usuario
