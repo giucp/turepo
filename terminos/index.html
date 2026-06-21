@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Términos de Uso · Tu Repo</title>
+<meta name="description" content="Términos de Uso de Tu Repo: reglas de la comunidad, responsabilidades, contenido de usuarios y ley aplicable.">
+<meta name="theme-color" content="#e07b1a">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<script>
+  /* Respeta el tema elegido en la app (mismo dominio); si no hay, usa el del sistema */
+  (function(){
+    try{
+      var t = localStorage.getItem('temaTuRepo');
+      var oscuro = t === 'dark' || (t === null && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      if(oscuro) document.documentElement.classList.add('dark');
+    }catch(e){}
+  })();
+</script>
+<style>
+  :root{
+    --bg:#f4ede0; --paper:#fffaf2; --ink:#221a12; --ink2:#5d5444; --ink3:#8a7a63;
+    --sun:#f2a13b; --sun-deep:#e07b1a; --line:#e6dac6;
+  }
+  html.dark{
+    --bg:#15110c; --paper:#1d1812; --ink:#f4ecdf; --ink2:#beb19b; --ink3:#857a64;
+    --line:#2a2318;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(600px 360px at 90% -8%, #ffd9a0 0%, transparent 60%), var(--bg);
+    color:var(--ink); line-height:1.62; padding:0 0 56px; -webkit-text-size-adjust:100%;
+    min-height:100vh;
+  }
+  html.dark body{ background:radial-gradient(600px 360px at 90% -8%, rgba(224,123,26,.16) 0%, transparent 60%), var(--bg); }
+
+  /* Cabecera */
+  .top{
+    display:flex; align-items:center; gap:11px;
+    max-width:720px; margin:0 auto; padding:16px 20px 10px;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink); }
+  .logo{
+    width:38px; height:38px; border-radius:12px; overflow:hidden; flex:none;
+    box-shadow:0 4px 10px rgba(224,123,26,.4); background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+  }
+  .logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .brand b{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:18px; letter-spacing:-.01em; }
+  .volver{
+    margin-left:auto; font-size:13px; font-weight:700; color:var(--sun-deep);
+    text-decoration:none; padding:7px 13px; border:1px solid var(--line); border-radius:999px;
+    white-space:nowrap; transition:.15s;
+  }
+  .volver:active{ transform:scale(.97); }
+
+  /* Tarjeta de contenido */
+  .card{
+    max-width:720px; margin:8px auto 0; background:var(--paper);
+    border:1px solid var(--line); border-radius:20px; padding:26px 22px;
+  }
+  h1{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:25px; line-height:1.15; letter-spacing:-.02em; }
+  .upd{ color:var(--ink3); font-size:13px; font-weight:600; margin-top:6px; margin-bottom:18px; }
+  .intro{ color:var(--ink2); margin-bottom:6px; }
+  h2{
+    font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px; color:var(--sun-deep);
+    margin-top:26px; margin-bottom:8px; letter-spacing:-.01em;
+  }
+  p{ margin-bottom:11px; }
+  .sub{ font-weight:700; color:var(--ink); margin-top:10px; margin-bottom:6px; }
+  ul{ margin:0 0 11px 0; padding-left:20px; }
+  li{ margin-bottom:7px; }
+  a{ color:var(--sun-deep); font-weight:600; }
+  hr{ border:none; border-top:1px solid var(--line); margin:24px 0; }
+  .callout{
+    background:rgba(224,123,26,.08); border:1px solid var(--line); border-radius:14px;
+    padding:13px 15px; margin:14px 0; color:var(--ink2); font-size:14px;
+  }
+
+  /* Botón final */
+  .foot{ text-align:center; margin-top:26px; }
+  .btn{
+    display:inline-block; background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+    color:#fff; text-decoration:none; font-weight:800; font-size:14.5px;
+    padding:12px 26px; border-radius:999px; box-shadow:0 4px 14px rgba(224,123,26,.35);
+  }
+  .btn:active{ transform:scale(.98); }
+
+  @media (max-width:520px){
+    .card{ border-radius:0; border-left:none; border-right:none; padding:22px 17px; }
+    h1{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <a class="brand" href="/">
+      <span class="logo"><img src="/icon-192.png" alt="Tu Repo"></span>
+      <b>Tu Repo</b>
+    </a>
+    <a class="volver" href="/">← Volver a la app</a>
+  </header>
+
+  <main class="card">
+    <h1>Términos de Uso de Tu Repo</h1>
+    <p class="upd">Última actualización: 21 de junio de 2026</p>
+
+    <p class="intro">Estos Términos de Uso (“Términos”) regulan el uso de Tu Repo (“la aplicación”, “el servicio”, “nosotros”). Tu Repo es operado por una persona natural en Venezuela. Al acceder o usar la aplicación, declaras que leíste, entendiste y aceptas estos Términos y nuestra <a href="/privacidad">Política de Privacidad</a>. Si no estás de acuerdo, no uses la aplicación.</p>
+
+    <h2>1. Qué es Tu Repo</h2>
+    <p>Tu Repo es una plataforma <b>comunitaria</b> de información local en Venezuela. Todo el contenido —estatus de servicios (luz, agua, gasolina, vías), precios, ofertas, ubicaciones, fotos, comentarios y reportes en general— es <b>generado por los propios usuarios</b> y <b>no es verificado por nosotros</b>.</p>
+    <p>La información puede ser inexacta, estar desactualizada o ser falsa. Debes usarla solo como una <b>orientación</b>, nunca como un dato oficial o profesional.</p>
+
+    <h2>2. Quién puede usar la aplicación</h2>
+    <p>Tu Repo está dirigido a <b>personas mayores de 18 años</b>. Al usar la aplicación declaras que tienes al menos 18 años y capacidad legal para aceptar estos Términos. La aplicación está pensada para uso en Venezuela.</p>
+
+    <h2>3. Cuentas de usuario</h2>
+    <p>Puedes usar la aplicación de forma anónima o crear una cuenta (con correo/usuario o con Google). Si creas una cuenta:</p>
+    <ul>
+      <li>Eres responsable de mantener la confidencialidad de tu clave y de toda actividad realizada desde tu cuenta.</li>
+      <li>Debes elegir un nombre de usuario que no suplante a otra persona, marca o institución, ni sea ofensivo.</li>
+      <li>No puedes compartir, vender ni transferir tu cuenta.</li>
+    </ul>
+
+    <h2>4. Contenido que publicas</h2>
+    <p>Tú eres el único responsable del contenido que publicas (reportes, fotos, comentarios, nombres de lugares, etc.). Al publicar contenido declaras y garantizas que:</p>
+    <ul>
+      <li>Tienes los derechos necesarios sobre ese contenido (por ejemplo, que la foto es tuya o tienes permiso para publicarla).</li>
+      <li>El contenido no infringe derechos de autor, marcas, privacidad ni ningún otro derecho de terceros.</li>
+      <li>La información que aportas es de buena fe.</li>
+    </ul>
+    <p>Conservas la propiedad de tu contenido. Sin embargo, al publicarlo nos otorgas una licencia <b>no exclusiva, gratuita y mundial</b> para almacenarlo, mostrarlo y distribuirlo dentro de la aplicación con el fin de operar el servicio. Esta licencia termina cuando el contenido se elimina (los reportes y fotos caducan automáticamente tras un tiempo).</p>
+
+    <h2>5. Conducta y contenido prohibido</h2>
+    <p>Está prohibido publicar o realizar, entre otros:</p>
+    <ul>
+      <li>Contenido falso, engañoso o creado para causar pánico o daño.</li>
+      <li>Contenido ofensivo, violento, sexual explícito, de odio, acoso o discriminación.</li>
+      <li>Propaganda política con mala fe o desinformación.</li>
+      <li>Contenido ilegal o que promueva actividades ilegales.</li>
+      <li>Datos personales de terceros sin su consentimiento (direcciones exactas, teléfonos, etc.).</li>
+      <li>Spam, publicidad no autorizada o manipulación del sistema de puntos, votos o ranking.</li>
+      <li>Material que infrinja derechos de autor o de propiedad intelectual de otros.</li>
+    </ul>
+
+    <h2>6. Moderación</h2>
+    <p>Podemos revisar, ocultar, eliminar o rechazar cualquier contenido, y suspender o cerrar cuentas que incumplan estos Términos, a nuestra discreción y sin previo aviso. La comunidad también puede señalar o restar visibilidad a reportes mal intencionados.</p>
+
+    <h2>7. Uso de inteligencia artificial</h2>
+    <p>Tu Repo utiliza sistemas de <b>inteligencia artificial (IA)</b> en algunas de sus funciones, principalmente para la <b>moderación automática de fotos y texto</b> (filtrado de contenido potencialmente prohibido) y otras funciones asistidas. Estos sistemas pueden cometer errores; la moderación automática se complementa con revisión humana cuando es necesario. El uso de IA no sustituye tu responsabilidad sobre el contenido que publicas.</p>
+
+    <h2>8. Derechos de autor (DMCA / retiro de contenido)</h2>
+    <p>Respetamos los derechos de propiedad intelectual. Si crees que algún contenido publicado en Tu Repo infringe tus derechos de autor, puedes solicitarnos su retiro siguiendo el proceso descrito en nuestra <a href="/dmca">Política de Derechos de Autor</a>. Aplicamos una política de <b>terminación de cuentas para infractores reincidentes</b>.</p>
+
+    <h2>9. Sin garantías</h2>
+    <p>La aplicación se ofrece “tal cual” y “según disponibilidad”, sin garantías de ningún tipo. No garantizamos que la información sea exacta, completa, vigente o veraz, ni que el servicio funcione de forma ininterrumpida o libre de errores.</p>
+
+    <h2>10. Limitación de responsabilidad</h2>
+    <p>En la máxima medida permitida por la ley, no nos hacemos responsables por daños o perjuicios derivados de:</p>
+    <ul>
+      <li>Decisiones que tomes con base en la información de la aplicación.</li>
+      <li>El contenido publicado por otros usuarios.</li>
+      <li>Interrupciones, pérdidas de datos o fallas del servicio.</li>
+    </ul>
+    <p>Usas Tu Repo bajo tu propia responsabilidad.</p>
+
+    <h2>11. Indemnización</h2>
+    <p>Aceptas mantenernos indemnes frente a reclamos de terceros derivados del contenido que publiques o del uso que hagas de la aplicación incumpliendo estos Términos.</p>
+
+    <h2>12. Suspensión y terminación</h2>
+    <p>Podemos suspender o terminar tu acceso a la aplicación en cualquier momento si incumples estos Términos. Tú puedes dejar de usar la aplicación y solicitar la eliminación de tu cuenta cuando quieras (ver la <a href="/privacidad">Política de Privacidad</a>).</p>
+
+    <h2>13. Ley aplicable y resolución de disputas</h2>
+    <p>Estos Términos se rigen por las <b>leyes de la República Bolivariana de Venezuela</b>. Ante cualquier controversia, las partes procurarán primero una solución de buena fe escribiendo al correo de contacto. Si no se resuelve, la controversia se someterá a los <b>tribunales competentes de Venezuela</b>.</p>
+
+    <h2>14. Cambios a estos Términos</h2>
+    <p>Podemos actualizar estos Términos ocasionalmente. La fecha de “última actualización” indica la versión vigente. El uso continuado de la aplicación tras un cambio implica la aceptación de los nuevos Términos.</p>
+
+    <h2>15. Contacto</h2>
+    <p>Para cualquier consulta sobre estos Términos, escríbenos a: <a href="mailto:turepocom@gmail.com">turepocom@gmail.com</a></p>
+
+    <div class="callout">Este documento es un texto informativo para usuarios y no constituye asesoría legal.</div>
+
+    <hr>
+    <div class="foot">
+      <a class="btn" href="/">Volver a Tu Repo</a>
+    </div>
+  </main>
+
+</body>
+</html>

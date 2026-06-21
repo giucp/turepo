@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derechos de Autor (DMCA) · Tu Repo</title>
+<meta name="description" content="Política de Derechos de Autor de Tu Repo: cómo reportar contenido que infringe tus derechos y proceso de retiro.">
+<meta name="theme-color" content="#e07b1a">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<script>
+  /* Respeta el tema elegido en la app (mismo dominio); si no hay, usa el del sistema */
+  (function(){
+    try{
+      var t = localStorage.getItem('temaTuRepo');
+      var oscuro = t === 'dark' || (t === null && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+      if(oscuro) document.documentElement.classList.add('dark');
+    }catch(e){}
+  })();
+</script>
+<style>
+  :root{
+    --bg:#f4ede0; --paper:#fffaf2; --ink:#221a12; --ink2:#5d5444; --ink3:#8a7a63;
+    --sun:#f2a13b; --sun-deep:#e07b1a; --line:#e6dac6;
+  }
+  html.dark{
+    --bg:#15110c; --paper:#1d1812; --ink:#f4ecdf; --ink2:#beb19b; --ink3:#857a64;
+    --line:#2a2318;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'DM Sans',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(600px 360px at 90% -8%, #ffd9a0 0%, transparent 60%), var(--bg);
+    color:var(--ink); line-height:1.62; padding:0 0 56px; -webkit-text-size-adjust:100%;
+    min-height:100vh;
+  }
+  html.dark body{ background:radial-gradient(600px 360px at 90% -8%, rgba(224,123,26,.16) 0%, transparent 60%), var(--bg); }
+
+  /* Cabecera */
+  .top{
+    display:flex; align-items:center; gap:11px;
+    max-width:720px; margin:0 auto; padding:16px 20px 10px;
+  }
+  .brand{ display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink); }
+  .logo{
+    width:38px; height:38px; border-radius:12px; overflow:hidden; flex:none;
+    box-shadow:0 4px 10px rgba(224,123,26,.4); background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+  }
+  .logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .brand b{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:18px; letter-spacing:-.01em; }
+  .volver{
+    margin-left:auto; font-size:13px; font-weight:700; color:var(--sun-deep);
+    text-decoration:none; padding:7px 13px; border:1px solid var(--line); border-radius:999px;
+    white-space:nowrap; transition:.15s;
+  }
+  .volver:active{ transform:scale(.97); }
+
+  /* Tarjeta de contenido */
+  .card{
+    max-width:720px; margin:8px auto 0; background:var(--paper);
+    border:1px solid var(--line); border-radius:20px; padding:26px 22px;
+  }
+  h1{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:25px; line-height:1.15; letter-spacing:-.02em; }
+  .upd{ color:var(--ink3); font-size:13px; font-weight:600; margin-top:6px; margin-bottom:18px; }
+  .intro{ color:var(--ink2); margin-bottom:6px; }
+  h2{
+    font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px; color:var(--sun-deep);
+    margin-top:26px; margin-bottom:8px; letter-spacing:-.01em;
+  }
+  p{ margin-bottom:11px; }
+  .sub{ font-weight:700; color:var(--ink); margin-top:10px; margin-bottom:6px; }
+  ul,ol{ margin:0 0 11px 0; padding-left:20px; }
+  li{ margin-bottom:7px; }
+  a{ color:var(--sun-deep); font-weight:600; }
+  hr{ border:none; border-top:1px solid var(--line); margin:24px 0; }
+  .callout{
+    background:rgba(224,123,26,.08); border:1px solid var(--line); border-radius:14px;
+    padding:13px 15px; margin:14px 0; color:var(--ink2); font-size:14px;
+  }
+
+  /* Botón final */
+  .foot{ text-align:center; margin-top:26px; }
+  .btn{
+    display:inline-block; background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+    color:#fff; text-decoration:none; font-weight:800; font-size:14.5px;
+    padding:12px 26px; border-radius:999px; box-shadow:0 4px 14px rgba(224,123,26,.35);
+  }
+  .btn:active{ transform:scale(.98); }
+
+  @media (max-width:520px){
+    .card{ border-radius:0; border-left:none; border-right:none; padding:22px 17px; }
+    h1{ font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top">
+    <a class="brand" href="/">
+      <span class="logo"><img src="/icon-192.png" alt="Tu Repo"></span>
+      <b>Tu Repo</b>
+    </a>
+    <a class="volver" href="/">← Volver a la app</a>
+  </header>
+
+  <main class="card">
+    <h1>Política de Derechos de Autor</h1>
+    <p class="upd">Última actualización: 21 de junio de 2026</p>
+
+    <p class="intro">En Tu Repo respetamos los derechos de propiedad intelectual y esperamos que nuestros usuarios hagan lo mismo. Como las fotos y el contenido son subidos por los propios usuarios, ponemos a disposición un procedimiento para retirar contenido que infrinja derechos de autor, alineado con los principios de la <b>DMCA</b> (Digital Millennium Copyright Act) y la normativa aplicable.</p>
+
+    <h2>1. Si tu obra fue publicada sin permiso</h2>
+    <p>Si eres el titular de los derechos (o su representante autorizado) y crees que un contenido en Tu Repo infringe tus derechos de autor, envíanos una <b>notificación de retiro</b> a <a href="mailto:turepocom@gmail.com">turepocom@gmail.com</a> con el asunto “Retiro de contenido / DMCA”.</p>
+
+    <h2>2. Qué debe incluir tu notificación</h2>
+    <p>Para que podamos actuar, tu notificación debe contener:</p>
+    <ol>
+      <li>Identificación de la obra protegida que consideras infringida.</li>
+      <li>Identificación del contenido infractor y su <b>ubicación exacta</b> dentro de la aplicación (por ejemplo, una captura de pantalla, la zona/región y descripción del reporte o foto).</li>
+      <li>Tus datos de contacto: nombre completo, correo electrónico y, si aplica, teléfono.</li>
+      <li>Una declaración de que tienes <b>buena fe</b> de que el uso del material no está autorizado por el titular, su agente o la ley.</li>
+      <li>Una declaración de que la información de tu notificación es <b>exacta</b> y de que eres el titular del derecho o estás autorizado para actuar en su nombre.</li>
+      <li>Tu firma (física o electrónica).</li>
+    </ol>
+
+    <h2>3. Qué hacemos al recibirla</h2>
+    <p>Al recibir una notificación válida, retiraremos o deshabilitaremos el acceso al contenido señalado en un plazo razonable, y podremos notificar al usuario que lo publicó. (Ten en cuenta que muchas fotos y reportes ya caducan y se eliminan automáticamente tras un tiempo limitado.)</p>
+
+    <h2>4. Contra-notificación</h2>
+    <p>Si crees que tu contenido fue retirado por error o que tienes derecho a publicarlo, puedes enviarnos una <b>contra-notificación</b> a <a href="mailto:turepocom@gmail.com">turepocom@gmail.com</a> incluyendo:</p>
+    <ul>
+      <li>Identificación del contenido retirado y dónde estaba.</li>
+      <li>Una declaración bajo tu responsabilidad de que el retiro fue por error o identificación equivocada.</li>
+      <li>Tus datos de contacto y tu firma.</li>
+    </ul>
+
+    <h2>5. Infractores reincidentes</h2>
+    <p>Aplicamos una política de <b>terminación de cuentas</b> de los usuarios que resulten ser infractores reincidentes de derechos de autor.</p>
+
+    <h2>6. Contacto</h2>
+    <p>Agente / contacto para asuntos de derechos de autor de Tu Repo:<br>
+    <a href="mailto:turepocom@gmail.com">turepocom@gmail.com</a></p>
+
+    <div class="callout">Este documento es un texto informativo y no constituye asesoría legal. El envío de notificaciones falsas o de mala fe puede acarrear responsabilidad.</div>
+
+    <hr>
+    <div class="foot">
+      <a class="btn" href="/">Volver a Tu Repo</a>
+    </div>
+  </main>
+
+</body>
+</html>
