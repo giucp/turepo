@@ -1,0 +1,39 @@
+name: Limpiar datos viejos
+
+# Borra reportes/comentarios/fotos más viejos que RETENTION_DAYS (la app solo
+# muestra contenido de las últimas 12h, así que lo viejo ya no se ve).
+# Disparo a mano = SIMULACRO por defecto (revisa los conteos antes de borrar).
+# El schedule corre EN VIVO (respaldo; el disparo fiable se hace por cron-job.org).
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simulacro (marca esta casilla = solo cuenta, no borra)"
+        type: boolean
+        default: true
+  schedule:
+    - cron: "30 7 * * *"     # diario ~07:30 UTC (respaldo)
+
+jobs:
+  limpiar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install requests
+
+      - name: Limpiar datos viejos
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RETENTION_DAYS: "2"
+          # Scheduled => EN VIVO. Manual con dry_run marcado => simulacro.
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: python scripts/limpiar_viejos.py
