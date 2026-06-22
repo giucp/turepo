@@ -17,7 +17,7 @@
 <meta name="twitter:title" content="Tu Repo · Conectados nos ayudamos">
 <meta name="twitter:description" content="Lo que pasa en tu ciudad en tiempo real: luz, gasolina, vías y precios. Reportado por su gente.">
 <meta name="twitter:image" content="https://turepo.com/og.jpg">
-<meta name="theme-color" content="#f4ede0">
+<meta name="theme-color" content="#ffffff">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -44,7 +44,7 @@
   .appbar{padding:calc(env(safe-area-inset-top) + 12px) 14px 12px;display:flex;align-items:center;gap:8px;
     justify-content:space-between;border-bottom:2.5px solid #111;background:#fff;flex-shrink:0}
   .brand{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
-  .logo{width:36px;height:36px;border-radius:11px;background:#fff;border:2.5px solid #111;overflow:hidden;
+  .logo{width:36px;height:36px;border-radius:11px;background:#2d5bff;border:2.5px solid #111;overflow:hidden;
     display:grid;place-items:center;color:#fff;font-size:19px}
   .brand h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;letter-spacing:-.01em;line-height:1}
   .brand small{font-size:10.5px;color:#8a7a63;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis}
@@ -1040,7 +1040,7 @@ function pintarResumen(data, hayFotos){
 /* ===== Modo oscuro retirado (rediseño A+): la app es solo clara ===== */
 document.body.classList.remove('dark'); localStorage.removeItem('temaTuRepo');
 // El color de la barra de estado sigue el tema (oscuro/claro) en vez de un naranja fijo
-function pintarThemeColor(){ const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', document.body.classList.contains('dark')?'#15110c':'#f4ede0'); }
+function pintarThemeColor(){ const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', '#ffffff'); }
 pintarThemeColor();
 function toggleTema(){
   const oscuro=document.body.classList.toggle('dark');
