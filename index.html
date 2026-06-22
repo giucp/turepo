@@ -450,7 +450,7 @@
   body.dark .fbtn.has-cm{color:#f2913b}
   .brand small{white-space:nowrap}
   /* ======== LA PLAZA: sistema visual ======== */
-  body{--okC:#21965a;--warnC:#d8990a;--badC:#d6452e;
+  body{--okC:#21965a;--warnC:#ffc107;--badC:#ff3b3b;
     --okS:rgba(33,150,90,.12);--warnS:rgba(216,153,10,.14);--badS:rgba(214,69,46,.12);
     --accS:rgba(224,123,26,.12);--chip2:#eee5d3;--ink2:#5d5444;--ink3:#988b74}
   .hello{flex:1;min-width:0}
@@ -657,7 +657,7 @@
   /* barrido final: iconos en chrome */
   .fchip svg{width:14px;height:14px;vertical-align:-2.5px;margin-right:3px;stroke-width:2}
   .ce svg{width:21px;height:21px;stroke-width:2}
-  .opt .odot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px}
+  .opt .odot{display:inline-block;width:12px;height:12px;border:2px solid #111;border-radius:50%;vertical-align:-2px}
   .fbtn svg{width:14px;height:14px;vertical-align:-2.5px;stroke-width:2}
   .iic svg{width:22px;height:22px;stroke-width:2}
   .btn svg{width:16px;height:16px;vertical-align:-3px;stroke-width:2;margin-right:2px}
@@ -665,7 +665,7 @@
   .empty .big svg{width:34px;height:34px;stroke-width:1.6;display:block;margin:0 auto 4px;color:var(--ink3)}
   .pod .medal{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;margin:0 auto 4px;
     font-weight:800;font-size:13px;color:#fff;font-family:'Bricolage Grotesque'}
-  .medal.m0{background:linear-gradient(135deg,#f5c344,#d8990a)}
+  .medal.m0{background:linear-gradient(135deg,#f5c344,#ffc107)}
   .medal.m1{background:linear-gradient(135deg,#c9c9c9,#969ca3)}
   .medal.m2{background:linear-gradient(135deg,#d99a66,#a96433)}
   .foto-admin-banner .iic svg{width:20px;height:20px}
@@ -863,15 +863,15 @@ function textoNoPermitido(t,maxEmojis){ return hayGroseria(t) || tieneCaracteres
 // sugerencias (aprendidas por la comunidad) saca los nombres.
 const SERVICIOS = {
   luz:      {titulo:'Luz',          ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'12 horas',
-    sit:[['<i class="odot" style="background:#d6452e"></i>','Se fue la luz','sin_luz'],['<i class="odot" style="background:#21965a"></i>','Llegó la luz','con_luz'],['<i class="odot" style="background:#d8990a"></i>','Bajones / fluctuación','bajones'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]},
+    sit:[['<i class="odot" style="background:#ff3b3b"></i>','Se fue la luz','sin_luz'],['<i class="odot" style="background:#21965a"></i>','Llegó la luz','con_luz'],['<i class="odot" style="background:#ffc107"></i>','Bajones / fluctuación','bajones'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]},
   agua:     {titulo:'Agua',         ubLabel:'¿En qué sector?',   lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'12 horas',
-    sit:[['<i class="odot" style="background:#21965a"></i>','Llegó con fuerza','con_agua'],['<i class="odot" style="background:#d8990a"></i>','Poca presión','poca_agua'],['<i class="odot" style="background:#d6452e"></i>','Sin agua','sin_agua']]},
+    sit:[['<i class="odot" style="background:#21965a"></i>','Llegó con fuerza','con_agua'],['<i class="odot" style="background:#ffc107"></i>','Poca presión','poca_agua'],['<i class="odot" style="background:#ff3b3b"></i>','Sin agua','sin_agua']]},
   gasolina: {titulo:'Gasolina',     ubLabel:'¿Cuál estación?',   lugarTipo:'estacion', ph:'Ej: E/S Venezuela…', ttl:'12 horas',
-    sit:[['<i class="odot" style="background:#21965a"></i>','Fluyendo / sin cola','fluyendo'],['<i class="odot" style="background:#d8990a"></i>','Cola moderada','cola_media'],['<i class="odot" style="background:#d6452e"></i>','Cola pesada','cola_pesada'],['<i class="odot" style="background:#8a7a63"></i>','Cerrada / sin gasolina','cerrada']]},
+    sit:[['<i class="odot" style="background:#21965a"></i>','Fluyendo / sin cola','fluyendo'],['<i class="odot" style="background:#ffc107"></i>','Cola moderada','cola_media'],['<i class="odot" style="background:#ff3b3b"></i>','Cola pesada','cola_pesada'],['<i class="odot" style="background:#8a7a63"></i>','Cerrada / sin gasolina','cerrada']]},
   via:      {titulo:'Tráfico / vías',ubLabel:'¿En qué vía o zona?',lugarTipo:'zona',     ph:'Ej: Av. 23 de Enero…', ttl:'12 horas',
-    sit:[['<i class="odot" style="background:#d6452e"></i>','Accidente','accidente'],['<i class="odot" style="background:#d8990a"></i>','Trancón / cola fuerte','trancon'],['<i class="odot" style="background:#d6452e"></i>','Calle cerrada','cerrada_via'],['<i class="odot" style="background:#d8990a"></i>','Semáforo dañado','semaforo'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]},
+    sit:[['<i class="odot" style="background:#ff3b3b"></i>','Accidente','accidente'],['<i class="odot" style="background:#ffc107"></i>','Trancón / cola fuerte','trancon'],['<i class="odot" style="background:#ff3b3b"></i>','Calle cerrada','cerrada_via'],['<i class="odot" style="background:#ffc107"></i>','Semáforo dañado','semaforo'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]},
   alerta:   {titulo:'Alertas generales', ubLabel:'¿En qué zona?',    lugarTipo:'zona',     ph:'Ej: Tu Sector…', ttl:'12 horas',
-    sit:[['<i class="odot" style="background:#d8990a"></i>','Lluvia / clima','clima'],['<i class="odot" style="background:#d6452e"></i>','Calle inundada','inundacion'],['<i class="odot" style="background:#d6452e"></i>','Robo','robo'],['<i class="odot" style="background:#d8990a"></i>','Protesta / cierre','protesta'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]}
+    sit:[['<i class="odot" style="background:#ffc107"></i>','Lluvia / clima','clima'],['<i class="odot" style="background:#ff3b3b"></i>','Calle inundada','inundacion'],['<i class="odot" style="background:#ff3b3b"></i>','Robo','robo'],['<i class="odot" style="background:#ffc107"></i>','Protesta / cierre','protesta'],['<i class="odot" style="background:#8a7a63"></i>','Otra situación','otro']]}
 };
 
 /* ======================= De aquí abajo es la lógica ======================= */
@@ -2278,7 +2278,7 @@ function pintarMapa(){
   _mapaCapa.clearLayers();
   _mapaRep.forEach(r=>{
     if(_mapaFiltro.has(r.tipo) || r.lat==null || r.lng==null) return;
-    if(r.estado==='robo'){ L.circle([r.lat,r.lng],{radius:180,color:'#d6452e',weight:1,fillColor:'#d6452e',fillOpacity:.12,opacity:.4}).addTo(_mapaCapa); }
+    if(r.estado==='robo'){ L.circle([r.lat,r.lng],{radius:180,color:'#ff3b3b',weight:1,fillColor:'#ff3b3b',fillOpacity:.12,opacity:.4}).addTo(_mapaCapa); }
     const m=L.marker([r.lat,r.lng],{icon:mapaPinIcon(r)});
     m.on('click',()=>abrirFichaMapa(r));
     _mapaCapa.addLayer(m);
