@@ -147,23 +147,28 @@
   #foto-filtros .fchip.on{opacity:1;box-shadow:3px 3px 0 #111}
   /* ===== Noticias: hero destacada + tarjetas con categoria en color ===== */
   .cat{font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 9px;border-radius:6px;text-transform:uppercase;white-space:nowrap}
-  .cat.nac{background:rgba(224,123,26,.14);color:#b5630f}
-  .cat.intl{background:rgba(47,111,208,.13);color:#2f6fd0}
-  .cat.eco{background:rgba(187,90,48,.13);color:#bb5a30}
-  .cat.dep{background:rgba(47,128,72,.14);color:#2f8048}
-  .cat.suc{background:rgba(192,57,43,.13);color:#c0392b}
-  .nhero{display:block;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:18px}
+  .nhero-top .cat,.ncard-top .cat{border:2px solid #111;border-radius:999px}
+  .cat.nac{background:#ff9d3c;color:#5a3000}
+  .cat.intl{background:#7db0ff;color:#0a285c}
+  .cat.eco{background:#ff8a5b;color:#4a1c08}
+  .cat.dep{background:#6ce5b0;color:#06371f}
+  .cat.suc{background:#ff8a8a;color:#4a0808}
+  .nhero{display:block;text-decoration:none;background:#fff;border:2.5px solid #111;border-radius:16px;box-shadow:5px 5px 0 #111;padding:17px;margin-bottom:18px;animation:nbNoti .5s cubic-bezier(.22,1,.36,1) both}
+  .nhero:active{box-shadow:1px 1px 0 #111}
   .nhero-top{display:flex;align-items:center;gap:8px;margin-bottom:11px}
-  .nhero-recent{font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--ink3);text-transform:uppercase;margin-left:auto}
-  .nhero-title{font-family:'Bricolage Grotesque';font-size:19px;font-weight:800;line-height:1.25;color:var(--ink);margin-bottom:11px}
-  .nhero-src{font-size:12.5px;color:var(--ink2);font-weight:600}
-  .nhero-time{color:var(--ink3);font-weight:400}
-  .ncard{display:block;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
-  .ncard:active{transform:scale(.99)}
+  .nhero-recent{font-family:'Bricolage Grotesque';font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#fff;background:#111;text-transform:uppercase;margin-left:auto;padding:3px 9px;border-radius:999px}
+  .nhero-title{font-family:'Bricolage Grotesque';font-size:21px;font-weight:800;line-height:1.22;letter-spacing:-.3px;color:#111;margin-bottom:11px}
+  .nhero-src{font-size:12.5px;color:#5f5f5f;font-weight:600}
+  .nhero-time{color:#8a857c;font-weight:400}
+  .ncard{display:block;text-decoration:none;background:#fff;border:2.5px solid #111;border-radius:13px;box-shadow:3px 3px 0 #111;padding:13px;margin-bottom:11px;animation:nbNoti .5s cubic-bezier(.22,1,.36,1) both}
+  .ncard:active{box-shadow:0 0 0 #111}
+  .ncard:nth-child(2){animation-delay:.05s}.ncard:nth-child(3){animation-delay:.1s}.ncard:nth-child(4){animation-delay:.15s}.ncard:nth-child(5){animation-delay:.2s}.ncard:nth-child(n+6){animation-delay:.24s}
   .ncard-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
-  .ncard-time{font-size:11.5px;color:var(--ink3);margin-left:auto}
-  .ncard-title{font-family:'Bricolage Grotesque';font-size:15px;font-weight:700;line-height:1.3;color:var(--ink);margin-bottom:9px}
-  .ncard-src{font-size:12px;color:var(--ink2);font-weight:600}
+  .ncard-time{font-size:11.5px;color:#8a857c;margin-left:auto;font-weight:600}
+  .ncard-title{font-family:'Bricolage Grotesque';font-size:15px;font-weight:800;line-height:1.3;letter-spacing:-.2px;color:#111;margin-bottom:9px}
+  .ncard-src{font-size:12px;color:#5f5f5f;font-weight:600}
+  @keyframes nbNoti{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){.nhero,.ncard{animation:none}}
   body.dark .nhero{background:linear-gradient(160deg,#241c14,#1a1714);border-color:#3a2f22}
   body.dark .cat.nac{background:rgba(242,161,59,.16);color:var(--sun)}
   body.dark .cat.intl{background:rgba(90,140,210,.18);color:#7fa8e0}
@@ -742,7 +747,7 @@
     <section class="screen" id="s-noticias">
       <button class="backbtn" onclick="go('s-inicio')">← Volver</button>
       <div class="sec-title" style="margin-top:6px">Venezuela y el mundo</div>
-      <div class="q" style="font-size:13px;color:#8a7a63;margin:-4px 4px 12px">Titulares de medios nacionales. Toca una para leer la nota completa en su fuente.</div>
+      <div class="q" style="font-size:13px;color:#5f5f5f;margin:-4px 4px 12px">Titulares de medios nacionales. Toca una para leer la nota completa en su fuente.</div>
       <div id="noticias-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
 
@@ -771,7 +776,7 @@
     <section class="screen" id="s-admin">
       <button class="backbtn" onclick="go('s-fotos')">← Volver</button>
       <div class="sec-title" style="margin-top:6px">Moderar fotos</div>
-      <div class="q" style="font-size:13px;color:#8a7a63;margin:-4px 4px 12px">Las fotos que apruebes se publican y viven unas horas. Las que rechaces se borran.</div>
+      <div class="q" style="font-size:13px;color:#5f5f5f;margin:-4px 4px 12px">Las fotos que apruebes se publican y viven unas horas. Las que rechaces se borran.</div>
       <div id="solic-list"></div>
       <div id="admin-list"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
