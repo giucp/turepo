@@ -453,12 +453,9 @@
   .verdict{border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);padding:14px 15px;background:#b9f6ca}
   .verdict h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:21px;letter-spacing:-.015em;
     line-height:1.12;display:flex;align-items:center;gap:9px;color:#06381c}
-  .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111}
-  .verdict .ld-ok,.verdict .ld-warn,.verdict .ld-bad{box-shadow:none;animation:none}
-  .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;animation:nbhalo 2.1s ease-out infinite}
-  .verdict .ld-ok::after{background:var(--okC)}
-  .verdict .ld-warn::after{background:var(--warnC)}
-  .verdict .ld-bad::after{background:var(--badC)}
+  .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111;background:var(--okC)}
+  .verdict .ld-ok,.verdict .ld-warn,.verdict .ld-bad{box-shadow:none;animation:none;background:var(--okC)}
+  .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;background:var(--okC);animation:nbhalo 2.1s ease-out infinite}
   @keyframes nbhalo{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.8);opacity:0}}
   @media (prefers-reduced-motion:reduce){.verdict .ld::after{animation:none;display:none}}
   .ld{width:11px;height:11px;border-radius:50%;flex:none}
@@ -507,7 +504,7 @@
   .fx-res{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:#06381c;text-align:right;margin-top:9px}
   body.dark .fx-res{color:#f4a04a}
   body.dark .fx-gap .g{color:#f4a04a}
-  .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0 4px}
+  .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:5px 0 4px}
   .svc{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 2px 9px;border-radius:14px;
     font-family:'Bricolage Grotesque';font-size:11.5px;font-weight:800;border:var(--nb-bd);box-shadow:var(--nb-hard2);cursor:pointer;transition:transform .12s,box-shadow .12s}
   .svc:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
@@ -518,10 +515,6 @@
   .svc-oferta{background:#6ce5b0;color:#06371f}
   .svc-fotos{background:#ff9ecf;color:#4a0a2c}
   .svc svg{width:21px;height:21px;stroke-width:2}
-  .svc .gd{position:absolute;top:7px;right:8px;width:9px;height:9px;border-radius:50%;border:2px solid #111}
-  .svc.calm .gd{background:var(--okC)}
-  .svc.warn .gd{background:var(--warnC)}
-  .svc.alert .gd{background:var(--badC)}
   /* feed estilo plataforma (brutalista) */
   .post{display:flex;gap:11px;padding:11px 12px;border:var(--nb-bd);border-radius:14px;box-shadow:var(--nb-hard2);background:var(--paper);margin-bottom:9px}
   .post .pic{width:40px;height:40px;border:2.5px solid #111;border-radius:11px;display:grid;place-items:center;flex:none}
@@ -1005,13 +998,7 @@ function pintarResumen(data, hayFotos){
     sr.innerHTML=defs.map(d=>{
       const [t,lab,icn,click,modo]=d;
       let cls='', dot='';
-      if(modo==='svc'){                       // luz/gasolina/vías/alerta: tiñe segun reportes
-        const st=porTipo[t];
-        cls = st&&st.bad?'alert':(st&&st.warn?'warn':'calm');
-        dot = '<span class="gd"></span>';
-      } else if(modo==='on'){                 // oferta/fotos: punto verde "activo" si hay contenido
-        cls='calm'; dot='<span class="gd"></span>';
-      }                                       // modo 'off': sin punto ni tinte
+      // chips sin punto de estado (estilo brutalista): solo el color de identidad por tipo
       return `<button class="svc svc-${t} ${cls}" onclick="${click}">${dot}${ICONS[icn]}${lab}</button>`;
     }).join('');
   }
