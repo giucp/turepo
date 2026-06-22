@@ -411,17 +411,27 @@
   #mapaMap{position:absolute;inset:0;z-index:1}
   .mapa-top{position:absolute;top:12px;left:12px;right:12px;z-index:500;display:flex;flex-direction:column;gap:9px;pointer-events:none}
   .mapa-top>*{pointer-events:auto}
-  .mapa-verdict{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:11px 14px;box-shadow:0 6px 20px rgba(60,40,15,.16);display:flex;align-items:center;gap:9px;font-family:'Bricolage Grotesque';font-weight:800;font-size:15.5px;color:var(--ink)}
-  .mapa-verdict .mapa-count{margin-left:auto;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--ink3)}
+  .mapa-verdict{background:#fff;border:2.5px solid #111;border-radius:13px;padding:10px 13px;box-shadow:3px 3px 0 #111;display:flex;align-items:center;gap:9px;font-family:'Bricolage Grotesque';font-weight:800;font-size:15.5px;color:#111}
+  .mapa-verdict .mapa-count{margin-left:auto;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#8a857c}
+  .mapa-verdict .ld{width:12px;height:12px;border:2.5px solid #111;box-shadow:none;animation:none}
+  .mapa-verdict .ld-ok{background:#27d96b}
+  .mapa-verdict .ld-warn{background:#ffc107}
+  .mapa-verdict .ld-bad{background:#ff3b3b}
   .mapa-filtros{display:flex;gap:8px;overflow-x:auto;margin:0 -12px;padding:1px 12px;scrollbar-width:none}
   .mapa-filtros::-webkit-scrollbar{display:none}
-  .mapa-filtros .fchip{flex:none;background:var(--paper);box-shadow:0 2px 10px rgba(31,24,19,.14)}
-  .mapa-filtros .fchip.off{opacity:.45}
-  .mapa-fab{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:520;height:48px;padding:0 18px;border-radius:999px;background:linear-gradient(135deg,var(--sun),var(--sun-deep));color:#fff;border:none;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;box-shadow:0 8px 22px -6px rgba(224,123,26,.55);cursor:pointer}
+  .mapa-filtros .fchip{flex:none;background:#fff;box-shadow:1.5px 1.5px 0 #111}
+  .mapa-filtros .fchip.f-luz{background:#ffd23f;color:#3a2b00}
+  .mapa-filtros .fchip.f-gasolina{background:#9cc6ff;color:#0a285c}
+  .mapa-filtros .fchip.f-via{background:#ffb24d;color:#4a2600}
+  .mapa-filtros .fchip.f-alerta{background:#ff8a8a;color:#4a0808}
+  .mapa-filtros .fchip.f-oferta{background:#6ce5b0;color:#06371f}
+  .mapa-filtros .fchip.off{opacity:.4;box-shadow:none}
+  .mapa-fab{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:520;height:48px;padding:0 18px;border-radius:14px;background:#ff2d87;color:#fff;border:2.5px solid #111;display:inline-flex;align-items:center;gap:7px;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;box-shadow:3px 3px 0 #111;cursor:pointer}
+  .mapa-fab:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
   .mapa-fab svg{width:19px;height:19px}
   .mpin{position:relative;width:38px;height:46px}
   .mpin .halo{position:absolute;left:5px;top:3px;width:28px;height:28px;border-radius:50%;opacity:.5;animation:mpinPulse 1.9s cubic-bezier(.2,.55,.3,1) infinite}
-  .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;border:2.5px solid var(--paper);box-shadow:0 5px 12px rgba(31,24,19,.45);background-image:linear-gradient(150deg,rgba(255,255,255,.30),rgba(255,255,255,0) 58%)}
+  .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;border:2.5px solid #111;box-shadow:0 4px 10px rgba(31,24,19,.4)}
   .mpin .tile svg{width:18px;height:18px;stroke-width:2.2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
   .mpin .tip{position:absolute;left:50%;top:31px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:11px solid var(--ink3);filter:drop-shadow(0 2px 1.5px rgba(31,24,19,.3))}
   .mpin.s-ok .tile,.mpin.s-ok .halo{background-color:var(--okC)}      .mpin.s-ok .tip{border-top-color:var(--okC)}
@@ -2315,7 +2325,7 @@ function pintarMapaFiltros(){
   const defs=[['luz','Luz','bolt'],['gasolina','Gasolina','pump'],['via','Vías','traffic'],['alerta','Alertas','alert'],['oferta','Precios','cart']];
   cont.innerHTML=defs.map(d=>{
     const n=_mapaRep.filter(r=>r.tipo===d[0]).length;
-    return `<button class="fchip ${_mapaFiltro.has(d[0])?'off':''}" onclick="mapaToggleFiltro('${d[0]}')">${ICONS[d[2]]} ${d[1]} <span style="color:var(--ink3)">${n}</span></button>`;
+    return `<button class="fchip f-${d[0]} ${_mapaFiltro.has(d[0])?'off':''}" onclick="mapaToggleFiltro('${d[0]}')">${ICONS[d[2]]} ${d[1]} <span style="opacity:.55">${n}</span></button>`;
   }).join('');
 }
 function mapaToggleFiltro(t){ _mapaFiltro.has(t)?_mapaFiltro.delete(t):_mapaFiltro.add(t); pintarMapa(); pintarMapaFiltros(); }
