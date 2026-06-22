@@ -723,10 +723,6 @@
     <section class="screen" id="s-yo">
       <button class="backbtn" onclick="go('s-inicio')">← Volver</button>
       <div class="sec-title" style="margin-top:6px">Mi cuenta</div>
-      <div class="temarow" onclick="toggleTema()">
-        <span class="tlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>Modo oscuro</span>
-        <span class="tswitch"><i></i></span>
-      </div>
       <div class="lema" id="lemaYo"><div class="big">Conectados nos ayudamos</div><div class="sub">Lo que pasa en tu ciudad, reportado por su gente.</div></div>
       <div id="yo-cont"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
@@ -1006,8 +1002,8 @@ function pintarResumen(data, hayFotos){
     }).join('');
   }
 }
-/* ===== Tema claro/oscuro: lo elige cada quien y se recuerda en el dispositivo ===== */
-if(localStorage.getItem('temaTuRepo')==='dark') document.body.classList.add('dark');
+/* ===== Modo oscuro retirado (rediseño A+): la app es solo clara ===== */
+document.body.classList.remove('dark'); localStorage.removeItem('temaTuRepo');
 // El color de la barra de estado sigue el tema (oscuro/claro) en vez de un naranja fijo
 function pintarThemeColor(){ const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', document.body.classList.contains('dark')?'#15110c':'#f4ede0'); }
 pintarThemeColor();
