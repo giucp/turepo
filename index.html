@@ -138,6 +138,13 @@
   #s-estatus .filters .fchip:not([data-t]){background:#ff9ecf;color:#4a0a2c}
   #s-estatus .filters .fchip:not(.on){opacity:.45;box-shadow:none}
   #s-estatus .filters .fchip.on{opacity:1;box-shadow:3px 3px 0 #111}
+  #foto-filtros .fchip.f-luz{background:#ffd23f;color:#3a2b00}
+  #foto-filtros .fchip.f-gasolina{background:#9cc6ff;color:#0a285c}
+  #foto-filtros .fchip.f-via{background:#ffb24d;color:#4a2600}
+  #foto-filtros .fchip.f-oferta{background:#6ce5b0;color:#06371f}
+  #foto-filtros .fchip.f-carero{background:#c4a5ff;color:#2e1660}
+  #foto-filtros .fchip:not(.on){opacity:.5;box-shadow:none}
+  #foto-filtros .fchip.on{opacity:1;box-shadow:3px 3px 0 #111}
   /* ===== Noticias: hero destacada + tarjetas con categoria en color ===== */
   .cat{font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 9px;border-radius:6px;text-transform:uppercase;white-space:nowrap}
   .cat.nac{background:rgba(224,123,26,.14);color:#b5630f}
@@ -2088,7 +2095,7 @@ function pintarFotoFiltros(){
   const cont=$('foto-filtros'); if(!cont) return;
   cont.innerHTML = FOTO_CATS_FILTRO.map(c=>{
     const on = (c[0]==='todas' && !fotoCatFiltro) || (fotoCatFiltro===c[0]);
-    return `<div class="fchip ${on?'on':''}" onclick="setFotoFiltro('${c[0]}')">${c[1]} ${c[2]}</div>`;
+    return `<div class="fchip f-${c[0]} ${on?'on':''}" onclick="setFotoFiltro('${c[0]}')">${c[1]} ${c[2]}</div>`;
   }).join('');
 }
 function setFotoFiltro(c){ fotoCatFiltro = (c==='todas') ? null : c; cargarFotos(); }
