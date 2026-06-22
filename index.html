@@ -44,7 +44,7 @@
   .appbar{padding:calc(env(safe-area-inset-top) + 12px) 14px 12px;display:flex;align-items:center;gap:8px;
     justify-content:space-between;border-bottom:2.5px solid #111;background:#fff;flex-shrink:0}
   .brand{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
-  .logo{width:36px;height:36px;border-radius:11px;background:#2d5bff;border:2.5px solid #111;overflow:hidden;
+  .logo{width:36px;height:36px;border-radius:11px;background:#fff;border:2.5px solid #111;overflow:hidden;
     display:grid;place-items:center;color:#fff;font-size:19px}
   .brand h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;letter-spacing:-.01em;line-height:1}
   .brand small{font-size:10.5px;color:#8a7a63;font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis}
@@ -469,6 +469,7 @@
   .hline b{font-weight:800}
   .tickerlite{overflow:hidden;margin-top:11px;border:var(--nb-bd);border-radius:13px;box-shadow:var(--nb-hard);background:#fff0a6;padding:9px 0}
   .tickerlite .tk-item{color:#3a2e00;font-weight:700;font-size:12.5px}
+  .tickerlite .tk-item svg{width:14px;height:14px;stroke-width:2.2;margin-right:5px;flex:none}
   /* ===== Barra dólar BCV + Binance ===== */
   .fx{margin:12px 0 0;background:var(--paper);border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .fx-row{display:flex;align-items:stretch}
@@ -1308,6 +1309,7 @@ function pintarTicker(data){
     cola_pesada:'Cola pesada', cerrada:'Estación cerrada',
     trancon:'Trancón fuerte', accidente:'Accidente en vía', cerrada_via:'Calle cerrada', semaforo:'Semáforo dañado'
   };
+  const TICON = {luz:'bolt', agua:'drop', gasolina:'pump', via:'traffic', alerta:'alert'};
   // Agrupamos por situación + zona, y contamos
   const grupos = {};
   data.forEach(r=>{
@@ -1317,7 +1319,7 @@ function pintarTicker(data){
     if(!et) return;
     const lugar = (r.zona||r.lugar||'').trim();
     const clave = et+'|'+lugar.toLowerCase();
-    if(!grupos[clave]) grupos[clave] = {et, lugar, n:0};
+    if(!grupos[clave]) grupos[clave] = {et, lugar, n:0, tipo:r.tipo};
     grupos[clave].n++;
   });
   let titulares = Object.values(grupos)
@@ -1325,7 +1327,8 @@ function pintarTicker(data){
     .map(g=>{
       const donde = g.lugar ? ` en ${g.lugar}` : ` en ${estadoActual}`;
       const cuenta = g.n>1 ? `<span class="tk-num">· ${g.n} reportes</span>` : `<span class="tk-num">· 1 reporte</span>`;
-      return `<span class="tk-item">${g.et}${donde}${cuenta}</span>`;
+      const ico = ICONS[TICON[g.tipo]] || ICONS.alert || '';
+      return `<span class="tk-item">${ico}${g.et}${donde}${cuenta}</span>`;
     });
 
   // Si no hay alertas, mensaje tranquilo (nunca vacío)
