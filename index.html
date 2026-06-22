@@ -348,32 +348,32 @@
     background:#ffd23f;border:2px solid #111;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
   /* === FOTOS de comunidad === */
   .c-fotos .cic{background:#efe3f3;color:#7a4f9e}
-  .foto-admin-banner{background:linear-gradient(135deg,#2c2417,#4a3a23);color:#fff5e6;border-radius:16px;
-    padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:14px}
+  .foto-admin-banner{background:#ffd23f;color:#3a2b00;border:2.5px solid #111;border-radius:14px;
+    padding:13px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:14px;box-shadow:3px 3px 0 #111}
   .foto-admin-banner:active{transform:scale(.98)}
   .foto-admin-banner .iic{font-size:24px}
   .foto-admin-banner h4{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px}
   .foto-admin-banner p{font-size:11.5px;opacity:.9;margin-top:2px;line-height:1.3}
   .fotogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .foto{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+  .foto{background:#fff;border:2.5px solid #111;border-radius:14px;overflow:hidden;box-shadow:2px 2px 0 #111;
     display:flex;flex-direction:column}
-  .foto .ph{width:100%;aspect-ratio:1/1;object-fit:cover;background:#ece6da;display:block}
+  .foto .ph{width:100%;aspect-ratio:1/1;object-fit:cover;background:#ece6d8;display:block;border-bottom:2.5px solid #111}
   .foto .fbody{padding:9px 11px}
   .foto .ftags{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-  .foto .ftag{font-size:10.5px;font-weight:700;color:var(--sun-deep);background:#fff0d6;border-radius:999px;padding:2px 8px}
-  .foto .fdesc{font-size:12.5px;color:var(--ink);line-height:1.35;word-break:break-word;margin-top:4px}
-  .foto .fmeta{font-size:11px;color:#8a7a63;margin-top:5px}
+  .foto .ftag{font-family:'Bricolage Grotesque';font-size:10.5px;font-weight:800;color:#111;background:#ffe14d;border:1.5px solid #111;border-radius:999px;padding:1px 8px}
+  .foto .fdesc{font-size:12.5px;color:#111;line-height:1.35;word-break:break-word;margin-top:4px}
+  .foto .fmeta{font-size:11px;color:#8a857c;margin-top:5px}
   .fotopreview{width:100%;border-radius:14px;margin:4px 0 6px;display:none;max-height:280px;object-fit:cover}
   .fotopreview.show{display:block}
-  .modcard{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
-  .modcard img{width:100%;max-height:340px;object-fit:cover;display:block;background:#ece6da}
+  .modcard{background:#fff;border:2.5px solid #111;border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:3px 3px 0 #111}
+  .modcard img{width:100%;max-height:340px;object-fit:cover;display:block;background:#ece6d8;border-bottom:2.5px solid #111}
   .modcard .mbody{padding:13px}
   .modcard .mtags{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
   .modcard .mdesc{font-size:13.5px;line-height:1.4;word-break:break-word}
   .modcard .mact{display:flex;gap:9px;padding:0 13px 13px}
-  .modcard .mbtn{flex:1;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;
-    cursor:pointer;font-family:'DM Sans';transition:.12s}
-  .modcard .mbtn:active{transform:scale(.97)}
+  .modcard .mbtn{flex:1;border:2.5px solid #111;border-radius:11px;padding:12px;font-size:14px;font-weight:800;
+    cursor:pointer;font-family:'Bricolage Grotesque';box-shadow:2px 2px 0 #111;transition:transform .1s,box-shadow .1s}
+  .modcard .mbtn:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
   .mbtn.ok{background:#def0e3;color:#2c7a3e} .mbtn.no{background:#fbe3e1;color:#b5322a}
   /* === Lightbox de fotos === */
   .lightbox{position:fixed;inset:0;background:rgba(20,15,8,.92);z-index:200;display:none;
@@ -463,12 +463,12 @@
   .crow .tinput{flex:1}
   .ccount{font-size:11px;color:#a99a83;text-align:right;margin-top:5px}
   .factions{display:flex;gap:8px;margin-top:8px}
-  .fbtn{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 4px;font-size:12px;
-    font-weight:700;color:#6b5d49;cursor:pointer;transition:.15s}
+  .fbtn{flex:1;border:2px solid #111;background:#fff;border-radius:9px;padding:7px 4px;font-size:12px;
+    font-family:'Bricolage Grotesque';font-weight:800;color:#111;cursor:pointer;transition:transform .12s}
   .fbtn:active{transform:scale(.95)}
-  .fbtn.liked{color:var(--badC)}
-  .fbtn.liked svg{fill:var(--badC)}
-  .fbtn.has-cm{color:var(--sun-deep)}
+  .fbtn.liked{color:#ff3b3b}
+  .fbtn.liked svg{fill:#ff3b3b}
+  .fbtn.has-cm{color:#2d5bff}
   body.dark .fbtn.has-cm{color:#f2913b}
   .brand small{white-space:nowrap}
   /* ======== LA PLAZA: sistema visual ======== */
@@ -592,33 +592,33 @@
   .addfoto.haspic{align-items:center}
   .addfoto-prev{width:46px;height:46px;border:2.5px solid #111;border-radius:11px;object-fit:cover;flex:none}
   .addfoto-x{font-family:inherit;font-weight:700;font-size:12.5px;color:var(--badC);background:none;border:none;cursor:pointer;padding:6px}
-  .frep{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--sun-deep);
-    background:var(--accS);border-radius:8px;padding:3px 8px;margin-bottom:5px}
+  .frep{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:#3a2b00;
+    background:#ffe14d;border:1.5px solid #111;border-radius:8px;padding:2px 8px;margin-bottom:5px}
   .frep svg{width:12px;height:12px;stroke-width:2.2}
   body.dark .frep{color:#f4a04a}
-  .solicrow{display:flex;align-items:center;gap:11px;background:var(--paper);border:1px solid var(--line);
-    border-radius:14px;padding:11px 12px;margin-bottom:8px}
-  .solicrow .pr-ic{width:36px;height:36px;border-radius:10px;background:var(--accS);color:var(--sun-deep);display:grid;place-items:center;flex:none}
+  .solicrow{display:flex;align-items:center;gap:11px;background:#fff;border:2.5px solid #111;
+    border-radius:13px;padding:11px 12px;margin-bottom:8px;box-shadow:2px 2px 0 #111}
+  .solicrow .pr-ic{width:36px;height:36px;border:2.5px solid #111;border-radius:10px;background:#cfe0ff;color:#1a3a8a;display:grid;place-items:center;flex:none}
   .solicrow .pr-ic svg{width:18px;height:18px}
   .solicrow .pr-tx{flex:1;min-width:0}
   .solicrow .pr-tx h4{font-family:'Bricolage Grotesque';font-weight:700;font-size:14px;color:var(--ink)}
   .solicrow .pr-tx p{font-size:11.5px;color:var(--ink3)}
-  .solicaviso{font-size:12.5px;color:var(--sun-deep);background:var(--accS);border-radius:12px;
-    padding:9px 12px;margin:10px auto 0;max-width:280px;line-height:1.4;font-weight:600}
+  .solicaviso{font-size:12.5px;color:#1a3a8a;background:#eaf0ff;border:2px solid #111;border-radius:11px;
+    padding:9px 12px;margin:10px auto 0;max-width:280px;line-height:1.4;font-weight:700}
   body.dark .solicaviso{color:#f4a04a}
   .act-mas{}
-  .btn-bad{background:var(--badC);color:#fff;border:none}
-  .btn-bad:active{transform:scale(.97)}
-  .cbov{position:fixed;inset:0;background:rgba(20,15,9,.55);backdrop-filter:blur(3px);z-index:120;
+  .btn-bad{background:#ff3b3b;color:#fff;border:2.5px solid #111}
+  .btn-bad:active{transform:translate(3px,3px);box-shadow:0 0 0 #111}
+  .cbov{position:fixed;inset:0;background:rgba(20,15,5,.5);z-index:120;
     display:none;align-items:center;justify-content:center;padding:26px}
   .cbov.open{display:flex}
-  .cbcard{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;
+  .cbcard{background:#fff;border:2.5px solid #111;border-radius:18px;padding:22px 20px;box-shadow:5px 5px 0 #111;
     max-width:330px;width:100%;text-align:center}
-  .cbic{width:48px;height:48px;border-radius:14px;background:var(--badS);color:var(--badC);
+  .cbic{width:48px;height:48px;border:2.5px solid #111;border-radius:13px;background:#ffcabf;color:#b3261f;
     display:grid;place-items:center;margin:0 auto 12px}
   .cbic svg{width:24px;height:24px;stroke-width:2}
   .cbcard h3{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--ink);margin-bottom:6px}
-  .cbcard p{font-size:13px;color:var(--ink3);line-height:1.45;margin-bottom:18px}
+  .cbcard p{font-size:13px;color:#5f5f5f;line-height:1.45;margin-bottom:18px}
   .cbrow{display:flex;gap:10px}
   .cbrow .btn{flex:1}
   /* FAB + nav */
