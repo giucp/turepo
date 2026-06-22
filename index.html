@@ -453,9 +453,9 @@
   .verdict{border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);padding:14px 15px;background:#b9f6ca}
   .verdict h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:21px;letter-spacing:-.015em;
     line-height:1.12;display:flex;align-items:center;gap:9px;color:#06381c}
-  .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111;background:var(--okC)}
-  .verdict .ld-ok,.verdict .ld-warn,.verdict .ld-bad{box-shadow:none;animation:none;background:var(--okC)}
-  .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;background:var(--okC);animation:nbhalo 2.1s ease-out infinite}
+  .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111;background:#27d96b}
+  .verdict .ld-ok,.verdict .ld-warn,.verdict .ld-bad{box-shadow:none;animation:none;background:#27d96b}
+  .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;background:#27d96b;animation:nbhalo 2.1s ease-out infinite}
   @keyframes nbhalo{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.8);opacity:0}}
   @media (prefers-reduced-motion:reduce){.verdict .ld::after{animation:none;display:none}}
   .ld{width:11px;height:11px;border-radius:50%;flex:none}
@@ -471,7 +471,7 @@
   .tickerlite .tk-item{color:#3a2e00;font-weight:700;font-size:12.5px}
   .tickerlite .tk-item svg{width:14px;height:14px;stroke-width:2.2;margin-right:5px;flex:none}
   /* ===== Barra dólar BCV + Binance ===== */
-  .fx{margin:12px 0 0;background:var(--paper);border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .fx{margin:12px 0 0;background:#fff;border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .fx-row{display:flex;align-items:stretch}
   .fx-cell{flex:1;padding:11px 13px;min-width:0}
   .fx-cell .k{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);display:flex;align-items:center;gap:5px}
@@ -517,7 +517,7 @@
   .svc-fotos{background:#ff9ecf;color:#4a0a2c}
   .svc svg{width:21px;height:21px;stroke-width:2}
   /* feed estilo plataforma (brutalista) */
-  .post{display:flex;gap:11px;padding:11px 12px;border:var(--nb-bd);border-radius:14px;box-shadow:var(--nb-hard2);background:var(--paper);margin-bottom:9px}
+  .post{display:flex;gap:11px;padding:11px 12px 5px;border:var(--nb-bd);border-radius:14px;box-shadow:var(--nb-hard2);background:#fff;margin-bottom:9px}
   .post .pic{width:40px;height:40px;border:2.5px solid #111;border-radius:11px;display:grid;place-items:center;flex:none}
   .post .pic svg{width:20px;height:20px;stroke-width:1.9}
   .pic-ok{background:#c7f0d6;color:#1a7a40}
@@ -968,7 +968,7 @@ function pintarResumen(data, hayFotos){
   if(hb){
     if(tot){
       const pOk=Math.round(cont.ok/tot*100), pWa=Math.round(cont.warn/tot*100);
-      hb.innerHTML=`<i style="width:${pOk}%;background:var(--okC)"></i><i style="width:${pWa}%;background:var(--warnC)"></i><i style="width:${100-pOk-pWa}%;background:var(--badC)"></i>`;
+      hb.innerHTML=`<i style="width:${pOk}%;background:#27d96b"></i><i style="width:${pWa}%;background:#ffc107"></i><i style="width:${100-pOk-pWa}%;background:#ff3b3b"></i>`;
     } else {
       hb.innerHTML=`<i style="width:100%;background:var(--chip2)"></i>`;
     }
