@@ -505,17 +505,21 @@
   .fx-res{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:#06381c;text-align:right;margin-top:9px}
   body.dark .fx-res{color:#f4a04a}
   body.dark .fx-gap .g{color:#f4a04a}
-  .svcs{display:flex;align-items:center;gap:8px;padding:12px 0 2px;overflow-x:auto;scrollbar-width:none}
-  .svcs::-webkit-scrollbar{display:none}
-  .svc{flex:none;margin:0;display:inline-flex;align-items:center;justify-content:center;min-width:112px;gap:6px;padding:8px 12px;border-radius:999px;
-    font-size:12.5px;font-weight:700;background:var(--chip2);color:var(--ink2);cursor:pointer;border:none;font-family:inherit}
-  .svc svg{width:15px;height:15px;stroke-width:2}
-  .svc .gd{width:7px;height:7px;border-radius:50%}
-  .svc.calm .gd{background:var(--okC);box-shadow:0 0 6px var(--okC)}
-  .svc.warn{background:var(--warnS);color:var(--warnC)}
-  .svc.warn .gd{background:var(--warnC);box-shadow:0 0 7px var(--warnC)}
-  .svc.alert{background:var(--badS);color:var(--badC)}
-  .svc.alert .gd{background:var(--badC);box-shadow:0 0 7px var(--badC)}
+  .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px 0 4px}
+  .svc{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 2px 9px;border-radius:14px;
+    font-family:'Bricolage Grotesque';font-size:11.5px;font-weight:800;border:var(--nb-bd);box-shadow:var(--nb-hard2);cursor:pointer;transition:transform .12s,box-shadow .12s}
+  .svc:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
+  .svc-luz{background:#ffd23f;color:#3a2b00}
+  .svc-gasolina{background:#9cc6ff;color:#0a285c}
+  .svc-via{background:#ffb24d;color:#4a2600}
+  .svc-alerta{background:#ff8a8a;color:#4a0808}
+  .svc-oferta{background:#6ce5b0;color:#06371f}
+  .svc-fotos{background:#ff9ecf;color:#4a0a2c}
+  .svc svg{width:21px;height:21px;stroke-width:2}
+  .svc .gd{position:absolute;top:7px;right:8px;width:9px;height:9px;border-radius:50%;border:2px solid #111}
+  .svc.calm .gd{background:var(--okC)}
+  .svc.warn .gd{background:var(--warnC)}
+  .svc.alert .gd{background:var(--badC)}
   /* feed estilo plataforma */
   .post{display:flex;gap:11px;padding:13px 2px 11px;border-bottom:1px solid var(--line)}
   .post .pic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none}
@@ -1007,7 +1011,7 @@ function pintarResumen(data, hayFotos){
       } else if(modo==='on'){                 // oferta/fotos: punto verde "activo" si hay contenido
         cls='calm'; dot='<span class="gd"></span>';
       }                                       // modo 'off': sin punto ni tinte
-      return `<button class="svc ${cls}" onclick="${click}">${dot}${ICONS[icn]}${lab}</button>`;
+      return `<button class="svc svc-${t} ${cls}" onclick="${click}">${dot}${ICONS[icn]}${lab}</button>`;
     }).join('');
   }
 }
