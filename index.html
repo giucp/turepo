@@ -119,13 +119,13 @@
   .vmini{margin-top:8px}
   .vmini .vbtn{font-size:15px;padding:7px 4px;line-height:1}
   .vmini .vbtn span{font-size:12px;font-weight:700;vertical-align:1px}
-  .pcard{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:13px;margin-bottom:9px;
+  .pcard{background:#fff;border:2.5px solid #111;border-radius:13px;padding:12px;margin-bottom:9px;box-shadow:2px 2px 0 #111;
     display:flex;gap:12px;align-items:center}
-  .pcard .pemoji{width:46px;height:46px;border-radius:12px;background:#fff0d6;display:grid;place-items:center;
-    font-size:23px;flex-shrink:0}
-  .pcard .pinfo{flex:1}.pcard .pinfo h5{font-weight:700;font-size:14.5px}
-  .pcard .pinfo .meta{font-size:11.5px;color:#8a7a63;margin-top:2px}
-  .pcard .price{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:var(--llano)}
+  .pcard .pemoji{width:46px;height:46px;border:2.5px solid #111;border-radius:11px;background:#6ce5b0;color:#06371f;display:grid;place-items:center;flex-shrink:0}
+  .pcard .pemoji svg{width:23px;height:23px;stroke-width:2}
+  .pcard .pinfo{flex:1;min-width:0}.pcard .pinfo h5{font-family:'Bricolage Grotesque';font-weight:800;font-size:14.5px;color:#111}
+  .pcard .pinfo .meta{font-size:11.5px;color:#8a857c;margin-top:2px}
+  .pcard .price{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:#06371f}
   .filters{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
   .filters::-webkit-scrollbar{display:none}
   .fchip{white-space:nowrap;border:2px solid #111;background:#fff;border-radius:999px;padding:6px 13px;
@@ -1251,7 +1251,7 @@ async function cargarInicio(){
   const _sm=$('saludoMini'); if(_sm) _sm.textContent = saludo;
 
   const [data, hayFotos] = await Promise.all([
-    leer(['luz','agua','gasolina','via','oferta','alerta']),
+    leer(['luz','agua','gasolina','via','oferta','carero','alerta']),
     (async()=>{ try{ if(db){ const { count }=await db.from('fotos_activas').select('*',{count:'exact',head:true}).eq('region',estadoActual); return (count||0)>0; } }catch(_){} return false; })()
   ]);
   pintarTicker(data);
@@ -1444,9 +1444,9 @@ function postReporte(r, origen, nombreUb){
   const sev = sevDe(r);
   const acc = accionesRow(r, origen);
   if(r.tipo==='oferta' || r.tipo==='carero'){
-    const nom = `${EMOJI[r.producto]||''} ${escapeHtml(r.producto||'')} · ${escapeHtml(r.lugar||r.zona||'')}`;
+    const nom = `${escapeHtml(r.producto||'')} · ${escapeHtml(r.lugar||r.zona||'')}`;
     return `<div class="post"><div class="pic pic-acc">${ICONS.cart}</div><div class="pbody">
-      <div class="l1"><span class="zone">${nom}</span><span class="stchip st-ok">$${r.precio}</span></div>
+      <div class="l1"><span class="zone">${nom}</span><span class="stchip ${r.tipo==='carero'?'st-bad':'st-ok'}">$${r.precio}</span></div>
       <div class="pmeta">${quien}${ins} · ${hace(r.created_at)}</div>${acc}</div></div>`;
   }
   const i = infoEstado(r);
@@ -1498,8 +1498,7 @@ async function cargarOfertas(){
   let html='';
   claves.forEach(k=>{
     const lista = grupos[k].sort((a,b)=> esCarero ? b.precio-a.precio : a.precio-b.precio);
-    const emo = EMOJI[k]||'🛒';
-    html += `<p class="sec-title" style="padding:14px 4px 8px">${emo} ${k} · ${lista.length} ${lista.length===1?'precio':'precios'}</p>`;
+    html += `<p class="sec-title" style="padding:14px 4px 8px">${k} · ${lista.length} ${lista.length===1?'precio':'precios'}</p>`;
     html += lista.map((r,i)=>tarjetaOferta(r, i===0, esCarero)).join('');
   });
   cont.innerHTML = html;
@@ -1508,13 +1507,13 @@ function tarjetaOferta(r, esMejor, esCarero){
   let medalla = '';
   if(esMejor){
     medalla = esCarero
-      ? '<span class="insig" style="background:#fbe4e2;color:#c0392f">El más caro</span>'
-      : '<span class="insig" style="background:#def0e3;color:#2c7a3e">Más barato</span>';
+      ? '<span class="insig" style="background:#ff8a8a;color:#4a0808">El más caro</span>'
+      : '<span class="insig" style="background:#6ce5b0;color:#06371f">Más barato</span>';
   }
-  return `<div class="pcard"><div class="pemoji">${EMOJI[r.producto]||'🛒'}</div>
+  return `<div class="pcard"><div class="pemoji">${ICONS.cart}</div>
     <div class="pinfo"><h5>${r.producto}${r.autor?insignia(r.autor_nivel):''}${medalla}</h5>
     <div class="meta">${r.lugar||r.zona||''} · ${hace(r.created_at)}</div></div>
-    <div class="price"${esCarero?' style="color:#c0392f"':''}>$${r.precio}</div></div>`;
+    <div class="price"${esCarero?' style="color:#ff3b3b"':''}>$${r.precio}</div></div>`;
 }
 function vacio(msg){ return `<div class="empty"><span class="big">${ICONS.inbox}</span>${msg}</div>`; }
 
@@ -1693,7 +1692,7 @@ function renderOferta(){
   if(oStep===0){
     const t0 = oModo==='carero' ? '¿Qué viste caro?' : '¿Qué está barato?';
     body=`<h3>${t0}</h3><div class="q">Elige el producto · paso 1 de 4</div>
-      <div class="opts grid2">${PRODUCTOS.map((p,i)=>`<div class="opt ${oData.prod===i?'sel':''}" onclick="oPickProd(${i})"><span class="oe">${p[0]}</span>${p[1]}</div>`).join('')}</div>
+      <div class="opts grid2">${PRODUCTOS.map((p,i)=>`<div class="opt ${oData.prod===i?'sel':''}" onclick="oPickProd(${i})"><span class="oe">${ICONS.cart}</span>${p[1]}</div>`).join('')}</div>
       ${esOtro?`<div class="field" style="margin-top:4px">
         <input id="prodInput" class="tinput" placeholder="¿Qué producto? Ej: Azúcar, Pasta…" value="${(oData.prodOtro||'').replace(/"/g,'&quot;')}" oninput="oProdOtro(this.value)" autocomplete="off">
         <div class="warn" id="prodWarn">Solo letras, números y hasta 2 emojis. Sin groserías.</div></div>`:''}`;
