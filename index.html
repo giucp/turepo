@@ -34,6 +34,7 @@
     --sun:#f2a13b; --sun-deep:#e07b1a; --llano:#3f7d4e;
     --red:#d6453b; --amber:#eaa72a; --green:#3f9b54; --gray:#b9ad9b;
     --line:#e6dac6; --radio:18px;
+    --nb-bd:2.5px solid #111; --nb-hard:3px 3px 0 #111; --nb-hard2:2px 2px 0 #111; --nb-soft:0 8px 22px rgba(0,0,0,.06); --nb-r:15px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   html,body{height:100%}
@@ -449,18 +450,24 @@
   .hello .estado-pill select{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--ink);
     max-width:175px;letter-spacing:-.01em;padding:0}
   .hello .estado-pill .chev{width:15px;height:15px;color:var(--ink3)}
-  .verdict{padding:6px 2px 0}
-  .verdict h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;letter-spacing:-.015em;
-    line-height:1.12;display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .verdict{border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);padding:14px 15px;background:#b9f6ca}
+  .verdict.v-warn{background:#ffe08a}
+  .verdict.v-bad{background:#ffb7ab}
+  .verdict h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:21px;letter-spacing:-.015em;
+    line-height:1.12;display:flex;align-items:center;gap:9px;color:#06381c}
+  .verdict.v-warn h2{color:#4a3500}
+  .verdict.v-bad h2{color:#5a1408}
   .ld{width:11px;height:11px;border-radius:50%;flex:none}
   .ld-ok{background:var(--okC);box-shadow:0 0 0 4px var(--okS),0 0 10px var(--okC);animation:resp 3s ease-in-out infinite}
   .ld-warn{background:var(--warnC);box-shadow:0 0 0 4px var(--warnS),0 0 10px var(--warnC)}
   .ld-bad{background:var(--badC);box-shadow:0 0 0 4px var(--badS),0 0 12px var(--badC)}
   @keyframes resp{50%{box-shadow:0 0 0 6px var(--okS),0 0 16px var(--okC)}}
-  .hbar{height:5px;border-radius:99px;overflow:hidden;display:flex;background:var(--chip2);margin-top:10px}
+  .hbar{height:11px;border:var(--nb-bd);border-radius:6px;overflow:hidden;display:flex;background:#fff;margin-top:11px}
   .hbar i{height:100%;display:block}
-  .hline{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:12px;color:var(--ink3)}
-  .hline b{color:var(--ink2)}
+  .hline{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:12px;font-weight:700;color:#06381c}
+  .verdict.v-warn .hline{color:#4a3500}
+  .verdict.v-bad .hline{color:#5a1408}
+  .hline b{font-weight:800}
   .tickerlite{overflow:hidden;margin-top:11px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 0}
   .tickerlite .tk-item{color:var(--ink2);font-weight:600;font-size:12.5px}
   /* ===== Barra dólar BCV + Binance ===== */
@@ -954,6 +961,7 @@ function pintarResumen(data, hayFotos){
   else { palabra='Jornada complicada'; sev='bad'; }
   $('verdictWord').textContent=palabra;
   vd.className='ld ld-'+sev;
+  const vEl=vd.closest('.verdict'); if(vEl){ vEl.classList.remove('v-ok','v-warn','v-bad'); vEl.classList.add('v-'+sev); }
   const hb=$('hbar');
   if(hb){
     if(tot){
