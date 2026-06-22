@@ -201,7 +201,7 @@
     padding:13px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .12s,box-shadow .12s}
   .opt:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}.opt.sel{background:#eaf0ff;box-shadow:3px 3px 0 #2d5bff}.opt .oe{font-size:20px;display:inline-flex;align-items:center}
   .opt .oe svg{width:20px;height:20px;stroke-width:2}
-  .oe-cat{width:34px;height:34px;border-radius:10px;justify-content:center;flex:none}
+  .oe-cat{width:34px;height:34px;border:2.5px solid #111;border-radius:10px;justify-content:center;flex:none}
   .oe-cat svg{width:19px;height:19px}
   .actions{display:flex;gap:10px}
   .btn{flex:1;border:2.5px solid #111;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Bricolage Grotesque';box-shadow:3px 3px 0 #111;transition:transform .12s,box-shadow .12s}
@@ -211,11 +211,11 @@
   .btn-ghost{background:#fff;color:#111;flex:0 0 auto;padding:14px 20px}
   .pricebox{text-align:center;margin:6px 0 14px}
   .pricebox .amt{font-family:'Bricolage Grotesque';font-weight:800;font-size:46px;line-height:1}
-  .pricebox .amt .cur{color:var(--llano);font-size:30px;vertical-align:top}.pricebox .amt.empty{color:#ccbfa9}
+  .pricebox .amt .cur{color:#2d5bff;font-size:30px;vertical-align:top}.pricebox .amt.empty{color:#ccbfa9}
   .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:8px}
-  .key{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:16px;font-size:20px;font-weight:700;
-    cursor:pointer;font-family:'DM Sans';transition:.1s}
-  .key:active{transform:scale(.95);background:#f4ede0}.key.del{color:var(--red)}
+  .key{border:2.5px solid #111;background:#fff;border-radius:12px;padding:15px;font-size:20px;font-weight:800;
+    cursor:pointer;font-family:'Bricolage Grotesque';box-shadow:2px 2px 0 #111;transition:transform .1s,box-shadow .1s}
+  .key:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}.key.del{color:#ff3b3b}
   .field{margin-bottom:15px}
   .field label{font-family:'Bricolage Grotesque';font-size:12.5px;font-weight:800;color:#111;display:block;margin-bottom:8px}
   .field label .opt-tag{color:#8a857c;font-weight:600}
@@ -562,13 +562,13 @@
   body.dark .act.on-foto{color:#3cc7b4}
   .acts4{max-width:362px}
   .addfoto{display:flex;align-items:center;gap:8px;margin:4px 2px 2px;flex-wrap:wrap}
-  .addfoto-btn{display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-weight:700;font-size:13px;
-    color:var(--ink2);background:var(--chip2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;cursor:pointer}
+  .addfoto-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;
+    color:#111;background:#fff;border:2.5px solid #111;border-radius:11px;padding:9px 13px;cursor:pointer;box-shadow:2px 2px 0 #111}
   .addfoto-btn svg{width:16px;height:16px;stroke-width:2}
   .addfoto-btn:active{transform:scale(.96)}
   .addfoto-hint{font-size:12px;color:var(--ink3);font-weight:600}
   .addfoto.haspic{align-items:center}
-  .addfoto-prev{width:46px;height:46px;border-radius:11px;object-fit:cover;flex:none}
+  .addfoto-prev{width:46px;height:46px;border:2.5px solid #111;border-radius:11px;object-fit:cover;flex:none}
   .addfoto-x{font-family:inherit;font-weight:700;font-size:12.5px;color:var(--badC);background:none;border:none;cursor:pointer;padding:6px}
   .frep{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--sun-deep);
     background:var(--accS);border-radius:8px;padding:3px 8px;margin-bottom:5px}
@@ -2065,12 +2065,12 @@ function mostrarLegal(){
 const FOTO_CAT_LABEL = { luz:'Luz', gasolina:'Gasolina', via:'Vías', oferta:'Oferta', carero:'Carero' };
 const FOTO_CATS_FILTRO = [['todas',ICONS.image,'Todas'],['luz',ICONS.bolt,'Luz'],['gasolina',ICONS.pump,'Gasolina'],['via',ICONS.traffic,'Vías'],['oferta',ICONS.cart,'Ofertas'],['carero',ICONS.tag,'Careros']];
 const FOTO_CATS_SUBIR  = [
-  ['',ICONS.image,'General','background:#ece4d4;color:#8a7a63'],
-  ['luz',ICONS.bolt,'Luz','background:#fff0d6;color:var(--sun-deep)'],
-  ['gasolina',ICONS.pump,'Gasolina','background:#f1e6cf;color:#9a7410'],
-  ['via',ICONS.traffic,'Vías','background:#fae0dc;color:var(--red)'],
-  ['oferta',ICONS.cart,'Oferta','background:#e4efdc;color:var(--llano)'],
-  ['carero',ICONS.tag,'Carero','background:#fbe4e2;color:#c0392f']
+  ['',ICONS.image,'General','background:#ece6d8;color:#6b6253'],
+  ['luz',ICONS.bolt,'Luz','background:#ffd23f;color:#3a2b00'],
+  ['gasolina',ICONS.pump,'Gasolina','background:#9cc6ff;color:#0a285c'],
+  ['via',ICONS.traffic,'Vías','background:#ffb24d;color:#4a2600'],
+  ['oferta',ICONS.cart,'Oferta','background:#6ce5b0;color:#06371f'],
+  ['carero',ICONS.tag,'Carero','background:#c4a5ff;color:#2e1660']
 ];
 let fotoCatFiltro = null;
 let fotoBlob = null, fotoCatSel = '', fotoDesc = '';
