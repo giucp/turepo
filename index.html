@@ -933,38 +933,28 @@ function sevDe(r){
 /* Veredicto + barra de salud + chips de servicios (con datos reales) */
 function pintarResumen(data, hayFotos){
   const vd=$('verdictDot'); if(!vd) return;
-  const cont={ok:0,warn:0,bad:0};
-  const porTipo={};
+  const cont={ok:0,warn:0,bad:0,mid:0};
   data.forEach(r=>{
     if(r.tipo==='oferta'||r.tipo==='carero') return;
-    const sv=sevDe(r); if(sv==='mid') return;
-    cont[sv]++;
-    const t=porTipo[r.tipo]||(porTipo[r.tipo]={bad:0,warn:0});
-    if(sv==='bad') t.bad++; else if(sv==='warn') t.warn++;
+    cont[sevDe(r)]++;   // cuenta TODO, incluso 'mid' (sin color, ej. gasolinera cerrada = sí es una alerta)
   });
-  const alertas=cont.bad, avisos=cont.warn, tot=cont.ok+cont.warn+cont.bad;
-  let palabra, sev;
-  if(!tot){ palabra='Sin reportes aún'; sev='ok'; }
-  else if(!alertas && !avisos){ palabra='Todo en orden'; sev='ok'; }
-  else if(!alertas){ palabra='Con algunos avisos'; sev='warn'; }
-  else if(alertas<=2){ palabra='Hay alertas activas'; sev='warn'; }
-  else { palabra='Jornada complicada'; sev='bad'; }
+  // Reportes activos = TODOS (un reporte verde/restablecido también es un reporte). Ofertas/careros ya quedaron fuera arriba.
+  const activos=cont.ok+cont.warn+cont.bad+cont.mid;
+  const sev = activos<=3 ? 'ok' : (activos<=6 ? 'warn' : 'bad');   // 0-3 verde / 4-6 amarillo / +6 rojo
   vd.className='ld ld-'+sev;
   const hb=$('hbar');
   if(hb){
-    if(tot){
-      const pOk=Math.round(cont.ok/tot*100), pWa=Math.round(cont.warn/tot*100);
-      hb.innerHTML=`<i style="width:${pOk}%;background:#6ce5b0"></i><i style="width:${pWa}%;background:#ffd23f"></i><i style="width:${100-pOk-pWa}%;background:#ff8a8a"></i>`;
+    if(activos){
+      const pOk=Math.round(cont.ok/activos*100), pWa=Math.round(cont.warn/activos*100), pBad=Math.round(cont.bad/activos*100);
+      const pMid=Math.max(0,100-pOk-pWa-pBad);
+      hb.innerHTML=`<i style="width:${pOk}%;background:#6ce5b0"></i><i style="width:${pWa}%;background:#ffd23f"></i><i style="width:${pBad}%;background:#ff8a8a"></i><i style="width:${pMid}%;background:#cfc7b6"></i>`;
     } else {
       hb.innerHTML=`<i style="width:100%;background:var(--chip2)"></i>`;
     }
   }
   const hl=$('hlineL');
   if(hl){
-    if(alertas){ hl.textContent=`${alertas} alerta${alertas>1?'s':''} activa${alertas>1?'s':''}`; }
-    else if(avisos){ hl.textContent=`${avisos} aviso${avisos>1?'s':''}`; }
-    else if(tot){ hl.textContent='Todo en orden'; }
-    else { hl.textContent='Sin reportes aún'; }
+    hl.textContent = activos ? `${activos} reporte${activos>1?'s':''} activo${activos>1?'s':''}` : 'Sin reportes aún';
   }
   /* chips */
   const sr=$('svcsRow');
