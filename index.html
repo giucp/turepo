@@ -468,12 +468,24 @@
   .hello .estado-pill select{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--ink);
     max-width:175px;letter-spacing:-.01em;padding:0}
   .hello .estado-pill .chev{width:15px;height:15px;color:var(--ink3)}
-  .verdict{border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);padding:14px 15px;background:#b9f6ca}
-  .verdict h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:21px;letter-spacing:-.015em;
-    line-height:1.12;display:flex;align-items:center;gap:9px;color:#06381c}
-  .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111;background:#27d96b}
-  .verdict .ld-ok,.verdict .ld-warn,.verdict .ld-bad{box-shadow:none;animation:none;background:#27d96b}
-  .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;background:#27d96b;animation:nbhalo 2.1s ease-out infinite}
+  .verdict{border:var(--nb-bd);border-radius:var(--nb-r);box-shadow:var(--nb-hard),var(--nb-soft);padding:13px 15px 11px;background:#fff;cursor:pointer;transition:transform .12s,box-shadow .12s}
+  .verdict:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
+  .hn-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .hn-top .cat{border:2px solid #111;border-radius:999px}
+  .hn-go{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--ink3)}
+  .hn-title{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;line-height:1.25;color:var(--ink);min-height:43px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:opacity .35s}
+  .hn-meta{font-size:12.5px;color:var(--ink3);margin-top:5px;transition:opacity .35s}
+  .hn-div{height:2px;background:#111;opacity:.12;margin:11px 0 10px}
+  .hn-pulse{display:flex;align-items:center;gap:11px}
+  .hn-pulse .hbar{margin:0;flex:1}
+  .hn-status{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+  .hn-dots{display:flex;gap:5px;justify-content:center;margin-top:10px}
+  .hn-dots b{width:6px;height:6px;border-radius:50%;background:var(--line);display:inline-block;transition:background .3s}
+  .hn-dots b.on{background:#111}
+  .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111;box-shadow:none;animation:none}
+  .verdict .ld-ok{background:#27d96b} .verdict .ld-warn{background:#ffc107} .verdict .ld-bad{background:#ff3b3b}
+  .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;animation:nbhalo 2.1s ease-out infinite}
+  .verdict .ld-ok::after{background:#27d96b} .verdict .ld-warn::after{background:#ffc107} .verdict .ld-bad::after{background:#ff3b3b}
   @keyframes nbhalo{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.8);opacity:0}}
   @media (prefers-reduced-motion:reduce){.verdict .ld::after{animation:none;display:none}}
   .ld{width:11px;height:11px;border-radius:50%;flex:none}
@@ -646,10 +658,16 @@
   <div class="screens">
 
     <section class="screen active" id="s-inicio">
-      <div class="verdict">
-        <h2><span class="ld ld-ok" id="verdictDot"></span><span id="verdictWord">Leyendo tu ciudad…</span></h2>
-        <div class="hbar" id="hbar"><i style="width:100%;background:var(--chip2)"></i></div>
-        <div class="hline"><span id="hlineL">Cargando reportes…</span><span id="hlineR"></span></div>
+      <div class="verdict" id="heroNews" onclick="go('s-noticias')">
+        <div class="hn-top"><span class="cat nac" id="hnCat">Noticias</span><span class="hn-go">Noticias ›</span></div>
+        <div class="hn-title" id="hnTitle">Leyendo tu ciudad…</div>
+        <div class="hn-meta" id="hnMeta"></div>
+        <div class="hn-div"></div>
+        <div class="hn-pulse">
+          <div class="hbar" id="hbar"><i style="width:100%;background:var(--chip2)"></i></div>
+          <span class="hn-status"><span class="ld ld-ok" id="verdictDot"></span><span id="hlineL">Cargando…</span></span>
+        </div>
+        <div class="hn-dots" id="hnDots"></div>
       </div>
       <div class="tickerlite" id="ticker"><div class="ticker-track" id="ticker-track"><span class="tk-item">Cargando lo que pasa…</span></div></div>
       <div id="fxWrap"></div>
@@ -930,7 +948,6 @@ function pintarResumen(data, hayFotos){
   else if(!alertas){ palabra='Con algunos avisos'; sev='warn'; }
   else if(alertas<=2){ palabra='Hay alertas activas'; sev='warn'; }
   else { palabra='Jornada complicada'; sev='bad'; }
-  $('verdictWord').textContent=palabra;
   vd.className='ld ld-'+sev;
   const hb=$('hbar');
   if(hb){
@@ -941,19 +958,13 @@ function pintarResumen(data, hayFotos){
       hb.innerHTML=`<i style="width:100%;background:var(--chip2)"></i>`;
     }
   }
-  const hl=$('hlineL'), hr=$('hlineR');
+  const hl=$('hlineL');
   if(hl){
-    if(alertas){
-      const peor=data.find(r=>sevDe(r)==='bad');
-      const donde=peor? ` · ${infoEstado(peor).label} en ${escapeHtml(peor.zona||peor.lugar||estadoActual)}`:'';
-      hl.innerHTML=`<b>${alertas} alerta${alertas>1?'s':''}</b>${donde}`;
-    } else if(tot){
-      hl.innerHTML=`<b>${tot}</b> reporte${tot>1?'s':''} activo${tot>1?'s':''} · todo en orden`;
-    } else {
-      hl.textContent='Sé el primero en reportar hoy';
-    }
+    if(alertas){ hl.textContent=`${alertas} alerta${alertas>1?'s':''} activa${alertas>1?'s':''}`; }
+    else if(avisos){ hl.textContent=`${avisos} aviso${avisos>1?'s':''}`; }
+    else if(tot){ hl.textContent='Todo en orden'; }
+    else { hl.textContent='Sin reportes aún'; }
   }
-  if(hr) hr.textContent = data.length? ('hace '+hace(data[0].created_at).replace('hace ','')) : '';
   /* chips */
   const sr=$('svcsRow');
   if(sr){
@@ -1177,6 +1188,7 @@ async function cargarDolar(){
 }
 async function cargarInicio(){
   cargarDolar();
+  cargarHeroNoticias();
   const hr=new Date().getHours();
   const saludo = hr<12 ? 'Buenos días' : (hr<19 ? 'Buenas tardes' : 'Buenas noches');
   const _sm=$('saludoMini'); if(_sm) _sm.textContent = saludo;
@@ -1191,6 +1203,45 @@ async function cargarInicio(){
   const cont = $('reciente-list');
   if(!data.length){ cont.innerHTML = vacio('Todavía no hay reportes. ¡Sé el primero en avisar!'); return; }
   cont.innerHTML = data.slice(0,6).map(r=>postReporte(r,'inicio')).join('');
+}
+/* Hero del Inicio: titulares recientes que rotan cada 5s + pulso de servicios */
+let _heroTimer=null, _heroNews=[], _heroIdx=0;
+async function cargarHeroNoticias(){
+  if(!db) return;
+  try{
+    const { data }=await db.from('noticias')
+      .select('titulo,enlace,fuente,categoria,publicado')
+      .order('publicado',{ascending:false,nullsFirst:false}).limit(12);
+    const grupos=(data&&data.length)?agruparNoticias(data).slice(0,3):[];
+    _heroNews=grupos.map(g=>g.n);
+    if(_heroTimer){ clearInterval(_heroTimer); _heroTimer=null; }
+    const c=$('hnCat'), dd=$('hnDots');
+    if(!_heroNews.length){
+      const t=$('hnTitle'); if(t) t.textContent='Toca para ver las noticias';
+      if(c) c.style.display='none'; if(dd) dd.innerHTML=''; return;
+    }
+    if(c) c.style.display='';
+    if(dd) dd.innerHTML=_heroNews.map((_,k)=>`<b${k===0?' class="on"':''}></b>`).join('');
+    _heroIdx=0; pintarHeroNoticia();
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!reduce && _heroNews.length>1){
+      _heroTimer=setInterval(()=>{
+        const t=$('hnTitle'), m=$('hnMeta');
+        if(t) t.style.opacity=0; if(m) m.style.opacity=0;
+        setTimeout(()=>{ _heroIdx=(_heroIdx+1)%_heroNews.length; pintarHeroNoticia();
+          if(t) t.style.opacity=1; if(m) m.style.opacity=1; },380);
+      },5000);
+    }
+  }catch(_){}
+}
+function pintarHeroNoticia(){
+  const n=_heroNews[_heroIdx]; if(!n) return;
+  const cat=noticiaCat(n.categoria);
+  const c=$('hnCat'); if(c){ c.className='cat '+cat.cls; c.textContent=cat.txt; }
+  const t=$('hnTitle'); if(t) t.textContent=n.titulo||'';
+  const cuando=n.publicado?fxCuando(n.publicado):'';
+  const m=$('hnMeta'); if(m) m.textContent=(n.fuente||'')+(cuando?` · ${cuando}`:'');
+  const dd=$('hnDots'); if(dd) [...dd.children].forEach((b,k)=>b.classList.toggle('on',k===_heroIdx));
 }
 /* ---- NOTICIAS ---- */
 const NOTI_CAT = {
