@@ -1590,6 +1590,7 @@ async function svcSend(){
   enviando();
   // Ubicación: si marcó punto en el mapa úsalo; si no, intenta geolocalizar la zona escrita (mejor esfuerzo)
   let lat=svcSel.lat, lng=svcSel.lng;
+  const tienePin = (svcSel.lat!=null);            // solo el pin del usuario es ubicación CONFIABLE
   if(lat==null){                                  // 1º: ¿la comunidad ya marcó este lugar?
     const loc=await lugarCoords(cfg.lugarTipo, zona);
     if(loc){ lat=loc.lat; lng=loc.lng; }
@@ -1604,7 +1605,8 @@ async function svcSend(){
     const etq = `${cfg.sit[svcSel.sit][1]} en ${zona}`;
     await publicarFotoReporte(ins.id, etq);
   }
-  await registrarLugar(cfg.lugarTipo, zona, lat, lng);   // recuerda el lugar con su ubicación
+  // recuerda el lugar; solo aporta PUNTO a la mediana si fue un pin real (un geocode de nombre no es confiable)
+  await registrarLugar(cfg.lugarTipo, zona, tienePin?lat:null, tienePin?lng:null);
   marcarCooldown(svcTipo);
   estatusTipo=svcTipo;
   await premiar();
@@ -1983,11 +1985,11 @@ function mostrarLegal(){
       <p>Tu Repo usa <b>inteligencia artificial</b> para moderar automáticamente fotos y texto. La app es para <b>mayores de 18 años</b> y de uso en Venezuela.</p>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;font-size:12.5px;font-weight:700">
-      <a href="/terminos" target="_blank" rel="noopener" style="color:var(--sun-deep);text-decoration:none">Términos de uso</a>
+      <a href="/terminos" target="_blank" rel="noopener" style="color:#2d5bff;text-decoration:none;font-weight:800">Términos de uso</a>
       <span style="color:var(--ink3)">·</span>
-      <a href="/privacidad" target="_blank" rel="noopener" style="color:var(--sun-deep);text-decoration:none">Privacidad</a>
+      <a href="/privacidad" target="_blank" rel="noopener" style="color:#2d5bff;text-decoration:none;font-weight:800">Privacidad</a>
       <span style="color:var(--ink3)">·</span>
-      <a href="/dmca" target="_blank" rel="noopener" style="color:var(--sun-deep);text-decoration:none">Derechos de autor</a>
+      <a href="/dmca" target="_blank" rel="noopener" style="color:#2d5bff;text-decoration:none;font-weight:800">Derechos de autor</a>
     </div>
     <div class="actions" style="margin-top:18px"><button class="btn btn-prim" onclick="closeReport()">Entendido</button></div>`;
 }
@@ -2101,7 +2103,9 @@ function mapTiles(){
 }
 async function geoBuscar(q){
   try{
-    const u=`https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=es&countrycodes=ve&q=${encodeURIComponent(q+', '+estadoActual+', Venezuela')}`;
+    const c=ESTADO_COORD[estadoActual]||[8.62,-70.20];
+    const vb=`${c[1]-0.8},${c[0]+0.8},${c[1]+0.8},${c[0]-0.8}`; // acota al estado: evita matches lejísimos
+    const u=`https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=es&countrycodes=ve&bounded=1&viewbox=${vb}&q=${encodeURIComponent(q+', '+estadoActual+', Venezuela')}`;
     const r=await fetch(u); const j=await r.json();
     return (j&&j[0]) ? {lat:parseFloat(j[0].lat), lng:parseFloat(j[0].lon)} : null;
   }catch(e){ return null; }
@@ -2212,10 +2216,21 @@ async function cargarMapa(){
   } else { _mapa.setView(centro,11); }
   try{
     const { data }=await db.from('reportes_activos').select('*').eq('region',estadoActual).not('lat','is',null).limit(500);
-    _mapaRep=data||[];
+    _mapaRep=dedupMapa(data||[]);
   }catch(e){ _mapaRep=[]; }
   pintarMapa(); pintarMapaVerdict(); pintarMapaFiltros();
   setTimeout(()=>{ try{ _mapa.invalidateSize(); encuadrarMapa(); }catch(_){} },150);
+}
+// Un solo pin por lugar+servicio: conserva el reporte MÁS RECIENTE (el estado nuevo manda sobre el viejo).
+function dedupMapa(reps){
+  const vistos=new Map();
+  reps.slice()
+    .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))   // más nuevo primero
+    .forEach(r=>{
+      const k = r.tipo+'|'+(clave(r.zona||'') || (r.lat+','+r.lng)); // mismo lugar+servicio
+      if(!vistos.has(k)) vistos.set(k, r);                            // se queda el primero = el más reciente
+    });
+  return [...vistos.values()];
 }
 // Abre el mapa encuadrando los reportes activos (o vista amplia del estado si no hay)
 function encuadrarMapa(){

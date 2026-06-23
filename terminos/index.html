@@ -5,92 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Términos de Uso · Tu Repo</title>
 <meta name="description" content="Términos de Uso de Tu Repo: reglas de la comunidad, responsabilidades, contenido de usuarios y ley aplicable.">
-<meta name="theme-color" content="#e07b1a">
+<meta name="theme-color" content="#ffffff">
 <meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
-<script>
-  /* Respeta el tema elegido en la app (mismo dominio); si no hay, usa el del sistema */
-  (function(){
-    try{
-      var t = localStorage.getItem('temaTuRepo');
-      var oscuro = t === 'dark' || (t === null && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
-      if(oscuro) document.documentElement.classList.add('dark');
-    }catch(e){}
-  })();
-</script>
 <style>
   :root{
-    --bg:#f4ede0; --paper:#fffaf2; --ink:#221a12; --ink2:#5d5444; --ink3:#8a7a63;
-    --sun:#f2a13b; --sun-deep:#e07b1a; --line:#e6dac6;
-  }
-  html.dark{
-    --bg:#15110c; --paper:#1d1812; --ink:#f4ecdf; --ink2:#beb19b; --ink3:#857a64;
-    --line:#2a2318;
+    --bg:#f3f1ea; --paper:#fff; --ink:#1a1410; --ink2:#4a4235; --ink3:#8a7a63;
+    --blue:#2d5bff;
+    --nb-bd:2.5px solid #111; --nb-hard:3px 3px 0 #111; --nb-hard2:2px 2px 0 #111; --nb-r:15px;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent}
   body{
     font-family:'DM Sans',system-ui,-apple-system,sans-serif;
-    background:radial-gradient(600px 360px at 90% -8%, #ffd9a0 0%, transparent 60%), var(--bg);
-    color:var(--ink); line-height:1.62; padding:0 0 56px; -webkit-text-size-adjust:100%;
-    min-height:100vh;
+    background:var(--bg); color:var(--ink); line-height:1.62; padding:0 0 56px;
+    -webkit-text-size-adjust:100%; min-height:100vh;
   }
-  html.dark body{ background:radial-gradient(600px 360px at 90% -8%, rgba(224,123,26,.16) 0%, transparent 60%), var(--bg); }
 
   /* Cabecera */
-  .top{
-    display:flex; align-items:center; gap:11px;
-    max-width:720px; margin:0 auto; padding:16px 20px 10px;
-  }
-  .brand{ display:flex; align-items:center; gap:9px; text-decoration:none; color:var(--ink); }
+  .top{ display:flex; align-items:center; gap:11px; max-width:720px; margin:0 auto; padding:16px 20px 12px; }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); }
   .logo{
-    width:38px; height:38px; border-radius:12px; overflow:hidden; flex:none;
-    box-shadow:0 4px 10px rgba(224,123,26,.4); background:linear-gradient(140deg,var(--sun),var(--sun-deep));
+    width:40px; height:40px; border-radius:11px; overflow:hidden; flex:none;
+    border:var(--nb-bd); box-shadow:var(--nb-hard2); background:var(--blue);
   }
   .logo img{ width:100%; height:100%; object-fit:cover; display:block; }
   .brand b{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:18px; letter-spacing:-.01em; }
   .volver{
-    margin-left:auto; font-size:13px; font-weight:700; color:var(--sun-deep);
-    text-decoration:none; padding:7px 13px; border:1px solid var(--line); border-radius:999px;
-    white-space:nowrap; transition:.15s;
+    margin-left:auto; font-family:'Bricolage Grotesque'; font-size:12.5px; font-weight:800; color:var(--ink);
+    text-decoration:none; padding:8px 13px; border:var(--nb-bd); border-radius:11px; background:#fff;
+    box-shadow:var(--nb-hard2); white-space:nowrap; transition:transform .12s, box-shadow .12s;
   }
-  .volver:active{ transform:scale(.97); }
+  .volver:active{ transform:translate(2px,2px); box-shadow:0 0 0 #111; }
 
   /* Tarjeta de contenido */
   .card{
-    max-width:720px; margin:8px auto 0; background:var(--paper);
-    border:1px solid var(--line); border-radius:20px; padding:26px 22px;
+    max-width:720px; margin:10px auto 0; background:var(--paper);
+    border:var(--nb-bd); border-radius:var(--nb-r); box-shadow:var(--nb-hard),0 8px 22px rgba(0,0,0,.05);
+    padding:26px 22px;
   }
-  h1{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:25px; line-height:1.15; letter-spacing:-.02em; }
+  h1{ font-family:'Bricolage Grotesque'; font-weight:800; font-size:25px; line-height:1.13; letter-spacing:-.02em; }
   .upd{ color:var(--ink3); font-size:13px; font-weight:600; margin-top:6px; margin-bottom:18px; }
   .intro{ color:var(--ink2); margin-bottom:6px; }
   h2{
-    font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px; color:var(--sun-deep);
+    font-family:'Bricolage Grotesque'; font-weight:800; font-size:17px; color:var(--blue);
     margin-top:26px; margin-bottom:8px; letter-spacing:-.01em;
   }
   p{ margin-bottom:11px; }
   .sub{ font-weight:700; color:var(--ink); margin-top:10px; margin-bottom:6px; }
   ul{ margin:0 0 11px 0; padding-left:20px; }
   li{ margin-bottom:7px; }
-  a{ color:var(--sun-deep); font-weight:600; }
-  hr{ border:none; border-top:1px solid var(--line); margin:24px 0; }
+  a{ color:var(--blue); font-weight:700; }
+  hr{ border:none; border-top:2px solid #111; margin:24px 0; }
   .callout{
-    background:rgba(224,123,26,.08); border:1px solid var(--line); border-radius:14px;
-    padding:13px 15px; margin:14px 0; color:var(--ink2); font-size:14px;
+    background:#eef2ff; border:var(--nb-bd); border-radius:13px; box-shadow:var(--nb-hard2);
+    padding:13px 15px; margin:16px 0; color:var(--ink2); font-size:14px;
   }
 
   /* Botón final */
   .foot{ text-align:center; margin-top:26px; }
   .btn{
-    display:inline-block; background:linear-gradient(140deg,var(--sun),var(--sun-deep));
-    color:#fff; text-decoration:none; font-weight:800; font-size:14.5px;
-    padding:12px 26px; border-radius:999px; box-shadow:0 4px 14px rgba(224,123,26,.35);
+    display:inline-block; background:var(--blue); color:#fff; text-decoration:none;
+    font-family:'Bricolage Grotesque'; font-weight:800; font-size:14.5px;
+    padding:12px 26px; border:var(--nb-bd); border-radius:12px; box-shadow:var(--nb-hard);
+    transition:transform .12s, box-shadow .12s;
   }
-  .btn:active{ transform:scale(.98); }
+  .btn:active{ transform:translate(2px,2px); box-shadow:0 0 0 #111; }
 
   @media (max-width:520px){
-    .card{ border-radius:0; border-left:none; border-right:none; padding:22px 17px; }
+    .card{ border-radius:0; border-left:none; border-right:none; box-shadow:none;
+      border-top:var(--nb-bd); border-bottom:var(--nb-bd); padding:22px 17px; }
     h1{ font-size:22px; }
   }
 </style>
