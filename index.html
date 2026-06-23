@@ -424,9 +424,10 @@
   .mpin .tile{position:absolute;left:2px;top:0;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;border:2.5px solid #111;box-shadow:0 4px 10px rgba(31,24,19,.4)}
   .mpin .tile svg{width:18px;height:18px;stroke-width:2.2;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
   .mpin .tip{position:absolute;left:50%;top:31px;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:11px solid var(--ink3);filter:drop-shadow(0 2px 1.5px rgba(31,24,19,.3))}
-  .mpin.s-ok .tile,.mpin.s-ok .halo{background-color:var(--okC)}      .mpin.s-ok .tip{border-top-color:var(--okC)}
-  .mpin.s-warn .tile,.mpin.s-warn .halo{background-color:var(--warnC)} .mpin.s-warn .tip{border-top-color:var(--warnC)}
-  .mpin.s-bad .tile,.mpin.s-bad .halo{background-color:var(--badC)}    .mpin.s-bad .tip{border-top-color:var(--badC)}
+  .mpin.s-ok .tile,.mpin.s-ok .halo{background-color:#6ce5b0}      .mpin.s-ok .tip{border-top-color:#6ce5b0}
+  .mpin.s-warn .tile,.mpin.s-warn .halo{background-color:#ffd23f} .mpin.s-warn .tip{border-top-color:#ffd23f}
+  .mpin.s-bad .tile,.mpin.s-bad .halo{background-color:#ff8a8a}    .mpin.s-bad .tip{border-top-color:#ff8a8a}
+  .mpin.s-ok .tile,.mpin.s-warn .tile,.mpin.s-bad .tile{color:#1a1410}
   .mpin.s-mid .tile,.mpin.s-mid .halo{background-color:var(--ink3)}    .mpin.s-mid .tip{border-top-color:var(--ink3)}
   .mpin.s-acc .tile,.mpin.s-acc .halo{background-color:var(--sun-deep)} .mpin.s-acc .tip{border-top-color:var(--sun-deep)}
   @keyframes mpinPulse{0%{transform:scale(.7);opacity:.5}70%{opacity:0}100%{transform:scale(2.4);opacity:0}}
@@ -483,9 +484,9 @@
   .hn-dots b{width:6px;height:6px;border-radius:50%;background:var(--line);display:inline-block;transition:background .3s}
   .hn-dots b.on{background:#111}
   .verdict .ld{position:relative;z-index:0;width:12px;height:12px;border:2.5px solid #111;box-shadow:none;animation:none}
-  .verdict .ld-ok{background:#27d96b} .verdict .ld-warn{background:#ffc107} .verdict .ld-bad{background:#ff3b3b}
+  .verdict .ld-ok{background:#6ce5b0} .verdict .ld-warn{background:#ffd23f} .verdict .ld-bad{background:#ff8a8a}
   .verdict .ld::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;z-index:-1;animation:nbhalo 2.1s ease-out infinite}
-  .verdict .ld-ok::after{background:#27d96b} .verdict .ld-warn::after{background:#ffc107} .verdict .ld-bad::after{background:#ff3b3b}
+  .verdict .ld-ok::after{background:#6ce5b0} .verdict .ld-warn::after{background:#ffd23f} .verdict .ld-bad::after{background:#ff8a8a}
   @keyframes nbhalo{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.8);opacity:0}}
   @media (prefers-reduced-motion:reduce){.verdict .ld::after{animation:none;display:none}}
   .ld{width:11px;height:11px;border-radius:50%;flex:none}
@@ -658,7 +659,7 @@
   <div class="screens">
 
     <section class="screen active" id="s-inicio">
-      <div class="verdict" id="heroNews" onclick="go('s-noticias')">
+      <div class="verdict" id="heroNews" onclick="heroTap()">
         <div class="hn-top"><span class="cat nac" id="hnCat">Noticias</span><span class="hn-go">Noticias ›</span></div>
         <div class="hn-title" id="hnTitle">Leyendo tu ciudad…</div>
         <div class="hn-meta" id="hnMeta"></div>
@@ -953,7 +954,7 @@ function pintarResumen(data, hayFotos){
   if(hb){
     if(tot){
       const pOk=Math.round(cont.ok/tot*100), pWa=Math.round(cont.warn/tot*100);
-      hb.innerHTML=`<i style="width:${pOk}%;background:#27d96b"></i><i style="width:${pWa}%;background:#ffc107"></i><i style="width:${100-pOk-pWa}%;background:#ff3b3b"></i>`;
+      hb.innerHTML=`<i style="width:${pOk}%;background:#6ce5b0"></i><i style="width:${pWa}%;background:#ffd23f"></i><i style="width:${100-pOk-pWa}%;background:#ff8a8a"></i>`;
     } else {
       hb.innerHTML=`<i style="width:100%;background:var(--chip2)"></i>`;
     }
@@ -1205,7 +1206,7 @@ async function cargarInicio(){
   cont.innerHTML = data.slice(0,6).map(r=>postReporte(r,'inicio')).join('');
 }
 /* Hero del Inicio: titulares recientes que rotan cada 5s + pulso de servicios */
-let _heroTimer=null, _heroNews=[], _heroIdx=0;
+let _heroTimer=null, _heroNews=[], _heroIdx=0, _heroSwiped=0;
 async function cargarHeroNoticias(){
   if(!db) return;
   try{
@@ -1223,16 +1224,34 @@ async function cargarHeroNoticias(){
     if(c) c.style.display='';
     if(dd) dd.innerHTML=_heroNews.map((_,k)=>`<b${k===0?' class="on"':''}></b>`).join('');
     _heroIdx=0; pintarHeroNoticia();
-    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(!reduce && _heroNews.length>1){
-      _heroTimer=setInterval(()=>{
-        const t=$('hnTitle'), m=$('hnMeta');
-        if(t) t.style.opacity=0; if(m) m.style.opacity=0;
-        setTimeout(()=>{ _heroIdx=(_heroIdx+1)%_heroNews.length; pintarHeroNoticia();
-          if(t) t.style.opacity=1; if(m) m.style.opacity=1; },380);
-      },5000);
-    }
+    heroAutoStart();
+    heroSwipeInit();
   }catch(_){}
+}
+function heroAvanza(dir){
+  if(_heroNews.length<2) return;
+  const t=$('hnTitle'), m=$('hnMeta');
+  if(t) t.style.opacity=0; if(m) m.style.opacity=0;
+  setTimeout(()=>{ _heroIdx=(_heroIdx+dir+_heroNews.length)%_heroNews.length; pintarHeroNoticia();
+    if(t) t.style.opacity=1; if(m) m.style.opacity=1; },380);
+}
+function heroAutoStart(){
+  if(_heroTimer){ clearInterval(_heroTimer); _heroTimer=null; }
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce && _heroNews.length>1) _heroTimer=setInterval(()=>heroAvanza(1), 5000);
+}
+function heroMover(dir){ heroAvanza(dir); heroAutoStart(); }   // manual: avanza/vuelve y reinicia el auto-rotate
+function heroTap(){ if(_heroSwiped && Date.now()-_heroSwiped<400) return; go('s-noticias'); }
+function heroSwipeInit(){
+  if(heroSwipeInit._done) return;
+  const hero=$('heroNews'); if(!hero) return;
+  heroSwipeInit._done=true;
+  let sx=0, sy=0;
+  hero.addEventListener('touchstart',e=>{ const t=e.changedTouches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+  hero.addEventListener('touchend',e=>{
+    const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.5){ _heroSwiped=Date.now(); heroMover(dx<0?1:-1); }
+  },{passive:true});
 }
 function pintarHeroNoticia(){
   const n=_heroNews[_heroIdx]; if(!n) return;
@@ -2146,10 +2165,8 @@ function cargarLeaflet(){
   return _leafletP;
 }
 function mapTiles(){
-  const dark=document.body.classList.contains('dark');
-  return L.tileLayer(dark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  // Voyager: agua azul + parques verdes + más POIs (mismo dato OSM, base más colorida)
+  return L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     {maxZoom:19, attribution:'© OpenStreetMap © CARTO'});
 }
 async function geoBuscar(q){
