@@ -1204,6 +1204,13 @@ async function cargarDolar(){
     <div class="fx-hint">toca para abrir la calculadora</div>`;
   }catch(e){ wrap.innerHTML=''; }  // si falla la API, no mostramos nada (sin romper el inicio)
 }
+// Precarga de pantallas en segundo plano (1 vez por sesión) -> navegación instantánea
+let _prefetchDone=false, _estatusReady=false, _notiReady=false, _notiAt=0;
+function prefetchPantallas(){
+  try{ cargarNoticias(); }catch(_){}
+  try{ cargarEstatus(); }catch(_){}
+  try{ cargarLeaflet(); }catch(_){}   // calienta la librería del mapa (no crea el mapa todavía)
+}
 async function cargarInicio(){
   cargarDolar();
   cargarHeroNoticias();
@@ -1217,6 +1224,7 @@ async function cargarInicio(){
   ]);
   pintarTicker(data);
   pintarResumen(data, hayFotos);
+  if(!_prefetchDone){ _prefetchDone=true; setTimeout(prefetchPantallas, 700); }
 
   const cont = $('reciente-list');
   if(!data.length){ cont.innerHTML = vacio('Todavía no hay reportes. ¡Sé el primero en avisar!'); return; }
@@ -1318,7 +1326,8 @@ function notiOtras(otras){
 }
 async function cargarNoticias(){
   const cont=$('noticias-list'); if(!cont) return;
-  cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando…</div>';
+  if(_notiReady && Date.now()-_notiAt < 300000) return;   // cargadas hace <5min -> ni re-consulta ni re-render (sin pestañeo; las noticias cambian lento)
+  if(!_notiReady) cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando…</div>';
   try{
     if(!db) throw 0;
     const { data, error }=await db.from('noticias')
@@ -1326,6 +1335,7 @@ async function cargarNoticias(){
       .order('publicado',{ascending:false,nullsFirst:false})
       .limit(60);
     if(error) throw error;
+    _notiReady=true; _notiAt=Date.now();
     if(!data||!data.length){ cont.innerHTML=vacio('Todavía no hay noticias. Vuelve pronto.'); return; }
     const grupos=agruparNoticias(data);
     cont.innerHTML = postNoticiaHero(grupos[0]) + grupos.slice(1).map(postNoticia).join('');
@@ -1421,10 +1431,11 @@ function setEstatus(t){
   cargarEstatus();
 }
 async function cargarEstatus(){
-  const cont = $('estatus-list');
-  cont.innerHTML = '<div class="loading"><div class="spin"></div>Cargando…</div>';
+  const cont = $('estatus-list'); if(!cont) return;
+  if(!_estatusReady) cont.innerHTML = '<div class="loading"><div class="spin"></div>Cargando…</div>';
   const t = estatusTipo;
   const data = await leer([t]);
+  _estatusReady = true;
 
   // Vías: solo se listan los problemas activos (si no hay, vía despejada)
   if(t==='via'||t==='alerta'){
