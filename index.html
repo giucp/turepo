@@ -27,6 +27,9 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.2">
+<link rel="preconnect" href="https://lheknlauezomlmjiivsb.supabase.co" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -333,6 +336,18 @@
   .rankrow .rlvl{font-size:11px;color:#5f5f5f}
   .rankrow .rp{font-family:'Bricolage Grotesque';font-weight:800;color:#2d5bff;font-size:15px}
   .miposicion{margin-top:14px;padding-top:12px;border-top:2.5px dashed #111}
+  /* Pantalla de Niveles */
+  .lvlhow{display:flex;gap:9px}
+  .lvlhow-it{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:var(--nb-bd);border-radius:13px;box-shadow:var(--nb-hard2);padding:12px 8px;text-align:center}
+  .lvlhow-it b{font-family:'Bricolage Grotesque';font-weight:800;font-size:21px;color:#2d5bff}
+  .lvlhow-it span{font-size:12px;color:var(--ink2);font-weight:600;line-height:1.25}
+  .lvlrow{display:flex;align-items:center;gap:12px;background:#fff;border:var(--nb-bd);border-radius:13px;box-shadow:var(--nb-hard2);padding:11px 13px;margin-bottom:9px}
+  .lvlrow.now{background:#eaf0ff;box-shadow:3px 3px 0 #2d5bff}
+  .lvlrow .lvb{width:38px;height:38px;border:2.5px solid #111;border-radius:11px;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;color:#1a1410;flex:none}
+  .lvlrow .lvtx{flex:1;min-width:0}
+  .lvlrow .lvtx h4{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px;color:var(--ink);margin:0}
+  .lvlrow .lvtx p{font-size:12px;color:var(--ink3);margin:1px 0 0}
+  .lvlrow .lvnow{font-family:'Bricolage Grotesque';font-weight:800;font-size:10.5px;color:#2d5bff;border:2px solid #2d5bff;border-radius:99px;padding:2px 9px;white-space:nowrap}
   /* insignia en reportes */
   .insig{display:inline-flex;align-items:center;gap:3px;font-family:'Bricolage Grotesque';font-size:10.5px;font-weight:800;color:#3a2b00;
     background:#ffd23f;border:2px solid #111;border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
@@ -738,8 +753,8 @@
 
     <section class="screen" id="s-ranking">
       <button class="backbtn" onclick="go('s-inicio')">← Volver</button>
-      <div class="sec-title" style="margin-top:6px">Ranking de ciudadanos</div>
-      <div id="ranking-cont"><div class="loading"><div class="spin"></div>Cargando ranking…</div></div>
+      <div class="sec-title" style="margin-top:6px">Niveles de ciudadano</div>
+      <div id="ranking-cont"><div class="loading"><div class="spin"></div>Cargando…</div></div>
     </section>
 
     <section class="screen" id="s-fotos">
@@ -1900,7 +1915,7 @@ function cargarYo(){
   const lm=$('lemaYo'); if(lm) lm.style.display = usuario ? 'none' : '';
   if(usuario && usuario.sinNombre){
     c.innerHTML=`
-      <div class="q" style="margin:2px 2px 12px">¡Bienvenido! Elige tu <b>nombre de usuario</b> para terminar tu cuenta. Así te verán en los reportes y el ranking.</div>
+      <div class="q" style="margin:2px 2px 12px">¡Bienvenido! Elige tu <b>nombre de usuario</b> para terminar tu cuenta. Así te verán en los reportes.</div>
       <div class="authcard">
         <div class="authmsg" id="authMsg"></div>
         <div class="authfield"><label>Nombre de usuario</label>
@@ -1931,7 +1946,7 @@ function cargarYo(){
       <div class="prowlist">
         <div class="prow" onclick="go('s-ranking')">
           <div class="pr-ic">${ICONS.trophy}</div>
-          <div class="pr-tx"><h4>Ver el ranking</h4><p>Tu posición en el Top del estado</p></div>
+          <div class="pr-tx"><h4>Niveles de ciudadano</h4><p>Tus niveles y cómo subir de rango</p></div>
           <span class="pr-go">${ICONS.chevron}</span></div>
         <div class="prow" onclick="compartir()">
           <div class="pr-ic">${ICONS.share}</div>
@@ -2013,57 +2028,29 @@ async function guardarUsername(){
   await refrescarSesion(); cargarYo();
 }
 
-/* ======================= RANKING ======================= */
-async function cargarRanking(){
-  const cont=$('ranking-cont');
-  cont.innerHTML='<div class="loading"><div class="spin"></div>Cargando ranking…</div>';
-  if(!db){ cont.innerHTML=vacio('Ranking no disponible.'); return; }
-  // Top 10 por puntos (solo con al menos 1 punto)
-  const { data, error } = await db.from('perfiles').select('username,puntos')
-    .gt('puntos',0).order('puntos',{ascending:false}).limit(10);
-  if(error){ cont.innerHTML=vacio('No se pudo cargar el ranking.'); return; }
-  const top=(data||[]);
-  if(!top.length){
-    cont.innerHTML=vacio('Todavía nadie tiene puntos. ¡Reporta y sé el primero del ranking!');
-    return;
-  }
-  
-  // Podio (primeros 3)
-  let podio='';
-  if(top.length>=1){
-    const orden=[1,0,2]; // 2º, 1º, 3º para que el 1º quede al centro/arriba
-    podio='<div class="podio">'+orden.map(pos=>{
-      const r=top[pos]; if(!r) return '';
-      const lv=nivelDe(r.puntos);
-      return `<div class="pod ${pos===0?'first':''}"><div class="medal m${pos}">${pos+1}</div>
-        <div class="pn">${r.username||'—'}</div><div class="pp">${ICONS.star} ${r.puntos}</div><div class="lvl">${lv.n}</div></div>`;
-    }).join('')+'</div>';
-  }
-  // Lista del 4º en adelante
-  let lista='';
-  for(let i=3;i<top.length;i++){
-    const r=top[i], lv=nivelDe(r.puntos);
-    const yo = usuario && r.username===usuario.username ? ' me' : '';
-    lista+=`<div class="rankrow${yo}"><div class="pos">${i+1}</div>
-      <div class="rn">${r.username||'—'} <span class="insig">${lv.n}</span></div>
-      <div class="rp">${ICONS.star} ${r.puntos}</div></div>`;
-  }
-  // Mi posición si no estoy en el Top 10
-  let mi='';
-  if(usuario){
-    const estoy = top.some(r=>r.username===usuario.username);
-    if(!estoy){
-      const { count } = await db.from('perfiles').select('*',{count:'exact',head:true}).gt('puntos', usuario.puntos);
-      const pos = (count||0)+1;
-      const lv=nivelDe(usuario.puntos);
-      mi=`<div class="miposicion"><div class="rankrow me"><div class="pos">${pos}</div>
-        <div class="rn">${usuario.username} <span class="rlvl">${lv.n}</span></div>
-        <div class="rp">${ICONS.star} ${usuario.puntos}</div></div></div>`;
-    }
-  } else {
-    mi=`<div class="miposicion" style="text-align:center"><button class="btn btn-prim" style="width:100%" onclick="go('s-yo')">Crea tu cuenta para entrar al ranking</button></div>`;
-  }
-  cont.innerHTML = podio + lista + mi;
+/* ======================= NIVELES ======================= */
+function cargarRanking(){
+  const cont=$('ranking-cont'); if(!cont) return;
+  const idx = usuario ? nivelIdx(usuario.puntos) : -1;
+  const COLORS=['#ece6d8','#c7f0d6','#cfe0ff','#ffe6a8','#e6d9ff'];
+  const filas=NIVELES.map((lv,i)=>{
+    const sig=NIVELES[i+1];
+    const rango = sig ? `Desde ${lv.min} pts` : `Desde ${lv.min} pts · nivel máximo`;
+    const now = i===idx;
+    return `<div class="lvlrow${now?' now':''}">
+      <div class="lvb" style="background:${COLORS[i]}">${i+1}</div>
+      <div class="lvtx"><h4>${escapeHtml(lv.n)}</h4><p>${rango}</p></div>
+      ${now?'<span class="lvnow">Tú</span>':''}</div>`;
+  }).join('');
+  cont.innerHTML=`
+    <div class="q" style="margin:0 2px 12px">Ganas <b>Puntos Ciudadanos</b> ayudando a tu comunidad, y con ellos subes de nivel. No es una competencia: es tu progreso.</div>
+    <div class="lvlhow">
+      <div class="lvlhow-it"><b>+10</b><span>por cada reporte</span></div>
+      <div class="lvlhow-it"><b>+20</b><span>por cada persona que invitas</span></div>
+    </div>
+    <div class="sec-title" style="margin:16px 0 9px">Los 5 niveles</div>
+    ${filas}
+    <div class="q" style="margin:13px 2px 0;text-align:center">Pronto: cada nivel desbloqueará nuevas funciones dentro de Tu Repo.</div>`;
 }
 
 
