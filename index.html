@@ -536,6 +536,16 @@
   .fx-inrow input{flex:1;min-width:0;border:none;background:none;outline:none;font-family:'Bricolage Grotesque';
     font-weight:800;font-size:18px;color:var(--ink);width:100%}
   .fx-res{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:#06381c;text-align:right;margin-top:9px}
+  /* Transición de estatus en un reporte (pasó de X a Y) */
+  .ptrans{display:flex;align-items:center;flex-wrap:wrap;gap:5px 7px;margin-top:7px;font-size:11.5px;font-weight:700;color:var(--ink2)}
+  .ptrans .ti{width:22px;height:22px;flex:none;border:2px solid #111;border-radius:7px;display:inline-grid;place-items:center}
+  .ptrans .ti svg{width:13px;height:13px;stroke-width:2}
+  .ptrans .arr{color:var(--ink3);font-weight:800;margin:0 1px}
+  /* Menú de opciones del propio reporte + picker de estatus */
+  .cbcol{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .cbopts{display:flex;flex-direction:column;gap:7px;margin:8px 0 4px}
+  .cbopt{display:flex;align-items:center;gap:10px;width:100%;padding:11px 13px;border:var(--nb-bd);border-radius:11px;background:#fff;box-shadow:var(--nb-hard2);font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;color:var(--ink);cursor:pointer;text-align:left;transition:transform .12s,box-shadow .12s}
+  .cbopt:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
   .svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:5px 0 4px}
   .svc{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 2px 9px;border-radius:14px;
     font-family:'Bricolage Grotesque';font-size:11.5px;font-weight:800;border:var(--nb-bd);box-shadow:var(--nb-hard2);cursor:pointer;transition:transform .12s,box-shadow .12s}
@@ -548,7 +558,7 @@
   .svc-fotos{background:#ff9ecf;color:#4a0a2c}
   .svc svg{width:21px;height:21px;stroke-width:2}
   /* feed estilo plataforma (brutalista) */
-  .post{display:flex;gap:11px;padding:11px 12px 5px;border:var(--nb-bd);border-radius:14px;box-shadow:var(--nb-hard2);background:#fff;margin-bottom:9px}
+  .post{display:flex;gap:11px;padding:13px 13px 12px;border:var(--nb-bd);border-radius:14px;box-shadow:var(--nb-hard2);background:#fff;margin-bottom:10px}
   .post .pic{width:40px;height:40px;border:2.5px solid #111;border-radius:11px;display:grid;place-items:center;flex:none}
   .post .pic svg{width:20px;height:20px;stroke-width:1.9}
   .pic-ok{background:#c7f0d6;color:#1a7a40}
@@ -567,11 +577,11 @@
   .st-warn{background:#ffe6a8;color:#9a6a00} .st-warn .gd{background:var(--warnC)}
   .st-bad{background:#ffcabf;color:#b3361f}  .st-bad .gd{background:var(--badC)}
   .st-mid{background:#ece6d8;color:#6b6253} .st-mid .gd{background:var(--ink3)}
-  .pmeta{font-size:12px;color:var(--ink3);margin-top:2px}
+  .pmeta{font-size:12px;color:var(--ink3);margin-top:5px}
   .pmeta b{color:var(--ink2);font-weight:600}
   .ptxt{font-size:13px;color:var(--ink);margin-top:6px;background:#fff;border:2px solid #111;border-radius:0 12px 12px 12px;
     padding:8px 11px;display:inline-block;max-width:100%;word-break:break-word}
-  .acts{display:flex;margin-top:8px;max-width:290px;justify-content:space-between;margin-left:-5px}
+  .acts{display:flex;margin-top:11px;max-width:290px;justify-content:space-between;margin-left:-5px}
   .act{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink3);
     background:none;border:none;cursor:pointer;padding:5px 6px;border-radius:9px;font-family:inherit;transition:.12s}
   .act:active{transform:scale(.92);background:var(--chip2)}
@@ -1195,7 +1205,8 @@ async function cargarInicio(){
 
   const cont = $('reciente-list');
   if(!data.length){ cont.innerHTML = vacio('Todavía no hay reportes. ¡Sé el primero en avisar!'); return; }
-  cont.innerHTML = data.slice(0,6).map(r=>postReporte(r,'inicio')).join('');
+  const recientes = data.slice().sort((a,b)=> new Date(b.actualizado||b.created_at) - new Date(a.actualizado||a.created_at)).slice(0,6);
+  cont.innerHTML = recientes.map(r=>postReporte(r,'inicio')).join('');
 }
 /* Hero del Inicio: titulares recientes que rotan cada 5s + pulso de servicios */
 let _heroTimer=null, _heroNews=[], _heroIdx=0, _heroSwiped=0;
@@ -1446,9 +1457,18 @@ function postReporte(r, origen, nombreUb){
   const tile = ICONO_TIPO_SVG[r.tipo]||ICONS.bolt;
   const zona = escapeHtml(nombreUb || r.zona || estadoActual);
   const det = (r.estado==='otro' && r.detalle) ? `<div class="ptxt">${escapeHtml(r.detalle)}</div>` : '';
+  const trans = r.estado_anterior ? transReporte(r, tile) : '';
   return `<div class="post"><div class="pic pic-${sev}">${tile}</div><div class="pbody">
     <div class="l1"><span class="zone">${zona}</span><span class="stchip st-${sev}"><span class="gd"></span>${i.label}</span></div>
-    <div class="pmeta">${quien}${ins} · ${hace(r.created_at)}</div>${det}${acc}</div></div>`;
+    ${trans}<div class="pmeta">${quien}${ins} · ${hace(r.actualizado||r.created_at)}</div>${det}${acc}</div></div>`;
+}
+// Línea "pasó de X a Y" con los iconos del reporte pequeños (rojo/verde/gris) según severidad
+function transReporte(r, tile){
+  if(!r.estado_anterior) return '';
+  const ant=infoEstado({estado:r.estado_anterior});   // maneja 'otro' y estados desconocidos
+  const act=infoEstado(r);
+  const sevOf=e=>{ if(e==='otro') return 'warn'; const x=EST_INFO[e]; return x?(x.dot==='d-red'?'bad':x.dot==='d-amber'?'warn':x.dot==='d-green'?'ok':'mid'):'mid'; };
+  return `<div class="ptrans"><span class="ti pic-${sevOf(r.estado_anterior)}">${tile}</span>${escapeHtml(ant.label)}<span class="arr">→</span><span class="ti pic-${sevOf(r.estado)}">${tile}</span>${escapeHtml(act.label)}</div>`;
 }
 
 /* ---- OFERTAS · ranking de precios por producto (vive 24h) ---- */
@@ -1530,7 +1550,7 @@ function accionesRow(r, origen){
     ? `<button class="act on-foto" onclick="abrirFotoRep('${r.foto_path}')">${ICONS.camera}</button>`
     : `<button class="act" disabled style="opacity:.45">${ICONS.camera}</button>`;
   const mio = usuario && r.autor && r.autor===usuario.username;
-  const menu = mio ? `<button class="act act-mas" onclick="pedirBorrarReporte('${r.id}','${origen}')" aria-label="Opciones">${ICONS.mas}</button>` : '';
+  const menu = mio ? `<button class="act act-mas" onclick="opcionesReporte('${r.id}','${origen}','${r.tipo}')" aria-label="Opciones">${ICONS.mas}</button>` : '';
   return `<div class="acts acts4"><button class="act${ok>0?' on-ok':''}" onclick="votar('${r.id}',true,'${origen}')">${ICONS.up}${ok}${lOk}</button><button class="act${no>0?' on-no':''}" onclick="votar('${r.id}',false,'${origen}')">${ICONS.down}${no}${lNo}</button><button class="act${cm>0?' on-chat':''}" onclick="openComentarios('reporte','${r.id}')">${ICONS.chat}<span id="cn-${r.id}">${cm}</span></button>${fbtn}${menu}</div>`;
 }
 /* Avisito flotante */
@@ -1648,6 +1668,24 @@ async function svcSend(){
     detalle=(svcSel.detalle||'').trim();
     if(detalle.length<3){ const w=$('sitWarn'); if(w){ w.textContent='Cuéntanos qué pasa (mínimo 3 letras).'; w.classList.add('show'); } return; }
     if(textoNoPermitido(detalle)){ const w=$('sitWarn'); if(w) w.classList.add('show'); const inp=$('sitInput'); if(inp) inp.classList.add('bad'); return; }
+  }
+  // B) ¿Ya tienes un reporte activo de este mismo lugar+servicio? -> ofrece actualizarlo (evita duplicados)
+  if(usuario){
+    try{
+      const { data:mios }=await db.from('reportes_activos').select('id,estado,zona')
+        .eq('region',estadoActual).eq('tipo',svcTipo).eq('autor',usuario.username).limit(20);
+      const ya=(mios||[]).find(x=>clave(x.zona||'')===clave(zona));
+      if(ya && ya.estado!==estado){
+        const labA=(EST_INFO[ya.estado]||{}).label||ya.estado, labB=(EST_INFO[estado]||{}).label||estado;
+        const upd=await confirmAccion('Ya reportaste este lugar', `Tienes "${zona}" como ${labA}. ¿Actualizarlo a ${labB}?`, 'Sí, actualizar');
+        if(upd){
+          const {error}=await db.rpc('cambiar_estado_reporte',{p_id:ya.id,p_estado:estado});
+          if(error){ renderAviso(error.message||'No se pudo actualizar'); return; }
+          marcarCooldown(svcTipo); estatusTipo=svcTipo; await premiar();
+          renderDone('Actualizaste tu reporte. Ahora es el más reciente.','s-estatus',false); return;
+        }
+      }
+    }catch(_){}
   }
   enviando();
   // Ubicación: si marcó punto en el mapa úsalo; si no, intenta geolocalizar la zona escrita (mejor esfuerzo)
@@ -2313,7 +2351,7 @@ async function cargarMapa(){
 function dedupMapa(reps){
   const vistos=new Map();
   reps.slice()
-    .sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))   // más nuevo primero
+    .sort((a,b)=> new Date(b.actualizado||b.created_at) - new Date(a.actualizado||a.created_at))   // más nuevo primero (cuenta actualizaciones)
     .forEach(r=>{
       const k = r.tipo+'|'+(clave(r.zona||'') || (r.lat+','+r.lng)); // mismo lugar+servicio
       if(!vistos.has(k)) vistos.set(k, r);                            // se queda el primero = el más reciente
@@ -2426,6 +2464,48 @@ async function hacerBorrarReporte(rid, origen){
   if(Array.isArray(data) && data.length){ await db.storage.from('fotos').remove(data).catch(()=>{}); }
   toast('Reporte eliminado');
   if(origen==='estatus') cargarEstatus(); else cargarInicio();
+}
+/* ===== Cambiar estatus del propio reporte ===== */
+function opcionesReporte(rid, origen, tipo){
+  const servicio = !['oferta','carero'].includes(tipo);
+  let ov=$('confirmBorrar');
+  if(!ov){ ov=document.createElement('div'); ov.id='confirmBorrar'; ov.className='cbov'; document.body.appendChild(ov); }
+  ov.innerHTML=`<div class="cbcard">
+    <h3>Tu reporte</h3>
+    <div class="cbcol">
+      ${servicio?`<button class="btn btn-prim" onclick="abrirCambiarEstatus('${rid}','${origen}','${tipo}')">Cambiar estatus</button>`:''}
+      <button class="btn btn-bad" onclick="pedirBorrarReporte('${rid}','${origen}')">Borrar reporte</button>
+      <button class="btn btn-ghost" onclick="cerrarConfirmBorrar()">Cancelar</button>
+    </div></div>`;
+  ov.classList.add('open');
+}
+function abrirCambiarEstatus(rid, origen, tipo){
+  const cfg=SERVICIOS[tipo]; const ov=$('confirmBorrar'); if(!cfg||!ov) return;
+  const opts=cfg.sit.map(s=>`<button class="cbopt" onclick="hacerCambiarEstatus('${rid}','${origen}','${s[2]}')">${s[0]}<span>${s[1]}</span></button>`).join('');
+  ov.innerHTML=`<div class="cbcard">
+    <h3>¿Cómo está ahora?</h3>
+    <div class="cbopts">${opts}</div>
+    <div class="cbrow"><button class="btn btn-ghost" onclick="cerrarConfirmBorrar()">Cancelar</button></div></div>`;
+}
+async function hacerCambiarEstatus(rid, origen, estado){
+  cerrarConfirmBorrar();
+  try{ const {error}=await db.rpc('cambiar_estado_reporte',{p_id:rid,p_estado:estado}); if(error) throw error; }
+  catch(e){ toast(e.message||'No se pudo cambiar'); return; }
+  toast('Estatus actualizado');
+  if(origen==='estatus') cargarEstatus(); else cargarInicio();
+}
+// Confirmación genérica (Promise<bool>) reutilizando el overlay brutalista
+function confirmAccion(titulo, msg, okLabel){
+  return new Promise(resolve=>{
+    let ov=$('confirmGen');
+    if(!ov){ ov=document.createElement('div'); ov.id='confirmGen'; ov.className='cbov'; document.body.appendChild(ov); }
+    ov.innerHTML=`<div class="cbcard"><h3>${escapeHtml(titulo)}</h3><p>${escapeHtml(msg)}</p>
+      <div class="cbrow"><button class="btn btn-ghost" id="cgNo">No, crear nuevo</button>
+        <button class="btn btn-prim" id="cgYes">${escapeHtml(okLabel)}</button></div></div>`;
+    ov.classList.add('open');
+    $('cgYes').onclick=()=>{ ov.classList.remove('open'); resolve(true); };
+    $('cgNo').onclick=()=>{ ov.classList.remove('open'); resolve(false); };
+  });
 }
 /* ===== Borrar mi foto de la galería (autor) ===== */
 function pedirBorrarFoto(id, path){
