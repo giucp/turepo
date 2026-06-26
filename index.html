@@ -594,8 +594,8 @@
   .st-mid{background:#ece6d8;color:#6b6253} .st-mid .gd{background:var(--ink3)}
   .pmeta{font-size:12px;color:var(--ink3);margin-top:5px}
   .pmeta b{color:var(--ink2);font-weight:600}
-  .ptxt{font-size:13px;color:var(--ink);margin-top:6px;background:#fff;border:2px solid #111;border-radius:0 12px 12px 12px;
-    padding:8px 11px;display:inline-block;max-width:100%;word-break:break-word}
+  .ptxt{font-size:12.5px;line-height:1.35;color:var(--ink);margin-top:6px;background:#fff;border:2px solid #111;border-radius:0 11px 11px 11px;
+    padding:6px 10px;display:inline-block;max-width:100%;word-break:break-word}
   .acts{display:flex;margin-top:11px;max-width:290px;justify-content:space-between;margin-left:-5px}
   .act{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink3);
     background:none;border:none;cursor:pointer;padding:5px 6px;border-radius:9px;font-family:inherit;transition:.12s}
@@ -1304,9 +1304,11 @@ function notiTokens(t){
 }
 function notiSimil(a,b){
   if(!a.length||!b.length) return 0;
-  const B=new Set(b); let inter=0;
-  for(const w of new Set(a)) if(B.has(w)) inter++;
-  return inter/(new Set(a).size + B.size - inter);   // Jaccard de tokens
+  const A=new Set(a), B=new Set(b); let inter=0;
+  for(const w of A) if(B.has(w)) inter++;
+  const jac=inter/(A.size + B.size - inter);          // Jaccard de tokens
+  const ovl=inter/Math.min(A.size, B.size);           // solapamiento: capta misma historia titulada distinto entre medios
+  return Math.max(jac, inter>=4 ? ovl : 0);           // el solapamiento solo cuenta con >=4 palabras clave en común (evita falsos positivos)
 }
 // Agrupa titulares parecidos entre medios (misma historia, distinta URL): conserva
 // el mas reciente de cada grupo y anota las otras fuentes. Umbral 0.6 de similitud.
@@ -1486,7 +1488,7 @@ function postReporte(r, origen, nombreUb){
   const trans = r.estado_anterior ? transReporte(r, tile) : '';
   return `<div class="post"><div class="pic pic-${sev}">${tile}</div><div class="pbody">
     <div class="l1"><span class="zone">${zona}</span><span class="stchip st-${sev}"><span class="gd"></span>${i.label}</span></div>
-    ${trans}<div class="pmeta">${quien}${ins} · ${hace(r.actualizado||r.created_at)}</div>${det}${acc}</div></div>`;
+    ${trans}${det}<div class="pmeta">${quien}${ins} · ${hace(r.actualizado||r.created_at)}</div>${acc}</div></div>`;
 }
 // Línea "pasó de X a Y" con los iconos del reporte pequeños (rojo/verde/gris) según severidad
 function transReporte(r, tile){
