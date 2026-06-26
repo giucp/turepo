@@ -497,7 +497,7 @@ create event trigger trg_rls_auto_enable on ddl_command_end
 -- 5) VISTAS (contenido "activo" = últimas 12 horas)
 -- ============================================================================
 
-create or replace view public.reportes_activos as
+create or replace view public.reportes_activos with (security_invoker = on) as
   select id, tipo, zona, estado, producto, precio, lugar, votos_ok, votos_no,
          created_at, autor, autor_nivel, region, comentarios_n, detalle, foto_path, lat, lng,
          estado_anterior, actualizado
@@ -505,7 +505,7 @@ create or replace view public.reportes_activos as
   where actualizado > (now() - interval '12 hours')
     and not (votos_no >= 5 and votos_no > (votos_ok + 2));
 
-create or replace view public.fotos_activas as
+create or replace view public.fotos_activas with (security_invoker = on) as
   select id, region, categoria, descripcion, storage_path, autor, autor_nivel,
          created_at, aprobada_at, corazones, comentarios_n, reporte_id, reporte_label
   from public.fotos
