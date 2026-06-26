@@ -13,15 +13,11 @@ FEEDS = [
     {"fuente": "El Nacional", "url": "https://www.elnacional.com/mundo/feed/",     "categoria": "internacional"},
     {"fuente": "El Nacional", "url": "https://www.elnacional.com/economia/feed/",  "categoria": "economia"},
     {"fuente": "El Nacional", "url": "https://www.elnacional.com/deportes/feed/",  "categoria": "deportes"},
-    # El Diario (categorias completas, via /categoria/<slug>/feed/)
-    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/venezuela/feed/", "categoria": "nacional"},
-    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/mundo/feed/",     "categoria": "internacional"},
-    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/economia/feed/",  "categoria": "economia"},
-    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/deportes/feed/",  "categoria": "deportes"},
-    {"fuente": "El Diario", "url": "https://eldiario.com/categoria/sucesos/feed/",   "categoria": "sucesos"},
-    # Runrun.es (solo Nacional e Internacional disponibles)
-    {"fuente": "Runrun.es", "url": "https://runrun.es/nacional/feed/",      "categoria": "nacional"},
-    {"fuente": "Runrun.es", "url": "https://runrun.es/internacional/feed/", "categoria": "internacional"},
+    # CNN en Espanol ya no expone RSS propio (todo da 404) -> se trae via Google News
+    # acotado al sitio. OJO: el enlace es una redireccion de news.google.com, no link
+    # directo al articulo. 'google': True activa la limpieza del sufijo "- <Medio>" del titulo.
+    {"fuente": "CNN en Español", "categoria": "internacional", "google": True,
+     "url": "https://news.google.com/rss/search?q=site:cnnespanol.cnn.com+when:2d&hl=es-419&gl=US&ceid=US:es-419"},
 ]
 
 MAX_POR_FEED = 8             # max 8 por feed: equilibra la mezcla (El Nacional ~100 vs El Diario ~12)
@@ -68,6 +64,11 @@ def leer_feed(feed):
             enlace = (e.get("link") or "").strip()
             if not titulo or not enlace:
                 continue
+            # Google News agrega " - <Medio>" al final del titular -> quitarlo
+            if feed.get("google"):
+                sufijo = " - " + feed["fuente"]
+                if titulo.endswith(sufijo):
+                    titulo = titulo[:-len(sufijo)].strip()
             # SOLO titular + enlace + metadatos. NUNCA el contenido del artículo.
             registros.append({
                 "titulo": titulo[:500],
