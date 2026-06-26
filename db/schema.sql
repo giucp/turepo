@@ -46,7 +46,9 @@ create table if not exists public.reportes (
   detalle       text,
   foto_path     text,
   lat           double precision,
-  lng           double precision
+  lng           double precision,
+  estado_anterior text,
+  actualizado   timestamptz not null default now()
 );
 
 create table if not exists public.fotos (
@@ -297,6 +299,21 @@ as $$
    where id = reporte;
 $$;
 
+-- Cambiar el estado de mi propio reporte (valida autor; guarda el estado anterior y marca actualizado)
+create or replace function public.cambiar_estado_reporte(p_id uuid, p_estado text)
+returns void language plpgsql security definer set search_path to 'public'
+as $$
+declare v_user text; v_autor text; v_estado text;
+begin
+  select username into v_user from perfiles where id = auth.uid();
+  if v_user is null then raise exception 'Debes iniciar sesión'; end if;
+  select autor, estado into v_autor, v_estado from reportes where id = p_id;
+  if v_autor is null or v_autor <> v_user then raise exception 'No es tu reporte'; end if;
+  if p_estado is null or p_estado = v_estado then return; end if;
+  update reportes set estado_anterior = v_estado, estado = p_estado, actualizado = now()
+   where id = p_id;
+end; $$;
+
 -- Comentar (deriva autor de auth.uid(), valida y aplica rate limit)
 create or replace function public.comentar(p_tipo text, p_ref uuid, p_texto text,
   p_autor text default null, p_autor_nivel integer default null)
@@ -482,9 +499,10 @@ create event trigger trg_rls_auto_enable on ddl_command_end
 
 create or replace view public.reportes_activos as
   select id, tipo, zona, estado, producto, precio, lugar, votos_ok, votos_no,
-         created_at, autor, autor_nivel, region, comentarios_n, detalle, foto_path, lat, lng
+         created_at, autor, autor_nivel, region, comentarios_n, detalle, foto_path, lat, lng,
+         estado_anterior, actualizado
   from public.reportes
-  where created_at > (now() - interval '12 hours')
+  where actualizado > (now() - interval '12 hours')
     and not (votos_no >= 5 and votos_no > (votos_ok + 2));
 
 create or replace view public.fotos_activas as
