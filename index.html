@@ -550,6 +550,10 @@
   .fx-inrow .fx-cur{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px;color:#1a3a8a}
   .fx-inrow input{flex:1;min-width:0;border:none;background:none;outline:none;font-family:'Bricolage Grotesque';
     font-weight:800;font-size:18px;color:var(--ink);width:100%}
+  .fx-inrow .fx-swap{flex:none;width:34px;height:34px;padding:0;display:grid;place-items:center;
+    border:var(--nb-bd);border-radius:9px;background:#2d5bff;color:#fff;cursor:pointer;box-shadow:var(--nb-hard2)}
+  .fx-inrow .fx-swap:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
+  .fx-inrow .fx-swap svg{width:18px;height:18px;display:block}
   .fx-res{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:#06381c;text-align:right;margin-top:9px}
   /* Transición de estatus en un reporte (pasó de X a Y) */
   .ptrans{display:flex;align-items:center;flex-wrap:wrap;gap:5px 7px;margin-top:6px;font-size:11.5px;font-weight:700;color:var(--ink2)}
@@ -1103,6 +1107,7 @@ function pintarEstado(){
 
 /* ---- INICIO ---- */
 function fxFmt(n){ try{ return 'Bs. '+Number(n).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2}); }catch(e){ return 'Bs. '+n; } }
+function fxFmtUsd(n){ try{ return '$ '+Number(n).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2}); }catch(e){ return '$ '+n; } }
 function fxVar(p){
   if(p===null||p===undefined||isNaN(p)) return '';
   const v=Number(p); if(v>0) return ' <span class="fx-up">\u25B2 '+v.toFixed(1)+'%</span>';
@@ -1122,13 +1127,26 @@ function fxCalc(){
   var pts=raw.split('.'); if(pts.length>2) raw=pts[0]+'.'+pts.slice(1).join('');
   var m=parseFloat(raw)||0;
   var tasa=window.fxTasa[window.fxSel||'bcv']||0;
-  res.textContent='= '+fxFmt(m*tasa);
+  res.textContent = (window.fxDir==='b2d')
+    ? '= '+fxFmtUsd(tasa ? m/tasa : 0)
+    : '= '+fxFmt(m*tasa);
 }
 function fxAplicarSel(sel){
   window.fxSel=sel;
   var btns=document.querySelectorAll('.fx-seg button');
   for(var i=0;i<btns.length;i++){ btns[i].className=(btns[i].getAttribute('data-sel')===sel?'on':''); }
   fxCalc();
+}
+function fxAplicarDir(){
+  var b2d=(window.fxDir==='b2d');
+  var cur=document.getElementById('fxCur'), h=document.getElementById('fxCalcH');
+  if(cur) cur.textContent = b2d ? 'Bs' : '$';
+  if(h) h.textContent = b2d ? 'Calculadora · bolívares a dólares' : 'Calculadora · dólares a bolívares';
+  fxCalc();
+}
+function fxInvertir(){
+  window.fxDir = (window.fxDir==='b2d') ? 'd2b' : 'b2d';
+  fxAplicarDir();
 }
 // Delegación global (una sola vez): funciona aunque la barra se redibuje, en iOS y Android
 if(!window.__fxDeleg){
@@ -1137,6 +1155,8 @@ if(!window.__fxDeleg){
     var t=e.target; if(!t||!t.closest) return;
     var seg=t.closest('.fx-seg button');
     if(seg){ e.stopPropagation(); fxAplicarSel(seg.getAttribute('data-sel')); return; }
+    var sw=t.closest('.fx-swap');
+    if(sw){ e.stopPropagation(); fxInvertir(); return; }
     var row=t.closest('[data-fxrow]');
     if(row){ var fx=row.closest('.fx'); if(fx) fx.classList.toggle('open'); }
   });
@@ -1176,7 +1196,7 @@ async function cargarDolar(){
       }
     }catch(_){ /* si las tablas fallan, usamos los respaldos de dolarapi */ }
     const brecha=((vBin-vOfi)/vOfi*100);
-    window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv';
+    window.fxTasa={bcv:vOfi,bin:vBin}; if(!window.fxSel) window.fxSel='bcv'; if(!window.fxDir) window.fxDir='d2b';
     wrap.innerHTML=`<div class="fx">
       <div class="fx-row" style="cursor:pointer" data-fxrow="1">
         <div class="fx-cell"><div class="k"><span class="dotk" style="background:#6ce5b0"></span>BCV oficial</div><div class="v">${fxFmt(vOfi)}</div></div>
@@ -1185,20 +1205,18 @@ async function cargarDolar(){
         <div class="fx-gap"><div class="g">+${brecha.toFixed(0)}%</div><div class="gl">brecha</div></div>
       </div>
       <div class="fx-more"><div class="fx-more-in">
-        <div class="fx-line"><span>D\u00f3lar BCV (oficial)</span><b>${fxFmt(vOfi)}</b></div>
-        <div class="fx-line"><span>Binance (paralelo)</span><b>${fxFmt(vBin)}</b></div>
-        <div class="fx-line"><span>Brecha entre ambos</span><b>+${brecha.toFixed(1)}%</b></div>
-        <div class="fx-foot">BCV ${bcvCuando} \u00b7 Binance ${binCuando}</div>
         <div class="fx-calc">
-          <div class="fx-calc-h">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
+          <div class="fx-calc-h" id="fxCalcH">Calculadora \u00b7 d\u00f3lares a bol\u00edvares</div>
           <div class="fx-seg">
             <button id="fxSegBcv" class="on" type="button" data-sel="bcv">BCV</button>
             <button id="fxSegBin" type="button" data-sel="bin">Binance</button>
           </div>
-          <div class="fx-inrow"><span class="fx-cur">$</span>
-            <input id="fxMonto" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+          <div class="fx-inrow"><span class="fx-cur" id="fxCur">$</span>
+            <input id="fxMonto" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+            <button class="fx-swap" id="fxSwap" type="button" aria-label="Invertir moneda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16"/><path d="M3.5 7.5 7 4l3.5 3.5"/><path d="M17 20V4"/><path d="M13.5 16.5 17 20l3.5-3.5"/></svg></button></div>
           <div class="fx-res" id="fxRes">= Bs. 0,00</div>
         </div>
+        <div class="fx-foot">BCV ${bcvCuando} \u00b7 Binance ${binCuando}</div>
       </div></div>
     </div>
     <div class="fx-hint">toca para abrir la calculadora</div>`;
