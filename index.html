@@ -212,6 +212,33 @@
   .opt .oe svg{width:20px;height:20px;stroke-width:2}
   .oe-cat{width:34px;height:34px;border:2.5px solid #111;border-radius:10px;justify-content:center;flex:none}
   .oe-cat svg{width:19px;height:19px}
+  /* ===== Reporte: pantalla única (escribir o tocar) ===== */
+  .uni-lab{font-family:'Bricolage Grotesque';font-size:12px;font-weight:800;color:#111;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px}
+  .uni-cats{display:flex;flex-wrap:wrap;gap:8px}
+  .uni-cat{display:inline-flex;align-items:center;gap:8px;border:2.5px solid #111;background:#fff;border-radius:12px;
+    padding:8px 12px 8px 8px;font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;color:#111;cursor:pointer;box-shadow:2px 2px 0 #111;transition:transform .12s,box-shadow .12s}
+  .uni-cat:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
+  .uni-cat.sel{background:#eaf0ff;box-shadow:3px 3px 0 #2d5bff}
+  .uni-cat .ci{width:28px;height:28px;border:2px solid #111;border-radius:8px;display:grid;place-items:center;flex:none}
+  .uni-cat .ci svg{width:16px;height:16px;stroke-width:2}
+  .uni-sits{display:flex;flex-wrap:wrap;gap:8px}
+  .uni-sit{display:inline-flex;align-items:center;gap:7px;border:2.5px solid #111;background:#fff;border-radius:999px;
+    padding:7px 13px;font-family:'DM Sans';font-weight:700;font-size:12.5px;color:#111;cursor:pointer;box-shadow:1.5px 1.5px 0 #111;transition:transform .12s,box-shadow .12s}
+  .uni-sit:active{transform:translate(1.5px,1.5px);box-shadow:0 0 0 #111}
+  .uni-sit.sel{background:#eaf0ff;box-shadow:2.5px 2.5px 0 #2d5bff}
+  .uni-sit .odot{width:9px;height:9px;border-radius:50%;border:2px solid #111;flex:none;display:inline-block}
+  .uni-pin{display:inline-flex;align-items:center;gap:7px;border:2.5px solid #111;background:#fff;border-radius:999px;
+    padding:7px 14px;font-family:'Bricolage Grotesque';font-weight:800;font-size:12.5px;color:#111;cursor:pointer;box-shadow:1.5px 1.5px 0 #111;transition:transform .12s,box-shadow .12s}
+  .uni-pin svg{width:15px;height:15px;flex:none}
+  .uni-pin:active{transform:translate(1.5px,1.5px);box-shadow:0 0 0 #111}
+  .uni-pin.on{background:#eaf0ff;box-shadow:2px 2px 0 #2d5bff}
+  .uni-more{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .uni-more button{flex:1;min-width:104px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:2.5px solid #111;
+    background:#fff;border-radius:12px;padding:11px 8px;font-family:'Bricolage Grotesque';font-weight:800;font-size:12px;color:#111;cursor:pointer;box-shadow:2px 2px 0 #111;transition:transform .12s,box-shadow .12s}
+  .uni-more button:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
+  .uni-more button svg{width:16px;height:16px;flex:none}
+  .uni-more button .ci{width:24px;height:24px;border:2px solid #111;border-radius:7px;display:grid;place-items:center;flex:none}
+  .uni-more button .ci svg{width:14px;height:14px;stroke-width:2}
   .actions{display:flex;gap:10px}
   .btn{flex:1;border:2.5px solid #111;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:'Bricolage Grotesque';box-shadow:3px 3px 0 #111;transition:transform .12s,box-shadow .12s}
   .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #111}
@@ -1624,7 +1651,7 @@ function marcarCooldown(tipo){
 }
 
 /* ======================= Reportar ======================= */
-function openReport(){ fotoRepBlob=null; fotoRepSolicitada=false; $('modal').classList.add('open'); renderChooser(); }
+function openReport(){ fotoRepBlob=null; fotoRepSolicitada=false; $('modal').classList.add('open'); renderReporteUni(); }
 function closeReport(){ $('modal').classList.remove('open'); }
 function renderChooser(){
   $('sheet').innerHTML=`<div class="grip"></div>
@@ -1640,6 +1667,155 @@ function renderChooser(){
     </div>
     <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" style="flex:1" onclick="closeReport()">Cerrar</button></div>`;
 }
+  /* ================== PANTALLA ÚNICA DE REPORTE (escribir o tocar) ================== */
+let uni;
+const UNI_CATS = [
+  {tipo:'luz',      label:'Luz',      bg:'#ffd23f', fg:'#3a2b00', ic:ICONS.bolt},
+  {tipo:'gasolina', label:'Gasolina', bg:'#9cc6ff', fg:'#0a285c', ic:ICONS.pump},
+  {tipo:'via',      label:'Vías',     bg:'#ffb24d', fg:'#4a2600', ic:ICONS.traffic},
+  {tipo:'alerta',   label:'Alerta',   bg:'#ff8a8a', fg:'#4a0808', ic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'}
+];
+// Detección por palabras clave (capa 1 de la opción A). Pase 1: situación específica gana; pase 2: solo categoría.
+const UNI_KW = [
+  {tipo:'luz', estado:'con_luz', kw:['llego la luz','volvio la luz','ya hay luz','regreso la luz','vino la luz','llego la corriente','encendio']},
+  {tipo:'luz', estado:'sin_luz', kw:['se fue la luz','no hay luz','sin luz','apagon','se fue la electricidad','se fue la corriente','no hay corriente','pelo bola','sin servicio electrico','sin electricidad']},
+  {tipo:'luz', estado:'bajones', kw:['bajon','bajones','fluctua','parpade','sube y baja','subidas y bajadas']},
+  {tipo:'gasolina', estado:'cerrada', kw:['sin gasolina','no hay gasolina','no surte','cerro la bomba','cerraron la bomba','sin gasoil','no hay gasoil','seca la bomba']},
+  {tipo:'gasolina', estado:'cola_pesada', kw:['cola pesada','cola larga','cola kilometr','tremenda cola','mucha cola','cola enorme','cola eterna','cola full']},
+  {tipo:'gasolina', estado:'cola_media', kw:['cola moderada','cola media','algo de cola','poca cola','cola normal']},
+  {tipo:'gasolina', estado:'fluyendo', kw:['sin cola','fluyendo','surtiendo','despejad','sin nada de cola','rapidito la bomba']},
+  {tipo:'via', estado:'accidente', kw:['accidente','choque','chocaron','volcamiento','arrollad','colision','se volco']},
+  {tipo:'via', estado:'cerrada_via', kw:['calle cerrada','via cerrada','cerraron la via','cerraron la calle','via bloqueada','calle bloqueada']},
+  {tipo:'via', estado:'semaforo', kw:['semaforo']},
+  {tipo:'via', estado:'trancon', kw:['trancon','cola de carros','mucho trafico','trafico pesado','congestion','pegado el trafico','embotellamiento','tranca de carros']},
+  {tipo:'alerta', estado:'robo', kw:['robo','robaron','atraco','atracaron','hampa','malandr','delincuent','matraqueo','secuestr','hurto','arrebat']},
+  {tipo:'alerta', estado:'inundacion', kw:['inundacion','inundad','calle inundada','anegad','se desbordo','rio crecido']},
+  {tipo:'alerta', estado:'clima', kw:['lluvia','llovi','palo de agua','aguacero','tormenta','granizo','vendaval']},
+  {tipo:'alerta', estado:'protesta', kw:['protesta','manifestacion','trancazo','guarimba','cacerolazo']},
+  {tipo:'gasolina', estado:null, kw:['gasolina','gasoil','la bomba','estacion de servicio','surtidor','pdv','combustible']},
+  {tipo:'luz', estado:null, kw:['la luz','electricidad','la corriente','servicio electrico']},
+  {tipo:'via', estado:null, kw:['la via','la calle','la avenida','autopista','el trafico','redoma','alcabala']},
+  {tipo:'alerta', estado:null, kw:['alerta','peligro','emergencia']}
+];
+const UNI_PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+function uniDetectar(texto){
+  const n=normalizar(texto||''); if(n.length<3) return {tipo:null,estado:null};
+  for(const r of UNI_KW){ if(r.estado && r.kw.some(k=>n.includes(k))) return {tipo:r.tipo,estado:r.estado}; }
+  for(const r of UNI_KW){ if(!r.estado && r.kw.some(k=>n.includes(k))) return {tipo:r.tipo,estado:null}; }
+  return {tipo:null,estado:null};
+}
+function uniExtraerZona(t){
+  const m=(t||'').match(/\ben\s+(.+)/i); if(!m) return '';
+  let z=m[1].split(/[,.;]|\bdesde\b|\bporque\b|\bya que\b|\bque\b/i)[0].trim();
+  if(z.length>40) z=z.slice(0,40).trim();
+  return z.length>=2 ? z : '';
+}
+function renderReporteUni(){
+  uni={ texto:'', tipo:null, estado:null,
+        zona:(_puntoMapa&&_puntoMapa.zona)||'', lat:_puntoMapa?_puntoMapa.lat:null, lng:_puntoMapa?_puntoMapa.lng:null,
+        manual:false, zonaTocada:!!(_puntoMapa&&_puntoMapa.zona) };
+  const fijado=!!_puntoMapa; _puntoMapa=null;
+  $('sheet').innerHTML=`<div class="grip"></div>
+    <h3>¿Qué está pasando?</h3>
+    <div class="q">Escríbelo con tus palabras o toca una categoría · sin registrarte</div>
+    <div class="field" style="margin-bottom:12px">
+      <textarea id="uniTexto" class="tinput" rows="2" style="resize:none;line-height:1.35" placeholder="Ej: Se fue la luz en La Lago · Cola pesada en la PDV de la av 5 · Robo cerca del mercado" oninput="uniInput(this.value)" autocomplete="off"></textarea>
+      <div class="warn" id="uniWarn"></div>
+    </div>
+    <div class="uni-lab">Categoría</div>
+    <div class="uni-cats" id="uniCats"></div>
+    <div id="uniSits"></div>
+    <div class="uni-lab" style="margin-top:14px">¿Dónde?</div>
+    <div class="field" style="margin-bottom:4px">
+      <input id="uniZona" class="tinput" placeholder="Sector, calle, estación…" value="${(uni.zona||'').replace(/"/g,'&quot;')}" oninput="uniZonaInput(this.value)" autocomplete="off">
+      <div class="suggs" id="uniZonaSuggs"></div>
+    </div>
+    <button class="uni-pin${fijado?' on':''}" id="uniPinBtn" type="button" onclick="uniPin()">${UNI_PIN_SVG}${fijado?'Ubicación fijada':'Fijar en el mapa'}</button>
+    ${bloqueFotoRep()}
+    <div class="uni-more">
+      <button type="button" onclick="startOferta()"><span class="ci" style="background:#6ce5b0;color:#06371f">${ICONS.cart}</span>Oferta / precio</button>
+      <button type="button" onclick="startCarero()"><span class="ci" style="background:#c4a5ff;color:#2e1660">${ICONS.tag}</span>Carero</button>
+      <button type="button" onclick="openSubirFoto()"><span class="ci" style="background:#ff9ecf;color:#4a0a2c">${ICONS.camera}</span>Subir foto</button>
+    </div>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn btn-ghost" type="button" onclick="closeReport()">Cerrar</button>
+      <button class="btn btn-prim" type="button" onclick="uniSend()">Enviar reporte</button>
+    </div>`;
+  uniPintarCats(); uniPintarSits();
+  if(fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
+}
+function uniPintarCats(){
+  const c=$('uniCats'); if(!c) return;
+  c.innerHTML=UNI_CATS.map(k=>`<button type="button" class="uni-cat ${uni.tipo===k.tipo?'sel':''}" onclick="uniSetTipo('${k.tipo}')"><span class="ci" style="background:${k.bg};color:${k.fg}">${k.ic}</span>${k.label}</button>`).join('');
+}
+function uniPintarSits(){
+  const c=$('uniSits'); if(!c) return;
+  if(!uni.tipo){ c.innerHTML=''; return; }
+  const sit=SERVICIOS[uni.tipo].sit;
+  c.innerHTML=`<div class="uni-lab" style="margin-top:14px">¿Qué pasa?</div><div class="uni-sits">`+
+    sit.map((s,i)=>`<button type="button" class="uni-sit ${uni.estado===s[2]?'sel':''}" onclick="uniSetEstado(${i})">${s[0]}${s[1]}</button>`).join('')+`</div>`;
+}
+function uniInput(v){
+  uni.texto=v;
+  if(!uni.manual){
+    const det=uniDetectar(v);
+    if(det.tipo){
+      const cambio=det.tipo!==uni.tipo;
+      uni.tipo=det.tipo;
+      if(det.estado) uni.estado=det.estado; else if(cambio) uni.estado=null;
+      uniPintarCats(); uniPintarSits();
+    }
+  }
+  if(!uni.zonaTocada){
+    const z=uniExtraerZona(v);
+    if(z){ uni.zona=z; const zf=$('uniZona'); if(zf && document.activeElement!==zf) zf.value=z; }
+  }
+  uniValidarTexto(v);
+}
+function uniSetTipo(tipo){ uni.manual=true; if(uni.tipo!==tipo){ uni.tipo=tipo; uni.estado=null; } uniPintarCats(); uniPintarSits(); }
+function uniSetEstado(i){ uni.manual=true; uni.estado=SERVICIOS[uni.tipo].sit[i][2]; uniPintarSits(); }
+function uniValidarTexto(v){
+  const bad=!!(v && textoNoPermitido(v));
+  const t=$('uniTexto'); if(t) t.classList.toggle('bad',bad);
+  const w=$('uniWarn'); if(w){ if(bad){ w.textContent='Revisa el texto: sin groserías ni símbolos raros.'; w.classList.add('show'); } else w.classList.remove('show'); }
+}
+function uniWarn(msg){ const w=$('uniWarn'); if(w){ w.textContent=msg; w.classList.add('show'); } }
+async function uniZonaInput(v){
+  uni.zona=v; uni.zonaTocada=true;
+  const bad=textoNoPermitido(v); const zf=$('uniZona'); if(zf) zf.classList.toggle('bad',bad);
+  const lt=(uni.tipo && SERVICIOS[uni.tipo]) ? SERVICIOS[uni.tipo].lugarTipo : 'zona';
+  const lista=await sugerencias(lt, v);
+  const cont=$('uniZonaSuggs'); if(cont) cont.innerHTML=lista.map(s=>`<span class="sugg" onclick="uniUsarZona('${s.replace(/'/g,"\\'")}')">${s}<span class="pop">↗</span></span>`).join('');
+}
+function uniUsarZona(s){ uni.zona=s; uni.zonaTocada=true; const el=$('uniZona'); if(el){ el.value=s; el.classList.remove('bad'); } const c=$('uniZonaSuggs'); if(c) c.innerHTML=''; }
+async function uniPin(){
+  const p=await pickPunto();
+  if(p){ uni.lat=p.lat; uni.lng=p.lng; if(p.zona){ uni.zona=p.zona; uni.zonaTocada=true; const zf=$('uniZona'); if(zf) zf.value=p.zona; } const b=$('uniPinBtn'); if(b){ b.classList.add('on'); b.innerHTML=UNI_PIN_SVG+'Ubicación fijada'; } }
+}
+async function uniSend(){
+  const texto=(uni.texto||'').trim();
+  const zona=(uni.zona||'').trim();
+  if(zona.length<2){ uniWarn('Escribe dónde está pasando (mínimo 2 letras).'); const zf=$('uniZona'); if(zf) zf.classList.add('bad'); return; }
+  if(textoNoPermitido(zona)){ uniWarn('Revisa el lugar: sin groserías ni símbolos raros.'); const zf=$('uniZona'); if(zf) zf.classList.add('bad'); return; }
+  let tipo=uni.tipo, estado=uni.estado, detalle=null;
+  if(!tipo){
+    if(texto.length<3){ uniWarn('Escribe qué está pasando, o toca una categoría.'); return; }
+    if(textoNoPermitido(texto)){ uniValidarTexto(texto); return; }
+    tipo='alerta'; estado='otro'; detalle=texto;
+  } else if(!estado){
+    uniWarn('Toca la situación: lo que está pasando.'); return;
+  } else if(estado==='otro'){
+    detalle=texto;
+    if(detalle.length<3){ uniWarn('Cuéntanos qué pasa (mínimo 3 letras).'); return; }
+    if(textoNoPermitido(detalle)){ uniValidarTexto(detalle); return; }
+  }
+  svcTipo=tipo;
+  const cfg=SERVICIOS[tipo];
+  const idx=cfg.sit.findIndex(s=>s[2]===estado);
+  svcSel={ ub:zona, sit: idx>=0?idx:0, detalle: detalle||'', lat:uni.lat, lng:uni.lng };
+  await svcSend();
+}
+
   /* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
 let svcTipo, svcStep, svcSel;
 function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:(_puntoMapa&&_puntoMapa.zona)||'',sit:undefined,detalle:'',lat:_puntoMapa?_puntoMapa.lat:null,lng:_puntoMapa?_puntoMapa.lng:null}; _puntoMapa=null; renderServicio(); }
@@ -1803,7 +1979,7 @@ function renderOferta(){
   const last = oStep<3?`<button class="btn btn-prim" onclick="oNext()">Siguiente</button>`:`<button class="btn btn-prim" onclick="oSend()">${txtEnviar}</button>`;
   const foto = oStep===3 ? bloqueFotoRep() : '';
   $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}${foto}
-    <div class="actions" style="margin-top:18px"><button class="btn btn-ghost" onclick="${oStep>0?'oBack()':'renderChooser()'}">←</button>${last}</div>`;
+    <div class="actions" style="margin-top:18px"><button class="btn btn-ghost" onclick="${oStep>0?'oBack()':'renderReporteUni()'}">←</button>${last}</div>`;
   if(oStep===3 && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
   if(oStep===2) pintarSuggsZona('');
   if(oStep===3) pintarSuggsLugar('');
