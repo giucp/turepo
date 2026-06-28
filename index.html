@@ -1658,20 +1658,6 @@ function marcarCooldown(tipo){
 /* ======================= Reportar ======================= */
 function openReport(){ fotoRepBlob=null; fotoRepSolicitada=false; $('modal').classList.add('open'); renderReporteUni(); }
 function closeReport(){ $('modal').classList.remove('open'); }
-function renderChooser(){
-  $('sheet').innerHTML=`<div class="grip"></div>
-    <h3>¿Qué quieres reportar?</h3><div class="q">Toma 5 segundos. Sin registrarte.</div>
-    <div class="chooser">
-      <div class="choice" onclick="startServicio('luz')"><div class="ce" style="background:#ffd23f;color:#3a2b00"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.1 12.5h6L9.9 22 19 11.5h-6L13 2z"/></svg></div><div><h5>Luz</h5><p>Se fue, llegó, bajones…</p></div></div>
-      <div class="choice" onclick="startServicio('gasolina')"><div class="ce" style="background:#9cc6ff;color:#0a285c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M3 21h14"/><path d="M15 9h2.5a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9.5L19 7"/></svg></div><div><h5>Gasolina</h5><p>Cómo está la cola en la estación</p></div></div>
-      <div class="choice" onclick="startServicio('via')"><div class="ce" style="background:#ffb24d;color:#4a2600"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="20" rx="2.4"/><circle cx="12" cy="6.4" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none"/><circle cx="12" cy="17.6" r="1.25" fill="currentColor" stroke="none"/></svg></div><div><h5>Tráfico / vías</h5><p>Accidente, trancón, calle cerrada…</p></div></div>
-      <div class="choice" onclick="startOferta()"><div class="ce" style="background:#6ce5b0;color:#06371f"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1.6"/><circle cx="19" cy="21" r="1.6"/><path d="M1.5 2.5h3l3.1 13.4a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22.5 7H6"/></svg></div><div><h5>Oferta o precio</h5><p>Comida, básicos, el bajón…</p></div></div>
-      <div class="choice" onclick="startCarero()"><div class="ce" style="background:#c4a5ff;color:#2e1660"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H4a2 2 0 0 0-2 2v5.6c0 .5.2 1 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l5.6-5.6a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none"/></svg></div><div><h5>Carero / sobreprecio</h5><p>Algo que viste demasiado caro</p></div></div>
-      <div class="choice" onclick="startServicio('alerta')"><div class="ce" style="background:#ff8a8a;color:#4a0808"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div><div><h5>Alertas generales</h5><p>Clima, robo, inundación…</p></div></div>
-      <div class="choice" onclick="openSubirFoto()"><div class="ce" style="background:#ff9ecf;color:#4a0a2c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7.8 6.2H4a2 2 0 0 0-2 2V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8.2a2 2 0 0 0-2-2h-3.8L14.5 4z"/><circle cx="12" cy="13" r="3.6"/></svg></div><div><h5>Foto</h5><p>Muestra lo que está pasando</p></div></div>
-    </div>
-    <div class="actions" style="margin-top:14px"><button class="btn btn-ghost" style="flex:1" onclick="closeReport()">Cerrar</button></div>`;
-}
   /* ================== PANTALLA ÚNICA DE REPORTE (escribir o tocar) ================== */
 let uni;
 const UNI_CATS = [
@@ -1777,7 +1763,7 @@ function uniInput(v){
   }
   uniValidarTexto(v);
 }
-function uniSetTipo(tipo){ uni.manual=true; if(uni.tipo!==tipo){ uni.tipo=tipo; uni.estado=null; } uniPintarCats(); uniPintarSits(); }
+function uniSetTipo(tipo){ uni.manual=true; if(uni.tipo!==tipo){ uni.tipo=tipo; uni.estado=null; } uniPintarCats(); uniPintarSits(); if(uni.zona && uni.zona.trim()) uniZonaInput(uni.zona); }   // re-segmenta los sugeridos según la categoría elegida
 function uniSetEstado(i){ uni.manual=true; uni.estado=SERVICIOS[uni.tipo].sit[i][2]; uniPintarSits(); }
 function uniValidarTexto(v){
   const bad=!!(v && textoNoPermitido(v));
@@ -1788,9 +1774,11 @@ function uniWarn(msg){ const w=$('uniWarn'); if(w){ w.textContent=msg; w.classLi
 async function uniZonaInput(v){
   uni.zona=v; uni.zonaTocada=true;
   const bad=textoNoPermitido(v); const zf=$('uniZona'); if(zf) zf.classList.toggle('bad',bad);
-  const lt=(uni.tipo && SERVICIOS[uni.tipo]) ? SERVICIOS[uni.tipo].lugarTipo : 'zona';
+  const cont=$('uniZonaSuggs');
+  if(!v.trim()){ if(cont) cont.innerHTML=''; return; }   // sin texto -> sin sugeridos por defecto
+  const lt=(uni.tipo && SERVICIOS[uni.tipo]) ? SERVICIOS[uni.tipo].lugarTipo : 'zona';   // segmentado: estacion (gasolina) vs zona (resto)
   const lista=await sugerencias(lt, v);
-  const cont=$('uniZonaSuggs'); if(cont) cont.innerHTML=lista.map(s=>`<span class="sugg" onclick="uniUsarZona('${s.replace(/'/g,"\\'")}')">${s}<span class="pop">↗</span></span>`).join('');
+  if(cont) cont.innerHTML=lista.map(s=>`<span class="sugg" onclick="uniUsarZona('${s.replace(/'/g,"\\'")}')">${s}<span class="pop">↗</span></span>`).join('');
 }
 function uniUsarZona(s){ uni.zona=s; uni.zonaTocada=true; const el=$('uniZona'); if(el){ el.value=s; el.classList.remove('bad'); } const c=$('uniZonaSuggs'); if(c) c.innerHTML=''; }
 async function uniPin(){
@@ -1821,69 +1809,7 @@ async function uniSend(){
   await svcSend();
 }
 
-  /* FLUJO GENÉRICO DE SERVICIO (luz, agua, gasolina, vías) — 2 pasos */
-let svcTipo, svcStep, svcSel;
-function startServicio(tipo){ svcTipo=tipo; svcStep=0; svcSel={ub:(_puntoMapa&&_puntoMapa.zona)||'',sit:undefined,detalle:'',lat:_puntoMapa?_puntoMapa.lat:null,lng:_puntoMapa?_puntoMapa.lng:null}; _puntoMapa=null; renderServicio(); }
-function renderServicio(){
-  const cfg = SERVICIOS[svcTipo];
-  const esOtra = svcSel.sit!==undefined && cfg.sit[svcSel.sit][2]==='otro';
-  const total = esOtra ? 3 : 2;
-  const ultimo = svcStep === total-1;
-  const dots=Array.from({length:total},(_,i)=>`<div class="stepdot ${i<=svcStep?'on':''}"></div>`).join('');
-  let body;
-  if(svcStep===0){
-    body=`<h3>${cfg.titulo}</h3><div class="q">${cfg.ubLabel} · paso 1 de ${total}</div>
-      <div class="field">
-        <input id="ubInput" class="tinput" placeholder="${cfg.ph}" value="${(svcSel.ub||'').replace(/"/g,'&quot;')}" oninput="svcUb(this.value)" autocomplete="off">
-        <div class="warn" id="ubWarn">Solo letras, números y hasta 2 emojis. Sin groserías.</div>
-        <div class="suggs" id="ubSuggs"></div>
-        <div class="sugg-hint">Escribe el nombre. Si ya existe, tócalo en las sugerencias.</div>
-      </div>`;
-  } else if(svcStep===1){
-    body=`<h3>¿Cuál es la situación?</h3><div class="q">Toca lo que pasa · paso 2 de ${total}</div>
-      <div class="opts">${cfg.sit.map((s,i)=>`<div class="opt ${svcSel.sit===i?'sel':''}" onclick="svcPick('sit',${i})"><span class="oe">${s[0]}</span>${s[1]}</div>`).join('')}</div>`;
-  } else {
-    body=`<h3>Breve descripción</h3><div class="q">Cuéntalo corto · paso 3 de 3</div>
-      <div class="field">
-        <input id="sitInput" class="tinput" maxlength="40" placeholder="Cuéntalo corto. Ej: Palo de agua próx 🌧️" value="${(svcSel.detalle||'').replace(/"/g,'&quot;')}" oninput="svcDetalle(this.value)" autocomplete="off">
-        <div class="warn" id="sitWarn">Revisa el texto: corto y sin groserías.</div>
-      </div>`;
-  }
-  const last = ultimo?`<button class="btn btn-prim" onclick="svcSend()">Enviar reporte</button>`:`<button class="btn btn-prim" onclick="svcNext()">Siguiente</button>`;
-  const foto = ultimo ? bloqueFotoRep() : '';
-  $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}${foto}
-    <div class="actions"><button class="btn btn-ghost" onclick="${svcStep>0?'svcBack()':'renderChooser()'}">←</button>${last}</div>`;
-  if(ultimo && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
-  if(svcStep===0) pintarSuggsUb('');
-}
-async function pintarSuggsUb(texto){
-  const cont=$('ubSuggs'); if(!cont) return;
-  const lista = await sugerencias(SERVICIOS[svcTipo].lugarTipo, texto);
-  cont.innerHTML = lista.map(s=>`<span class="sugg" onclick="svcUsarSugg('${s.replace(/'/g,"\\'")}')">${s}<span class="pop">↗</span></span>`).join('');
-}
-function svcUb(v){
-  svcSel.ub=v;
-  const bad=textoNoPermitido(v);
-  $('ubInput').classList.toggle('bad',bad); $('ubWarn').classList.toggle('show',bad);
-  pintarSuggsUb(v);
-}
-function svcUsarSugg(s){ svcSel.ub=s; const el=$('ubInput'); if(el){el.value=s; svcUb(s);} }
-function svcPick(k,i){ svcSel[k]=i; renderServicio(); }
-function svcDetalle(v){
-  svcSel.detalle=v;
-  const bad=textoNoPermitido(v);
-  const inp=$('sitInput'); if(inp) inp.classList.toggle('bad',bad);
-  const w=$('sitWarn'); if(w) w.classList.toggle('show',bad);
-}
-function svcBack(){ if(svcStep>0){svcStep--; renderServicio();} }
-function svcNext(){
-  if(svcStep===0){
-    const u=(svcSel.ub||'').trim();
-    if(u.length<2){ $('ubWarn').textContent='Escribe dónde (mínimo 2 letras).'; $('ubWarn').classList.add('show'); return; }
-    if(textoNoPermitido(u)){ $('ubInput').classList.add('bad'); $('ubWarn').classList.add('show'); return; }
-  }
-  svcStep++; renderServicio();
-}
+let svcTipo, svcSel;   // usados por svcSend, que reutiliza la pantalla única (renderReporteUni)
 async function svcSend(){
   if(svcSel.sit===undefined) return;
   if(enCooldown(svcTipo)){ renderAviso('Ya reportaste esto hace poco. Espera unos minutos.'); return; }
@@ -1986,8 +1912,8 @@ function renderOferta(){
   $('sheet').innerHTML=`<div class="grip"></div><div class="steps">${dots}</div>${body}${foto}
     <div class="actions" style="margin-top:18px"><button class="btn btn-ghost" onclick="${oStep>0?'oBack()':'renderReporteUni()'}">←</button>${last}</div>`;
   if(oStep===3 && fotoRepBlob){ const p=$('fotoRepPrev'); if(p) p.src=URL.createObjectURL(fotoRepBlob); }
-  if(oStep===2) pintarSuggsZona('');
-  if(oStep===3) pintarSuggsLugar('');
+  if(oStep===2) pintarSuggsZona(oData.zona);
+  if(oStep===3) pintarSuggsLugar(oData.lugar);
 }
 function dig(d){
   if(d==='del') oData.precio=oData.precio.slice(0,-1);
@@ -2008,6 +1934,7 @@ function nombreProducto(){
 }
 async function pintarSuggsZona(t){
   const c=$('zonaSuggs'); if(!c) return;
+  if(!t || !t.trim()){ c.innerHTML=''; return; }   // sin texto -> sin sugeridos por defecto
   const lista=await sugerencias('zona', t);
   c.innerHTML=lista.map(s=>`<span class="sugg" onclick="oUsarZona('${s.replace(/'/g,"\\'")}')">${s}<span class="pop">↗</span></span>`).join('');
 }
@@ -2020,6 +1947,7 @@ function oZona(v){
 function oUsarZona(s){ oData.zona=s; const el=$('zonaInput'); if(el){el.value=s; oZona(s);} }
 async function pintarSuggsLugar(t){
   const c=$('lugarSuggs'); if(!c) return;
+  if(!t || !t.trim()){ c.innerHTML=''; return; }   // sin texto -> sin sugeridos por defecto
   const lista=await sugerencias('sitio', t);
   c.innerHTML=lista.map(s=>`<span class="sugg" onclick="useSugg('${s.replace(/'/g,"\\'")}')">${s}<span class="pop">↗</span></span>`).join('');
 }
