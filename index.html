@@ -1534,7 +1534,7 @@ function postReporte(r, origen, nombreUb){
   const i = infoEstado(r);
   const tile = ICONO_TIPO_SVG[r.tipo]||ICONS.bolt;
   const zona = escapeHtml(nombreUb || r.zona || estadoActual);
-  const det = (r.estado==='otro' && r.detalle) ? `<div class="ptxt">${escapeHtml(r.detalle)}</div>` : '';
+  const det = r.detalle ? `<div class="ptxt">${escapeHtml(r.detalle)}</div>` : '';
   const trans = r.estado_anterior ? transReporte(r, tile) : '';
   return `<div class="post"><div class="pic pic-${sev}">${tile}</div><div class="pbody">
     <div class="l1"><span class="zone">${zona}</span><span class="stchip st-${sev}"><span class="gd"></span>${i.label}</span></div>
@@ -1790,22 +1790,20 @@ async function uniSend(){
   const zona=(uni.zona||'').trim();
   if(zona.length<2){ uniWarn('Escribe dónde está pasando (mínimo 2 letras).'); const zf=$('uniZona'); if(zf) zf.classList.add('bad'); return; }
   if(textoNoPermitido(zona)){ uniWarn('Revisa el lugar: sin groserías ni símbolos raros.'); const zf=$('uniZona'); if(zf) zf.classList.add('bad'); return; }
-  let tipo=uni.tipo, estado=uni.estado, detalle=null;
+  if(texto && textoNoPermitido(texto)){ uniValidarTexto(texto); return; }   // si hay texto libre, validarlo (se guarda SIEMPRE)
+  let tipo=uni.tipo, estado=uni.estado;
   if(!tipo){
     if(texto.length<3){ uniWarn('Escribe qué está pasando, o toca una categoría.'); return; }
-    if(textoNoPermitido(texto)){ uniValidarTexto(texto); return; }
-    tipo='alerta'; estado='otro'; detalle=texto;
+    tipo='alerta'; estado='otro';
   } else if(!estado){
     uniWarn('Toca la situación: lo que está pasando.'); return;
-  } else if(estado==='otro'){
-    detalle=texto;
-    if(detalle.length<3){ uniWarn('Cuéntanos qué pasa (mínimo 3 letras).'); return; }
-    if(textoNoPermitido(detalle)){ uniValidarTexto(detalle); return; }
+  } else if(estado==='otro' && texto.length<3){
+    uniWarn('Cuéntanos qué pasa (mínimo 3 letras).'); return;
   }
   svcTipo=tipo;
   const cfg=SERVICIOS[tipo];
   const idx=cfg.sit.findIndex(s=>s[2]===estado);
-  svcSel={ ub:zona, sit: idx>=0?idx:0, detalle: detalle||'', lat:uni.lat, lng:uni.lng };
+  svcSel={ ub:zona, sit: idx>=0?idx:0, detalle: texto, lat:uni.lat, lng:uni.lng };   // el texto libre SIEMPRE se guarda como detalle
   await svcSend();
 }
 
@@ -1816,12 +1814,7 @@ async function svcSend(){
   const cfg=SERVICIOS[svcTipo];
   const zona=svcSel.ub.trim();
   const estado=cfg.sit[svcSel.sit][2];
-  let detalle=null;
-  if(estado==='otro'){
-    detalle=(svcSel.detalle||'').trim();
-    if(detalle.length<3){ const w=$('sitWarn'); if(w){ w.textContent='Cuéntanos qué pasa (mínimo 3 letras).'; w.classList.add('show'); } return; }
-    if(textoNoPermitido(detalle)){ const w=$('sitWarn'); if(w) w.classList.add('show'); const inp=$('sitInput'); if(inp) inp.classList.add('bad'); return; }
-  }
+  let detalle=(svcSel.detalle||'').trim() || null;   // el texto libre se guarda SIEMPRE (uniSend ya lo validó)
   // B) ¿Ya tienes un reporte activo de este mismo lugar+servicio? -> ofrece actualizarlo (evita duplicados)
   if(usuario){
     try{
