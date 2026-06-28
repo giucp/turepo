@@ -65,12 +65,11 @@ def make_icon(size, maskable=False):
     d = ImageDraw.Draw(img)
 
     if maskable:
-        d.rectangle([0, 0, S, S], fill=BLUE)
-        cs = 0.78
+        d.rectangle([0, 0, S, S], fill=BLUE)   # full-bleed: identico al "any", solo el fondo a sangre
+        cs = 1.0
         def tf(p):
-            return ((256 + (p[0] - GROUP_C[0]) * cs) * SS,
-                    (256 + (p[1] - GROUP_C[1]) * cs) * SS)
-        dr = DOT_R * cs * SS
+            return (p[0] * SS, p[1] * SS)        # posiciones nativas: mismo tamano y lugar que el any
+        dr = DOT_R * SS
     else:
         d.rounded_rectangle([0, 0, S - 1, S - 1], radius=CORNER * SS, fill=BLUE)
         cs = 1.0
