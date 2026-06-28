@@ -293,6 +293,11 @@
   .lema .sub{font-size:12.5px;color:#5f5f5f;margin-top:4px;font-weight:500}
   .legalnote{margin-top:10px;text-align:center;font-size:11.5px;color:#8a857c;line-height:1.5;cursor:pointer;padding:6px}
   .legalnote u{color:#5f5f5f}
+  .social{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px}
+  .social-lab{font-family:'Bricolage Grotesque';font-weight:800;font-size:12.5px;color:#8a857c}
+  .social-ic{width:40px;height:40px;border:2.5px solid #111;border-radius:11px;display:grid;place-items:center;background:#fff;box-shadow:2px 2px 0 #111;color:#111;transition:transform .12s,box-shadow .12s}
+  .social-ic:active{transform:translate(2px,2px);box-shadow:0 0 0 #111}
+  .social-ic svg{width:19px;height:19px}
   .legaltext{font-size:13px;color:#6b5d49;line-height:1.6}
   .legaltext p{margin-bottom:10px}
   /* auth / perfil */
@@ -2117,6 +2122,13 @@ async function premiar(){   // suma 10 puntos al usuario si tiene sesión
   if(typeof data==='number'){ usuario.puntos=data; pintarBadge(); }
 }
 
+function pieYo(){
+  return `<div class="social">
+        <span class="social-lab">Síguenos</span>
+        <a class="social-ic" href="https://x.com/turepove" target="_blank" rel="noopener noreferrer" aria-label="X / Twitter de Tu Repo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg></a>
+        <a class="social-ic" href="https://instagram.com/turepo_com" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Tu Repo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg></a>
+      </div>`;
+}
 function cargarYo(){
   const c=$('yo-cont');
   const lm=$('lemaYo'); if(lm) lm.style.display = usuario ? 'none' : '';
@@ -2129,6 +2141,7 @@ function cargarYo(){
           <input id="newUser" class="tinput" placeholder="Solo letras, números y _" maxlength="20"></div>
         <button class="btn btn-prim" style="width:100%;margin-top:6px" onclick="guardarUsername()">Confirmar nombre</button>
       </div>
+      ${pieYo()}
       <div class="legalnote" onclick="mostrarLegal()">ⓘ <u>Cómo funciona y nuestra responsabilidad</u></div>`;
   } else if(usuario){
     const idx=nivelIdx(usuario.puntos), lv=NIVELES[idx], sig=NIVELES[idx+1];
@@ -2165,6 +2178,7 @@ function cargarYo(){
           <span class="pr-go">${ICONS.chevron}</span></div>
       </div>
       <button class="linkbtn" onclick="cerrarSesion()">Cerrar sesión</button>
+      ${pieYo()}
       <div class="legalnote" onclick="mostrarLegal()">ⓘ <u>Cómo funciona y nuestra responsabilidad</u></div>`;
   } else {
     c.innerHTML=`
@@ -2191,6 +2205,7 @@ function cargarYo(){
           <div class="pr-tx"><h4>Instala Tu Repo</h4><p>Agrégala a tu pantalla de inicio</p></div>
           <span class="pr-go">${ICONS.chevron}</span></div>
       </div>
+      ${pieYo()}
       <div class="legalnote" onclick="mostrarLegal()">ⓘ <u>Cómo funciona y nuestra responsabilidad</u></div>`;
   }
 }
